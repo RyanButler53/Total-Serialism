@@ -12,8 +12,8 @@ private:
     std::vector<short> dynamicsRow_;
     const std::vector<std::string> pitchMap_{"c,cs,d,ef,e,f,fs,g,af,a,bf,b"};
     const std::vector<std::string> articulationMap_{"->", "-^", "-_", "-!", "-.", "--", "->-.", "-^\\sfz", " ", "->-!", "\\sfz", "-^-!"};
-    const std::vector<std::string> dynamicMap_;
-    AnalysisMatrix *pitches_;
+    const std::vector<std::string> dynamicMap_{"\\ppppp", "\\pppp", "\\ppp", "\\pp", "\\p", "\\mp", "\\mf", "\\f", "\\ff", "\\fff", "\\ffff", "\\fffff"};
+    AnalysisMatrix* pitches_;
     AnalysisMatrix* rhythms_;
     AnalysisMatrix* articulations_;
     
@@ -29,6 +29,17 @@ public:
     ~SerialismGenerator();
 
     void initializeRandom();
-    string mapRhythm(short duration, std::string pitch, string articulation);
-    string rowToLilypond(Row r);
+    std::string mapRhythm(short duration, std::string pitch, std::string articulation);
+    std::string rowToLilypond(Row r);
+
+    /**
+     * @brief Function that formats a string in lilypond style for a given 
+     * rhythm duration. Called only when no barline tie is needed
+     * 
+     * @param duration Note length required. 
+     * @param pitch String of the pitch 
+     * @param articulation Articulation (is "" if no articulation needed)
+     * @return std::string : Lilypond formatted string for the duration
+     */
+    std::string fullDuration(short duration, std::string pitch, std::string articulation);
 };

@@ -99,3 +99,8 @@ ostream &operator<<(ostream &os, const AnalysisMatrix &a){
     a.printMatrix(os);
     return os;
 }
+
+ostream &operator<<(ostream &os, const Row& r){
+    os << r.rtype_ << "-" << r.num_;
+    return os;
+}

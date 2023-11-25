@@ -14,7 +14,7 @@ analysisMatrix-test: analysisMatrix.o analysisMatrix-test.o
 serialismGenerator-test: serialismGenerator-test.o serialismGenerator.o analysisMatrix.o
 	$(CXX) -o $@ $^
 
-analysisMatrix.o: analysisMatrix.cpp analysisMatrix.hpp
+analysisMatrix.o: analysisMatrix.cpp analysisMatrix.hpp matrix.hpp
 	$(CXX) $(CXXFLAGS) -c analysisMatrix.cpp
 	
 analysisMatrix-test.o: analysisMatrix-test.cpp  analysisMatrix.hpp matrix.hpp

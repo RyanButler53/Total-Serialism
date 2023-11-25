@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+analysisMatrix-test
+serialismGenerator-test
+totalSerialism
+
+# Tests:
+test/

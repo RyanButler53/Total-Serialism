@@ -48,3 +48,5 @@ private:
 };
 
 std::ostream &operator<<(std::ostream &os, const AnalysisMatrix &a);
+
+std::ostream &operator<<(std::ostream &os, const Row &r);

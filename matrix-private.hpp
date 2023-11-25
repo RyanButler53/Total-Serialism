@@ -1,5 +1,5 @@
 #include "matrix.hpp"
-
+#include <iostream>
 template <typename T>
 Matrix<T>::Matrix(size_t numRows, size_t numCols): numRows_{numRows}, numCols_{numCols}
 {
@@ -29,6 +29,7 @@ void Matrix<T>::print(std::ostream& os) const {
 
             os <<  data_[idx]<< " ";
         }
+        os << std::endl;
     }
 }
 
