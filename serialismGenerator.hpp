@@ -10,8 +10,8 @@ private:
     std::vector<Row> rhRows_;
     std::vector<Row> lhRows_;
     std::vector<short> dynamicsRow_;
-    const std::vector<std::string> pitchMap_{"c,cs,d,ef,e,f,fs,g,af,a,bf,b"};
-    const std::vector<std::string> articulationMap_{"->", "-^", "-_", "-!", "-.", "--", "->-.", "-^\\sfz", " ", "->-!", "\\sfz", "-^-!"};
+    const std::vector<std::string> pitchMap_{"c","cs","d","ef","e","f","fs","g","af","a","bf","b"};
+    const std::vector<std::string> articulationMap_{"->", "-^", "-_", "-!", "-.", "--", "->-.", "-^\\sfz", "", "->-!", "\\sfz", "-^-!"};
     const std::vector<std::string> dynamicMap_{"\\ppppp", "\\pppp", "\\ppp", "\\pp", "\\p", "\\mp", "\\mf", "\\f", "\\ff", "\\fff", "\\ffff", "\\fffff"};
     AnalysisMatrix* pitches_;
     AnalysisMatrix* rhythms_;
@@ -29,7 +29,6 @@ public:
     ~SerialismGenerator();
 
     void initializeRandom();
-    std::string mapRhythm(short duration, std::string pitch, std::string articulation);
     std::string rowToLilypond(Row r);
 
     /**

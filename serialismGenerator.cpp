@@ -12,6 +12,7 @@ SerialismGenerator::SerialismGenerator(): seed_{time(0)}
 {
     initializeRandom();
 }
+
 SerialismGenerator::SerialismGenerator(long seed): 
     seed_{seed}
     {
@@ -67,18 +68,8 @@ SerialismGenerator::SerialismGenerator(string inputfile):seed_{time(0)}{
     pitches_ = new AnalysisMatrix(sequences[0]);
     rhythms_ = new AnalysisMatrix(sequences[1]);
     articulations_ = new AnalysisMatrix(sequences[2]);
-    cout << "Pitches: \n" << *pitches_ << endl;
-    cout << "Rhythms: \n" << *rhythms_ << endl;
-    cout << "Articulations: \n" << *articulations_ << endl;
-
     dynamicsRow_ = sequences[5];
-    cout << "dynamics: "<< endl;
-    for (auto& d: dynamicsRow_){
-        cout << d << " ";
-    }
-    cout << endl;
     input >> tempo_;
-    cout << "tempo: " << tempo_ << endl;
 }
 
 void SerialismGenerator::initializeRandom(){
@@ -128,8 +119,7 @@ SerialismGenerator::~SerialismGenerator()
 }
 
 string SerialismGenerator::fullDuration(short duration, string pitch, string articulation){
-    switch (duration)
-    {
+    switch (duration) {
     case 1:
         return pitch  + "16"  + articulation;
     case 2: 
@@ -155,7 +145,7 @@ string SerialismGenerator::fullDuration(short duration, string pitch, string art
     case 12:
         return pitch + "2." + articulation;
     default:
-        break;
+        return "";
     }
     return "";
 }
@@ -165,8 +155,42 @@ string SerialismGenerator::rowToLilypond(Row r){
     vector<short> pitches = pitches_->getRow(r);
     vector<short> rhythms = rhythms_->getRow(r);
     vector<short> articulations = articulations_->getRow(r);
+    // Increment Durations: 1-12 instead of 0-11
+    for (auto &duration : rhythms)
+    {
+        ++duration;
+    }
 
+    // 16th notes remaining in the measure
     short availableDuration = 13;
-    // Loop through all 12 notes
-    return "";
+    string lilypondCode = "";
+    
+    for (size_t note = 0; note < 12; ++note){
+        short noteDuration = rhythms[note];
+        string pitch = pitchMap_[pitches[note]];
+        string articulation = articulationMap_[articulations[note]];
+        if (noteDuration < availableDuration)
+        { // fit entire note in measure
+            lilypondCode += fullDuration(noteDuration, pitch, articulation);
+            lilypondCode += " ";
+            availableDuration -= noteDuration;
+        }
+        else if (noteDuration == availableDuration)
+        { // End of bar case.
+            lilypondCode += fullDuration(noteDuration, pitch, articulation);
+            lilypondCode += " | ";
+            availableDuration = 13;
+        }
+        else
+        { // Split note into 2 bars case
+            lilypondCode += fullDuration(availableDuration, pitch, articulation);
+            short remaining = noteDuration - availableDuration; // total - used
+            lilypondCode += "~ | ";
+            lilypondCode += fullDuration(remaining, pitch, "");
+            lilypondCode += " ";
+            availableDuration = 13 - remaining;
+        }
+    }
+    lilypondCode += "\n";
+    return lilypondCode;
 }
