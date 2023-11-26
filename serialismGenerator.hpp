@@ -3,6 +3,9 @@
 #include <random>
 #include "analysisMatrix.hpp"
 
+#ifndef SERIALISM_GENERATOR_HPP_INCLUDED
+#define SERIALISM_GENERATOR_HPP_INCLUDED
+
 class SerialismGenerator
 {
 private:
@@ -13,7 +16,10 @@ private:
     const std::vector<std::string> pitchMap_{"c","cs","d","ef","e","f","fs","g","af","a","bf","b"};
     const std::vector<std::string> articulationMap_{"->", "-^", "-_", "-!", "-.", "--", "->-.", "-^\\sfz", "", "->-!", "\\sfz", "-^-!"};
     const std::vector<std::string> dynamicMap_{"\\ppppp", "\\pppp", "\\ppp", "\\pp", "\\p", "\\mp", "\\mf", "\\f", "\\ff", "\\fff", "\\ffff", "\\fffff"};
-    AnalysisMatrix* pitches_;
+    
+    std::string title_;
+    std::string composer_;
+    AnalysisMatrix *pitches_;
     AnalysisMatrix* rhythms_;
     AnalysisMatrix* articulations_;
     
@@ -29,7 +35,7 @@ public:
     ~SerialismGenerator();
 
     void initializeRandom();
-    std::string rowToLilypond(Row r);
+    std::string rowToLilypond(Row r, short dynamic);
 
     /**
      * @brief Function that formats a string in lilypond style for a given 
@@ -41,4 +47,11 @@ public:
      * @return std::string : Lilypond formatted string for the duration
      */
     std::string fullDuration(short duration, std::string pitch, std::string articulation);
+
+    std::vector<std::string> generatePiece(bool rh);
+
+    std::string header();
+
 };
+
+#endif

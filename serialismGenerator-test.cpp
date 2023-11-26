@@ -35,7 +35,9 @@ int main()
     assert(duration12 == "af2.--" || (cout << "duration 12: " <<duration12 << endl));
 
     SerialismGenerator fileGen("test/test-in.txt");
-    string rowP0 = fileGen.rowToLilypond(Row(P, 0));
-    string P0row = "c16 cs8 d8. ef4 e8.~ | e8 f4. fs4~fs16~ | fs8 g2 af8.~ | af4. a4..~ | a8. bf2~bf8~ | bf16 b2. | \n";
-    assert(rowP0 == P0row || !(cout << rowP0 << endl));
+    string rowP0 = fileGen.rowToLilypond(Row(P, 0), 5);
+    string P0row = "c16-- \\mp cs8-- d8.-- ef4-- e8.--~ | e8 f4.-- fs4--~fs16~ | fs8 g2-- af8.--~ | af4. a4..--~ | a8. bf2--~bf8~ | bf16 b2.-- | \n";
+    //"c16 \\mp cs8 d8. ef4 e8.~ | e8 f4. fs4~fs16~ | fs8 g2 af8.~ | af4. a4..~ | a8. bf2~bf8~ | bf16 b2. | \n";
+
+    assert(rowP0 == P0row || (cout << rowP0 << endl));
 }

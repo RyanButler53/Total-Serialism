@@ -2,6 +2,9 @@
 #include <vector>
 #include <ostream>
 
+#ifndef ANALYSIS_MATRIX_HPP_INCLUDED
+#define ANALYSIS_MATRIX_HPP_INCLUDED
+
 const int ROW_LEN = 12;
 
 enum RowType
@@ -50,3 +53,5 @@ private:
 std::ostream &operator<<(std::ostream &os, const AnalysisMatrix &a);
 
 std::ostream &operator<<(std::ostream &os, const Row &r);
+
+#endif

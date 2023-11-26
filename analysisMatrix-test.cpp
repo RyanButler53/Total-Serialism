@@ -27,8 +27,6 @@ int main()
     assert(testMapRow == rowMap);
     assert(testColMap == colMap);
 
-    cout << A << endl;
-
     vector<short> row1 = A.getRow(Row{RowType(R), 5});
     vector<short> row2 = A.getRow(Row{RowType(P), 2});
     vector<short> row3 = A.getRow(Row{RowType(I), 5});

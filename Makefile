@@ -27,7 +27,7 @@ serialismGenerator-test.o: serialismGenerator-test.cpp serialismGenerator.hpp an
 	$(CXX) $(CXXFLAGS) -c $<
 
 totalSerialism: totalSerialism.o analysisMatrix.o serialismGenerator.o
-	$(CXX) -o $@ $<
+	$(CXX) -o $@ $^
 
 totalSerialism.o: totalSerialism.cpp analysisMatrix.hpp serialismGenerator.hpp
 	$(CXX) $(CXXFLAGS) -c $<

@@ -6,8 +6,6 @@
 
 using namespace std;
 
-
-
 SerialismGenerator::SerialismGenerator(): seed_{time(0)}
 {
     initializeRandom();
@@ -70,6 +68,8 @@ SerialismGenerator::SerialismGenerator(string inputfile):seed_{time(0)}{
     articulations_ = new AnalysisMatrix(sequences[2]);
     dynamicsRow_ = sequences[5];
     input >> tempo_;
+    input >> title_;
+    input >> composer_;
 }
 
 void SerialismGenerator::initializeRandom(){
@@ -109,7 +109,10 @@ void SerialismGenerator::initializeRandom(){
     pitches_ = new AnalysisMatrix(pitchRow);
     rhythms_ = new AnalysisMatrix(rhythmRow);
     articulations_ = new AnalysisMatrix(articulationRow);
-} 
+
+    title_ = "Random Composition";
+    composer_ = "Seed = " + to_string(seed_);
+}
 
 SerialismGenerator::~SerialismGenerator()
 {
@@ -150,7 +153,7 @@ string SerialismGenerator::fullDuration(short duration, string pitch, string art
     return "";
 }
 
-string SerialismGenerator::rowToLilypond(Row r){
+string SerialismGenerator::rowToLilypond(Row r, short dynamic){
     // Get the piches, rhythms and articulations for the row. 
     vector<short> pitches = pitches_->getRow(r);
     vector<short> rhythms = rhythms_->getRow(r);
@@ -190,7 +193,56 @@ string SerialismGenerator::rowToLilypond(Row r){
             lilypondCode += " ";
             availableDuration = 13 - remaining;
         }
+
+        if (note == 0 and dynamic >= 0){
+            size_t codelen = lilypondCode.length();
+            if (lilypondCode.substr(codelen - 2) == "z ")
+            {
+                lilypondCode.erase(lilypondCode.length() - 6);
+            }
+            lilypondCode += dynamicMap_[dynamic] + " ";
+        }
     }
     lilypondCode += "\n";
     return lilypondCode;
 }
+
+vector<string> SerialismGenerator::generatePiece(bool rh){
+    vector<Row> &allRows = lhRows_;
+    vector<string> lilypondCode;
+    if (rh) {
+        allRows = rhRows_;
+        string staffStart = "<< \\new Staff \\relative c'{\\clef treble \\time 13/16 \\tempo 4 = ";
+        staffStart += to_string(tempo_);
+        lilypondCode.push_back(staffStart + "\n");
+    } else {
+        string staffStart = "    \\new Staff \\relative c{\\clef bass \\time 13/16\n";
+        lilypondCode.push_back(staffStart);
+    }
+    for (size_t rowInd = 0; rowInd < allRows.size(); ++rowInd) {
+        short dynamic = -1;
+        if (rh)
+        {
+            dynamic = dynamicsRow_[rowInd];
+        }
+        string lilypondRow = rowToLilypond(allRows[rowInd], dynamic);
+        lilypondCode.push_back(lilypondRow);
+    }
+    lilypondCode.push_back("         \\fine}\n");
+    if (!rh) {
+        lilypondCode.push_back(">>");
+    }
+    return lilypondCode;
+}
+
+string SerialismGenerator::header(){
+    string header = "\\version \"2.24.1\"\n\\language \"english\"\n\n";
+    header += "\\header {\n   title = \"";
+    header += title_;
+    header += "\"\n   subtitle = \"Algorithmic Composition\"\n   instrument = \"Piano\"\n   ";
+    header += "composer = \"";
+    header += composer_;
+    header += "\"\n}\n";
+    return header;
+}
+

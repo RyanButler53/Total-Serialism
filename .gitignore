@@ -36,3 +36,6 @@ totalSerialism
 
 # Tests:
 test/
+
+# Lilypond output files
+*.ly
