@@ -34,8 +34,11 @@ analysisMatrix-test
 serialismGenerator-test
 totalSerialism
 
-# Tests:
+# Tests and Vscode:
 test/
+.vscode/
 
-# Lilypond output files
+# Lilypond output files and pdfs
 *.ly
+*.pdf
+*.txt

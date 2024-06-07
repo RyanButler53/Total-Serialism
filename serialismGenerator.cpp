@@ -42,13 +42,16 @@ SerialismGenerator::SerialismGenerator(string inputfile):seed_{time(0)}{
     for (size_t num = 0; num < 12; ++ num){
         string s;
         input >> s;
-        if (rowTypes.contains(s)){
+        if (rowTypes.contains(s))
+        {
             rhRows_.push_back(Row(rowTypes[s], sequences[3][num]));
-        } else {
+        }
+        else
+        {
             cerr << "Invalid Row: " << s << endl;
             exit(1);
         }
-    }   
+    }
     // Left Hand Rows
     for (size_t num = 0; num < 12; ++ num){
         string s;
@@ -84,7 +87,7 @@ void SerialismGenerator::initializeRandom(){
     shuffle(rowNums.begin(), rowNums.end(), rng_);
     vector<short> articulationRow = rowNums;
     shuffle(rowNums.begin(), rowNums.end(), rng_);
-    vector<short> dynamicsRow_ = rowNums;
+    dynamicsRow_ = rowNums; // Member Variable
 
     // Row Numbers RH/LH
     shuffle(rowNums.begin(), rowNums.end(), rng_);
@@ -242,7 +245,8 @@ string SerialismGenerator::header(){
     header += "\"\n   subtitle = \"Algorithmic Composition\"\n   instrument = \"Piano\"\n   ";
     header += "composer = \"";
     header += composer_;
-    header += "\"\n}\n";
+    header += "\"\n";
+    header += "  tagline = ##f}\n";
     return header;
 }
 

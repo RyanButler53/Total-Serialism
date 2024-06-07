@@ -9,45 +9,33 @@ using namespace std;
 void printCommands();
 
 int main(int argc, char** argv){
-    SerialismGenerator *generator;
+    SerialismGenerator* generator;
     string outputFilename = "";
     string inputFilename = "";
     size_t seed = 0;
-    if (argc == 1) // No command line arguments case
-    {
-        generator = new SerialismGenerator;
-        outputFilename = "randomScore.ly";
-        cout << "Outputting Lilypond to " << outputFilename << endl;
-    } else {
-        // Parse arguments;
-        for (int arg_i = 1; arg_i < argc; ++arg_i)
-        {
-            if (!strcmp(argv[arg_i], "-o") and arg_i+1 != argc){
-                outputFilename = argv[arg_i+1];
-            } else if (!strcmp(argv[arg_i],"-i") and arg_i+1 != argc) {
-                inputFilename = argv[arg_i+1];
-            } else if (!strcmp(argv[arg_i],"-s") and arg_i+1 != argc){
-                seed = strtoul(argv[arg_i+1], nullptr,10);
-            } else if (!strcmp(argv[arg_i], "-h"))
-            {
-                printCommands();
-                exit(0);
-            }
-        }
+    cout << argc << endl;
+    if (argc == 3)
+    { // gave input and output file
+        outputFilename = argv[1];
+        inputFilename = argv[2];
+    }
+    else if (argc == 2)
+    { // gave seed
+        cout << argv[1] << endl;
+        seed = stoull(argv[1]);
+    }
+    else {
+        cerr << "Incorrect Script use" << endl;
+        exit(1);
+    }
 
-        // Construct appropriate generator
-        if (seed == 0){ // Gave inputfile, no output or seed. 
-            if (outputFilename == ""){
-                cout << "No output file given." << endl;
-            } else if (inputFilename == "") {
-                cout << "No input file given." << endl;
-            }
-            generator = new SerialismGenerator(inputFilename);
-        }
-        else {
-            generator = new SerialismGenerator(seed);
-            outputFilename = "random_score_seed_" + to_string(seed) + ".ly";
-        }
+    // Construct appropriate generator
+    if (seed == 0){ // Gave inputfile, no output or seed. 
+        generator = new SerialismGenerator(inputFilename);
+    }
+    else {
+        generator = new SerialismGenerator(seed);
+        outputFilename = "random_score_seed_" + to_string(seed) + ".ly";
     }
 
     ofstream outputFile(outputFilename);
