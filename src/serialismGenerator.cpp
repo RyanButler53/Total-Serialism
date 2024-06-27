@@ -42,7 +42,7 @@ SerialismGenerator::SerialismGenerator(string inputfile):seed_{time(0)}{
     for (size_t num = 0; num < 12; ++ num){
         string s;
         input >> s;
-        if (rowTypes.contains(s))
+        if (rowTypes.find(s) != rowTypes.end())
         {
             rhRows_.push_back(Row(rowTypes[s], sequences[3][num]));
         }
@@ -56,7 +56,7 @@ SerialismGenerator::SerialismGenerator(string inputfile):seed_{time(0)}{
     for (size_t num = 0; num < 12; ++ num){
         string s;
         input >> s;
-        if (rowTypes.contains(s)){
+        if (rowTypes.find(s) != rowTypes.end()){
             lhRows_.push_back(Row(rowTypes[s], sequences[4][num]));
         } else {
             cerr << "Invalid Row: " << s << endl;
@@ -201,7 +201,7 @@ string SerialismGenerator::rowToLilypond(Row r, short dynamic){
             size_t codelen = lilypondCode.length();
             if (lilypondCode.substr(codelen - 2) == "z ")
             {
-                lilypondCode.erase(lilypondCode.length() - 6);
+                lilypondCode.erase(lilypondCode.length() - 5);
             }
             lilypondCode += dynamicMap_[dynamic] + " ";
         }

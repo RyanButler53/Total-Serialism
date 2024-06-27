@@ -13,7 +13,6 @@ int main(int argc, char** argv){
     string outputFilename = "";
     string inputFilename = "";
     size_t seed = 0;
-    cout << argc << endl;
     if (argc == 3)
     { // gave input and output file
         outputFilename = argv[1];
@@ -21,7 +20,6 @@ int main(int argc, char** argv){
     }
     else if (argc == 2)
     { // gave seed
-        cout << argv[1] << endl;
         seed = stoull(argv[1]);
     }
     else {
@@ -40,6 +38,8 @@ int main(int argc, char** argv){
 
     ofstream outputFile(outputFilename);
     string header = generator->header();
+    
+    // Parallelize!
     vector<string> rh = generator->generatePiece(true);
     vector<string> lh = generator->generatePiece(false);
     outputFile << header;

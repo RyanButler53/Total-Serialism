@@ -4,6 +4,8 @@ CXX = clang++
 TARGET = totalSerialism
 TESTS = analysisMatrix-test serialismGenerator-test
 
+SRCDIR = src/
+
 all: $(TARGET) $(TESTS)
 
 tests: $(TESTS)
@@ -14,22 +16,22 @@ analysisMatrix-test: analysisMatrix.o analysisMatrix-test.o
 serialismGenerator-test: serialismGenerator-test.o serialismGenerator.o analysisMatrix.o
 	$(CXX) -o $@ $^
 
-analysisMatrix.o: analysisMatrix.cpp analysisMatrix.hpp matrix.hpp
-	$(CXX) $(CXXFLAGS) -c analysisMatrix.cpp
+analysisMatrix.o: $(SRCDIR)analysisMatrix.cpp $(SRCDIR)analysisMatrix.hpp $(SRCDIR)matrix.hpp
+	$(CXX) $(CXXFLAGS) -c $(SRCDIR)analysisMatrix.cpp
 	
-analysisMatrix-test.o: analysisMatrix-test.cpp  analysisMatrix.hpp matrix.hpp
-	$(CXX) $(CXXFLAGS) -c analysisMatrix-test.cpp
+analysisMatrix-test.o: $(SRCDIR)analysisMatrix-test.cpp  $(SRCDIR)analysisMatrix.hpp $(SRCDIR)matrix.hpp
+	$(CXX) $(CXXFLAGS) -c $(SRCDIR)analysisMatrix-test.cpp
 	
-serialismGenerator.o: serialismGenerator.cpp serialismGenerator.hpp analysisMatrix.hpp 
+serialismGenerator.o: $(SRCDIR)serialismGenerator.cpp $(SRCDIR)serialismGenerator.hpp $(SRCDIR)analysisMatrix.hpp 
 	$(CXX) $(CXXFLAGS) -c $< 
 
-serialismGenerator-test.o: serialismGenerator-test.cpp serialismGenerator.hpp analysisMatrix.hpp
+serialismGenerator-test.o: $(SRCDIR)serialismGenerator-test.cpp $(SRCDIR)serialismGenerator.hpp $(SRCDIR)analysisMatrix.hpp
 	$(CXX) $(CXXFLAGS) -c $<
 
 totalSerialism: totalSerialism.o analysisMatrix.o serialismGenerator.o
 	$(CXX) -o $@ $^
 
-totalSerialism.o: totalSerialism.cpp analysisMatrix.hpp serialismGenerator.hpp
+totalSerialism.o: $(SRCDIR)totalSerialism.cpp $(SRCDIR)analysisMatrix.hpp $(SRCDIR)serialismGenerator.hpp
 	$(CXX) $(CXXFLAGS) -c $<
 
 clean: 

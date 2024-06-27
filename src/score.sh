@@ -9,7 +9,8 @@ then # specify input and output
 else # use randomness
     seed=${1:-70}
     ./totalSerialism  $seed;
-    lilypond -f pdf random_score_seed_$seed.ly; # -o folder
+    lilypond -f pdf -l NONE random_score_seed_$seed.ly; # -o folder
     finalFile=random_score_seed_$seed.pdf
 fi
+echo "Opening $finalFile"
 open $finalFile
