@@ -1,6 +1,8 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <thread>
+#include <future>
 #include "analysisMatrix.hpp"
 #include "serialismGenerator.hpp"
 
@@ -38,11 +40,23 @@ int main(int argc, char** argv){
 
     ofstream outputFile(outputFilename);
     string header = generator->header();
-    
+
+    vector<string> rh;
+    vector<string> lh;
     // Parallelize!
-    vector<string> rh = generator->generatePiece(true);
-    vector<string> lh = generator->generatePiece(false);
+    auto gen = [&generator](bool rh, vector<string>& lilypondCode)
+    {
+        generator->generatePiece(rh, lilypondCode);
+    };
+
+    // Do right and left in parallel
+    thread right(gen, true, rh);
+    gen(false, lh);
+
+    // Continue working on the main thread if right hand isn't finished
     outputFile << header;
+
+    right.join();
     for (auto &line : rh)
     {
         outputFile << line;

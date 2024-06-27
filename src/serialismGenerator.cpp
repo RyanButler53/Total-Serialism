@@ -210,9 +210,8 @@ string SerialismGenerator::rowToLilypond(Row r, short dynamic){
     return lilypondCode;
 }
 
-vector<string> SerialismGenerator::generatePiece(bool rh){
+void SerialismGenerator::generatePiece(bool rh, vector<string>& lilypondCode){
     vector<Row> &allRows = lhRows_;
-    vector<string> lilypondCode;
     if (rh) {
         allRows = rhRows_;
         string staffStart = "<< \\new Staff \\relative c'{\\clef treble \\time 13/16 \\tempo 4 = ";
@@ -235,7 +234,6 @@ vector<string> SerialismGenerator::generatePiece(bool rh){
     if (!rh) {
         lilypondCode.push_back(">>");
     }
-    return lilypondCode;
 }
 
 string SerialismGenerator::header(){

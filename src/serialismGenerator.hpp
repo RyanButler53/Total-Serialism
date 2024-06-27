@@ -48,7 +48,7 @@ public:
      */
     std::string fullDuration(short duration, std::string pitch, std::string articulation);
 
-    std::vector<std::string> generatePiece(bool rh);
+    void generatePiece(bool rh,std::vector<std::string>& lilypondCode);
 
     std::string header();
 
