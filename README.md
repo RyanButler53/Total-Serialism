@@ -3,13 +3,20 @@
 This repo contains code for a Total Serial Music generator
 
  ### Requirements:
-  - Unix Make
+  - Cmake
   - Python3 with PyQt6
   - Lilypond Compiler (www.lilypond.org)
 
-### Build: `make`
+### Build: 
+
+`mkdir build && cd build`
+`cmake ..`
+
 
 ### Run: `python3 main.py`
+
+There are 2 non rigorous test suites: 
+`build/analysisMatrix-test` and `build/serialismGenerator-test`
 
 ### Notes:
 
@@ -33,7 +40,7 @@ The_Algorithm // Composer. Must be one word (will change...)
 
 
 ### Roadmap: 
-- Ensure all notes fall in playable piano range
+- Ensure all notes fall in playable piano range (Highest Priority)
 - Allow for longer pieces
 - Time signature other than 13/16
 - Better GUI (Planned and drawn, not implemented)

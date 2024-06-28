@@ -37,8 +37,8 @@ totalSerialism
 # Tests and Vscode:
 test/
 .vscode/
+build/
 
 # Lilypond output files and pdfs
 *.ly
 *.pdf
-*.txt

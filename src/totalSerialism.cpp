@@ -50,7 +50,7 @@ int main(int argc, char** argv){
     };
 
     // Do right and left in parallel
-    thread right(gen, true, rh);
+    thread right(gen, true, std::ref(rh));
     gen(false, lh);
 
     // Continue working on the main thread if right hand isn't finished
