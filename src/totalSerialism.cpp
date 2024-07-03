@@ -15,27 +15,23 @@ int main(int argc, char** argv){
     string outputFilename = "";
     string inputFilename = "";
     size_t seed = 0;
-    if (argc == 3)
-    { // gave input and output file
-        outputFilename = argv[1];
-        inputFilename = argv[2];
+
+    if (argc == 1)
+    { // no args given
+        generator = new SerialismGenerator();
+        outputFilename = "random_score.ly";
     }
     else if (argc == 2)
     { // gave seed
         seed = stoull(argv[1]);
-    }
-    else {
-        cerr << "Incorrect Script use" << endl;
-        exit(1);
-    }
-
-    // Construct appropriate generator
-    if (seed == 0){ // Gave inputfile, no output or seed. 
-        generator = new SerialismGenerator(inputFilename);
-    }
-    else {
         generator = new SerialismGenerator(seed);
         outputFilename = "random_score_seed_" + to_string(seed) + ".ly";
+    }
+    else if (argc == 3)
+    { // gave input and output file
+        outputFilename = argv[1];
+        inputFilename = argv[2];        
+        generator = new SerialismGenerator(inputFilename);
     }
 
     ofstream outputFile(outputFilename);
@@ -73,5 +69,5 @@ void printCommands(){
     cout << "Command Line options: " << endl;
     cout << "-s [SEED]: Sets the seed for random music to SEED. Cannot specify output or input files" << endl;
     cout << "-i [INPUT-FILENAME]: Sets the input filename for generating sheet music." << endl;
-    cout << "-o Specifies the output name of the score. " << endl;
+    cout << "-o [OUTPUT-FILENAME]: Specifies the output name of the score. " << endl;
 }

@@ -1,0 +1,2 @@
+rm *.ly
+rm *.pdf

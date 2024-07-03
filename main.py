@@ -99,23 +99,17 @@ class MainWindow(QMainWindow):
             print("No Output Filename given. Output file is Score.pdf")
             outputFilename = "score"
         outputFilename = outputFilename.rstrip(".pdf")
-        subprocess.call(["sh", "src/score.sh", outputFilename, inputFilename])
+        subprocess.call(["sh", "score.sh", outputFilename, inputFilename])
         
 
     def randomMusic(self):
         seed = self.seed.text()
-        print(f"Seed: {seed}")
-        if seed == "":
-            #TODO: CHANGE THIS TO BE THE CURRENT TIME
-            print("No Seed given, generating with seed 70")
-            seed = 70
         try: #Check if seed is an integer
             seed = int(seed)
+            subprocess.call(["sh", "score.sh", str(seed)])
         except ValueError as error:
-            print("Invalid Seed. Defaulting to seed 70")
-            seed = 70
-        print(f"Seed: {seed}")
-        subprocess.call(["sh", "src/score.sh", str(seed)])
+            subprocess.call(["sh", "score.sh"])
+        
 
     
 

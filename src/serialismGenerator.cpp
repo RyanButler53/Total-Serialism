@@ -214,11 +214,11 @@ void SerialismGenerator::generatePiece(bool rh, vector<string>& lilypondCode){
     vector<Row> &allRows = lhRows_;
     if (rh) {
         allRows = rhRows_;
-        string staffStart = "<< \\new Staff \\relative c'{\\clef treble \\time 13/16 \\tempo 4 = ";
+        string staffStart = "<< \\new Staff \\fixed c'{\\clef treble \\time 13/16 \\tempo 4 = ";
         staffStart += to_string(tempo_);
         lilypondCode.push_back(staffStart + "\n");
     } else {
-        string staffStart = "    \\new Staff \\relative c{\\clef bass \\time 13/16\n";
+        string staffStart = "    \\new Staff \\fixed c{\\clef bass \\time 13/16\n";
         lilypondCode.push_back(staffStart);
     }
     for (size_t rowInd = 0; rowInd < allRows.size(); ++rowInd) {

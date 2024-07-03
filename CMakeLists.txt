@@ -21,22 +21,24 @@ set(CMAKE_EXE_LINKER_FLAGS "${GCC_UBSAN_LINK_FLAGS}")
 
 include_directories(inc)
 
+# Production
+add_executable(
+    totalSerialism 
+    src/totalSerialism.cpp
+    src/serialismGenerator.cpp
+    src/analysisMatrix.cpp
+    )
+
+# Tests
 add_executable(
     analysisMatrix-test 
-    test/analysisMatrix-test.cpp
+    src/analysisMatrix-test.cpp
     src/analysisMatrix.cpp
     )
 
 add_executable(
     serialismGenerator-test
-    test/serialismGenerator-test.cpp
-    src/serialismGenerator.cpp
-    src/analysisMatrix.cpp
-    )
-
-add_executable(
-    totalSerialism 
-    src/totalSerialism.cpp
+    src/serialismGenerator-test.cpp
     src/serialismGenerator.cpp
     src/analysisMatrix.cpp
     )
