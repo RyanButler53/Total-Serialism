@@ -6,6 +6,8 @@
 #include "analysisMatrix.hpp"
 #include "serialismGenerator.hpp"
 
+#define PARALLEL true
+
 using namespace std;
 
 void printCommands();
@@ -37,27 +39,34 @@ int main(int argc, char** argv){
     ofstream outputFile(outputFilename);
     string header = generator->header();
 
-    vector<string> rh;
-    vector<string> lh;
+    vector<string> rightCode;
+    vector<string> leftCode;
     // Parallelize!
+
+    #if PARALLEL
     auto gen = [&generator](bool rh, vector<string>& lilypondCode)
     {
         generator->generatePiece(rh, lilypondCode);
     };
 
     // Do right and left in parallel
-    thread right(gen, true, std::ref(rh));
-    gen(false, lh);
-
-    // Continue working on the main thread if right hand isn't finished
-    outputFile << header;
+    thread right(gen, true, std::ref(rightCode));
+    gen(false, leftCode);
+    
 
     right.join();
-    for (auto &line : rh)
+    #else
+    generator->generatePiece(true, rightCode);
+    generator->generatePiece(false, leftCode);
+    #endif
+    // Continue working on the main thread if right hand isn't finished
+    outputFile << header;
+    // right.join
+    for (auto &line : rightCode)
     {
         outputFile << line;
     }
-    for (auto& line:lh){
+    for (auto& line:leftCode){
         outputFile << line;
     }
 

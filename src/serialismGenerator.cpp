@@ -2,22 +2,27 @@
 #include <chrono>
 #include <iostream>
 #include <fstream>
+#include <cmath>
 #include <unordered_map>
 
 using namespace std;
 
-SerialismGenerator::SerialismGenerator(): seed_{time(0)}
-{
-    initializeRandom();
-}
-
-SerialismGenerator::SerialismGenerator(long seed): 
-    seed_{seed}
+SerialismGenerator::SerialismGenerator(): 
+    seed_{time(0)},
+    boulezFactor_{0.5}
     {
     initializeRandom();
 }
 
-SerialismGenerator::SerialismGenerator(string inputfile):seed_{time(0)}{
+SerialismGenerator::SerialismGenerator(long seed):
+    seed_{seed},boulezFactor_{0.5}
+    {
+    initializeRandom();
+}
+
+SerialismGenerator::SerialismGenerator(string inputfile):
+    seed_{time(0)}, boulezFactor_(0.0)
+    {
     // Set up rng, fileinput and row mapping
     rng_ = mt19937(seed_);
     fstream input = fstream(inputfile);
@@ -77,7 +82,7 @@ SerialismGenerator::SerialismGenerator(string inputfile):seed_{time(0)}{
 
 void SerialismGenerator::initializeRandom(){
     rng_ = mt19937(seed_);
-
+    boulezDist_ = std::normal_distribution<double>(0, boulezFactor_);
     // Get pitch, rhythm, articulation and dynamics rows
     vector<short> rowNums{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
     shuffle(rowNums.begin(), rowNums.end(), rng_);
@@ -124,32 +129,33 @@ SerialismGenerator::~SerialismGenerator()
     delete articulations_;
 }
 
-string SerialismGenerator::fullDuration(short duration, string pitch, string articulation){
+string SerialismGenerator::fullDuration(short duration, string boulezJitter, string pitch, string articulation){
+    string absPitch = pitch + boulezJitter;
     switch (duration) {
     case 1:
-        return pitch  + "16"  + articulation;
+        return absPitch  + "16"  + articulation;
     case 2: 
-        return pitch + "8" + articulation ;
+        return absPitch + "8" + articulation ;
     case 3: 
-        return pitch  + "8." + articulation;
+        return absPitch  + "8." + articulation;
     case 4: 
-        return pitch  + "4" + articulation;
+        return absPitch  + "4" + articulation;
     case 5:
-        return pitch + "4" + articulation + "~" + pitch + "16";
+        return absPitch + "4" + articulation + "~" + absPitch + "16";
     case 6:
-        return pitch + "4." + articulation;
+        return absPitch + "4." + articulation;
     case 7:
-        return pitch + "4.." + articulation;
+        return absPitch + "4.." + articulation;
     case 8:
-        return pitch + "2" + articulation;
+        return absPitch + "2" + articulation;
     case 9:
-        return pitch + "2" + articulation + "~" + pitch + "16";
+        return absPitch + "2" + articulation + "~" + absPitch + "16";
     case 10:
-        return pitch + "2" + articulation + "~" + pitch + "8";
+        return absPitch + "2" + articulation + "~" + absPitch + "8";
     case 11:
-        return pitch + "2" + articulation + "~" + pitch + "8.";   
+        return absPitch + "2" + articulation + "~" + absPitch + "8.";   
     case 12:
-        return pitch + "2." + articulation;
+        return absPitch + "2." + articulation;
     default:
         return "";
     }
@@ -170,29 +176,31 @@ string SerialismGenerator::rowToLilypond(Row r, short dynamic){
     // 16th notes remaining in the measure
     short availableDuration = 13;
     string lilypondCode = "";
-    
-    for (size_t note = 0; note < 12; ++note){
+    // cout << boolalpha;
+    for (size_t note = 0; note < 12; ++note)
+    {
         short noteDuration = rhythms[note];
         string pitch = pitchMap_[pitches[note]];
         string articulation = articulationMap_[articulations[note]];
+        string jitter = boulezJitter();
         if (noteDuration < availableDuration)
         { // fit entire note in measure
-            lilypondCode += fullDuration(noteDuration, pitch, articulation);
+            lilypondCode += fullDuration(noteDuration, jitter, pitch, articulation);
             lilypondCode += " ";
             availableDuration -= noteDuration;
         }
         else if (noteDuration == availableDuration)
         { // End of bar case.
-            lilypondCode += fullDuration(noteDuration, pitch, articulation);
+            lilypondCode += fullDuration(noteDuration, jitter, pitch, articulation);
             lilypondCode += " | ";
             availableDuration = 13;
         }
         else
         { // Split note into 2 bars case
-            lilypondCode += fullDuration(availableDuration, pitch, articulation);
+            lilypondCode += fullDuration(availableDuration, jitter, pitch, articulation);
             short remaining = noteDuration - availableDuration; // total - used
             lilypondCode += "~ | ";
-            lilypondCode += fullDuration(remaining, pitch, "");
+            lilypondCode += fullDuration(remaining, jitter, pitch, "");
             lilypondCode += " ";
             availableDuration = 13 - remaining;
         }
@@ -211,9 +219,7 @@ string SerialismGenerator::rowToLilypond(Row r, short dynamic){
 }
 
 void SerialismGenerator::generatePiece(bool rh, vector<string>& lilypondCode){
-    vector<Row> &allRows = lhRows_;
     if (rh) {
-        allRows = rhRows_;
         string staffStart = "<< \\new Staff \\fixed c'{\\clef treble \\time 13/16 \\tempo 4 = ";
         staffStart += to_string(tempo_);
         lilypondCode.push_back(staffStart + "\n");
@@ -221,13 +227,16 @@ void SerialismGenerator::generatePiece(bool rh, vector<string>& lilypondCode){
         string staffStart = "    \\new Staff \\fixed c{\\clef bass \\time 13/16\n";
         lilypondCode.push_back(staffStart);
     }
-    for (size_t rowInd = 0; rowInd < allRows.size(); ++rowInd) {
+    for (size_t rowInd = 0; rowInd < 12; ++rowInd) {
         short dynamic = -1;
+        string lilypondRow;
         if (rh)
         {
             dynamic = dynamicsRow_[rowInd];
+            lilypondRow = rowToLilypond(rhRows_[rowInd], dynamic);
+        } else {
+            lilypondRow = rowToLilypond(lhRows_[rowInd], dynamic);
         }
-        string lilypondRow = rowToLilypond(allRows[rowInd], dynamic);
         lilypondCode.push_back(lilypondRow);
     }
     lilypondCode.push_back("         \\fine}\n");
@@ -248,3 +257,29 @@ string SerialismGenerator::header(){
     return header;
 }
 
+std::string SerialismGenerator::boulezJitter(){
+    if (boulezFactor_ == 0.0){
+        return "";
+    }
+    std::scoped_lock lock{boulezMutex_};
+    double value = boulezDist_(rng_);
+    int octave = std::round(value);
+    std::clamp(octave, -2, 2);
+    switch (octave)
+    {
+    case -2:
+        return ",,";
+    case -1:
+        return ",";
+    case 0:
+        return "";
+    case 1:
+        return "'";
+    case 2:
+        return "''";
+    default:
+        cerr << "Never Should reach here" << endl;
+        break;
+    }
+    return "";
+}

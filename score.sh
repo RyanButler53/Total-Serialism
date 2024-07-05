@@ -10,11 +10,11 @@ elif [ $numArgs == 1 ];
 then
     seed=$1
     build/totalSerialism  $seed;
-    lilypond -f pdf -l NONE random_score_seed_$seed.ly; # -o folder
+    lilypond -f pdf random_score_seed_$seed.ly; # -o folder -l NONE 
     finalFile=random_score_seed_$seed.pdf;
 else #No Arguments
     build/totalSerialism;
-    lilypond -f pdf -l NONE random_score.ly;
+    lilypond -f pdf random_score.ly; # -l NONE
     finalFile=random_score.pdf
 fi
 open $finalFile

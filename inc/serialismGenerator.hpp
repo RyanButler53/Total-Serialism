@@ -1,6 +1,7 @@
 #include <string>
 #include <vector>
 #include <random>
+#include <mutex>
 #include "analysisMatrix.hpp"
 
 #ifndef SERIALISM_GENERATOR_HPP_INCLUDED
@@ -10,6 +11,8 @@ class SerialismGenerator
 {
 private:
     std::mt19937 rng_;
+    std::normal_distribution<double> boulezDist_;
+    std::mutex boulezMutex_;
     std::vector<Row> rhRows_;
     std::vector<Row> lhRows_;
     std::vector<short> dynamicsRow_;
@@ -25,6 +28,7 @@ private:
     
     long seed_;
     short tempo_;
+    float boulezFactor_;
 
 public:
 
@@ -46,12 +50,13 @@ public:
      * @param articulation Articulation (is "" if no articulation needed)
      * @return std::string : Lilypond formatted string for the duration
      */
-    std::string fullDuration(short duration, std::string pitch, std::string articulation);
+    std::string fullDuration(short duration, std::string jitter, std::string pitch, std::string articulation);
 
     void generatePiece(bool rh,std::vector<std::string>& lilypondCode);
 
     std::string header();
 
+    std::string boulezJitter();
 };
 
 #endif

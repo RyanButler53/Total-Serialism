@@ -40,7 +40,6 @@ The_Algorithm // Composer. Must be one word (will change...)
 
 
 ### Roadmap: 
-- Ensure all notes fall in playable piano range (Highest Priority)
 - Allow for longer pieces
 - Time signature other than 13/16
 - Better GUI (Planned and drawn, not implemented)

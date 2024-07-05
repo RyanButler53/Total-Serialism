@@ -13,8 +13,8 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-# set(GCC_UBSAN_COMPILE_FLAGS "-fsanitize=undefined -fsanitize=address")
-# set(GCC_UBSAN_LINK_FLAGS    "-fsanitize=undefined -fsanitize=address")
+set(GCC_UBSAN_COMPILE_FLAGS "-fsanitize=undefined -fsanitize=address")
+set(GCC_UBSAN_LINK_FLAGS    "-fsanitize=undefined -fsanitize=address")
 
 set(CMAKE_CXX_FLAGS "${GCC_UBSAN_COMPILE_FLAGS}")
 set(CMAKE_EXE_LINKER_FLAGS "${GCC_UBSAN_LINK_FLAGS}")
