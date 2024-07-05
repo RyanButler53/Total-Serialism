@@ -278,7 +278,7 @@ std::string SerialismGenerator::boulezJitter(){
     case 2:
         return "''";
     default:
-        cerr << "Never Should reach here" << endl;
+        // Clamp and round gaurantee an integer val between -2 and 2. 
         break;
     }
     return "";
