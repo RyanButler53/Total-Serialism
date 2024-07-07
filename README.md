@@ -13,7 +13,9 @@ This repo contains code for a Total Serial Music generator
 `cmake ..`
 
 
-### Run: `python3 main.py`
+### Run: 
+
+`python3 main.py` or `./run`
 
 There are 2 non rigorous test suites: 
 `build/analysisMatrix-test` and `build/serialismGenerator-test`

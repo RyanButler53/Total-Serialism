@@ -8,19 +8,58 @@ from PyQt6.QtWidgets import (
     QTabWidget,
     QVBoxLayout,
     QHBoxLayout,
+    QSlider,
     QWidget,
 )
 import subprocess
-#Early UI has 2 tabs: Input from file, random. 
+import random
 #Later UI will have inputting the whole graphical language. 
+
+def toString(l):
+    s = ""
+    for x in l:
+        s += f"{x} "
+    return s[:-1]
+
+def cleanNums(num_string:str, field_name:str):
+    """Cleans the input and returns a cleaned list of numbers"""
+    split = num_string.split()
+    try:
+        nums = [int(n) for n in split]
+        if sorted(nums) == list(range(1,13)):
+            return nums
+        else:
+            print(f"Need exactly 12 unique numbers 1-12 in {field_name}")
+
+    except ValueError as error:
+        print(f"Error converting numbers to string in {field_name}")
+    nums = list(range(0,12))
+    random.shuffle(nums)
+    return nums
+
+def cleanRows(row_str:str, field_name:str):
+    """Cleans a list of strings"""
+    row_str.upper()
+    split = row_str.split()
+    validStrings = ["P", "R", "I", "RI"]
+    if len(split) == 12:
+        if all([x in validStrings for x in split]):
+            return split
+        else:
+            print(f"At least one invalid character in {field_name}")
+    else:
+        print(f"Need exactly 12 rows in {field_name}")
+
+    return [random.choice(validStrings) for _ in range(12)]
+    
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
         self.setWindowTitle("Total Serialism Sheet Music Generator")
-        self.setFixedWidth(300)
-        self.setFixedHeight(200)
+        self.setFixedWidth(500)
+        # self.setHeight(200)
 
         self.left_layout()
         self.right_layout()
@@ -44,23 +83,63 @@ class MainWindow(QMainWindow):
 
         self.leftLayout = QVBoxLayout()
         title = self.make_title("Custom Total Serial Music")
+        self.leftLayout.addWidget(title)
 
-        inLayout = QHBoxLayout()
-        self.input = QLineEdit()
-        inLayout.addWidget(QLabel("Input Filename"))
-        inLayout.addWidget(self.input)
+        self.leftNumberBoxes = {} #Maps label to input field and random button
+        for label in ["Pitch Row", "Rhythm Row", "Articulation Row", "Dynamic Row", "Right Hand Row Numbers", "Left Hand Row Numbers"]:
+            boxLayout = QHBoxLayout()
+            boxLayout.addWidget(QLabel(f"{label}: "))
+            input = QLineEdit()
+            input.setPlaceholderText("1 2 3 4 5 6 7 8 9 10 11 12")
+            # randomButton = QPushButton("Random")
+            # randomButton.clicked.connect(self.shuffle12)
+            #link to something
+            self.leftNumberBoxes[label] = input#,randomButton
+            boxLayout.addWidget(input)
+            # boxLayout.addWidget(randomButton)
+            self.leftLayout.addLayout(boxLayout)
+        
+        self.leftRowBoxes = {}
+        for label in ["Right Hand Row Types", "Left Hand Row Types"]:
+            boxLayout = QHBoxLayout()
+            boxLayout.addWidget(QLabel(f"{label}: "))
+            input = QLineEdit()
+            # randomButton = QPushButton("Random")
+            input.setPlaceholderText("P I R RI P I R RI P I R RI")
 
-        outLayout = QHBoxLayout()
-        outLayout.addWidget(QLabel("Output Filename"))
-        self.output = QLineEdit()
-        outLayout.addWidget(self.output)
+            # Link the random button to something else. 
+            self.leftRowBoxes[label] = input#,randomButton
+            boxLayout.addWidget(input)
+            # boxLayout.addWidget(randomButton)
+            self.leftLayout.addLayout(boxLayout)
+
+        # Slider
+        sliderBox = QHBoxLayout()
+        sliderBox.addWidget(QLabel("Tempo: 40"))
+        slider = QSlider(Qt.Orientation.Horizontal)
+        slider.setRange(40,240)
+        slider.setSingleStep(1)
+        sliderBox.addWidget(slider)
+        sliderBox.addWidget(QLabel("240"))
+        self.slider = slider
+        self.leftLayout.addLayout(sliderBox)
+
+        titleBox = QHBoxLayout()
+        titleBox.addWidget(QLabel("Title: "))
+        self.title = QLineEdit()
+        titleBox.addWidget(self.title)
+        self.leftLayout.addLayout(titleBox)
+
+        composerBox = QHBoxLayout()
+        composerBox.addWidget(QLabel("Composer: "))
+        self.composerBox = QLineEdit()
+        composerBox.addWidget(self.composerBox)
+        self.leftLayout.addLayout(composerBox)
 
         generateButton = QPushButton("Generate")
         generateButton.clicked.connect(self.customMusic)
 
-        self.leftLayout.addWidget(title)
-        self.leftLayout.addLayout(inLayout)
-        self.leftLayout.addLayout(outLayout)
+
         self.leftLayout.addWidget(generateButton)
 
     def right_layout(self):
@@ -91,16 +170,40 @@ class MainWindow(QMainWindow):
     
     def customMusic(self,input):
         """Calls the script with  """
-        inputFilename = self.input.text()
-        outputFilename = self.output.text()
-        if (inputFilename == ""):
-            return
-        if outputFilename == "":
-            print("No Output Filename given. Output file is Score.pdf")
-            outputFilename = "score"
-        outputFilename = outputFilename.rstrip(".pdf")
-        subprocess.call(["sh", "score.sh", outputFilename, inputFilename])
+        text_strings = []
+        for field_name, box in self.leftNumberBoxes.items():
+            nums_str = box.text()
+            nums = cleanNums(nums_str, field_name)
+            nums_str = toString(nums)
+            text_strings.append(nums_str+ "\n")
+
+        for field_name,box in self.leftRowBoxes.items():
+            row_str = box.text()
+            rows = cleanRows(row_str, field_name)
+            row_str = toString(rows)
+            text_strings.append(row_str+"\n")
+
+            tempo = str(self.slider.value())
+            title = self.title.text()
+            if (title == ""):
+                title = "Total Serialist Piece"
+            composer = self.composerBox.text()
+            if composer == "":
+                composer = "The Algorithm"
+
+        text_strings.append(tempo+ "\n")
+        text_strings.append(title + "\n")
+        text_strings.append(composer+ "\n")
         
+        with open("params.txt", "w") as f:
+            f.writelines(text_strings)
+
+        subprocess.call(["sh", "score.sh", f"{title}", "params.txt"])
+        
+    def shuffle12(self):
+        nums = list(range(0,12))
+        random.shuffle(nums)
+        return toString(nums)
 
     def randomMusic(self):
         seed = self.seed.text()
@@ -110,9 +213,6 @@ class MainWindow(QMainWindow):
         except ValueError as error:
             subprocess.call(["sh", "score.sh"])
         
-
-    
-
 app = QApplication([])
 window = MainWindow()
 window.show()  

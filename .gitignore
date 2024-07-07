@@ -42,3 +42,4 @@ build/
 # Lilypond output files and pdfs
 *.ly
 *.pdf
+params.txt
