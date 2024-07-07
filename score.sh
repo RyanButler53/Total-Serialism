@@ -6,6 +6,7 @@ then # specify input and output
     build/totalSerialism $out_filename.ly $in_filename;
     lilypond -f pdf -l NONE $out_filename.ly; # -o folder -l none
     finalFile=$(basename $out_filename).pdf
+    rm params.txt 
 elif [ $numArgs == 1 ];
 then
     seed=$1

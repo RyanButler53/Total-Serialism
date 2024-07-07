@@ -2,6 +2,7 @@
 #include <chrono>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <cmath>
 #include <unordered_map>
 
@@ -36,38 +37,49 @@ SerialismGenerator::SerialismGenerator(string inputfile):
     vector<vector<short>> sequences{6};
     for (auto& seq : sequences)
     {
-        for (size_t num = 0; num < 12; ++num){
+        string s;
+        getline(input, s);
+        stringstream ss{s};
+        for (size_t num = 0; num < 12; ++num)
+        {
             short value;
-            input >> value;
+            ss >> value;
             seq.push_back(value);
         }
     }
-
     // Right Hand rows
+    string rightRows;
+    getline(input, rightRows);
+    stringstream ss1{rightRows};
     for (size_t num = 0; num < 12; ++ num){
-        string s;
-        input >> s;
-        if (rowTypes.find(s) != rowTypes.end())
+        string row;
+        ss1 >> row;
+        if (rowTypes.find(row) != rowTypes.end())
         {
-            rhRows_.push_back(Row(rowTypes[s], sequences[3][num]));
+            rhRows_.push_back(Row(rowTypes[row], sequences[3][num]));
         }
         else
         {
-            cerr << "Invalid Row: " << s << endl;
+            cerr << "Invalid Row: " << row << endl;
             exit(1);
         }
     }
     // Left Hand Rows
-    for (size_t num = 0; num < 12; ++ num){
-        string s;
-        input >> s;
-        if (rowTypes.find(s) != rowTypes.end()){
-            lhRows_.push_back(Row(rowTypes[s], sequences[4][num]));
+    string leftRows;
+    getline(input, leftRows);
+    stringstream ss2{leftRows};
+    ss2 << leftRows;
+    for (size_t num = 0; num < 12; ++num)
+    {
+        string row;
+        ss2 >> row;
+        if (rowTypes.find(row) != rowTypes.end()){
+            lhRows_.push_back(Row(rowTypes[row], sequences[4][num]));
         } else {
-            cerr << "Invalid Row: " << s << endl;
+            cerr << "Invalid Row: " << row << endl;
             exit(1);
         }
-    }   
+    }
 
     // TODO: Elminate repeated for loop
 
@@ -75,9 +87,13 @@ SerialismGenerator::SerialismGenerator(string inputfile):
     rhythms_ = new AnalysisMatrix(sequences[1]);
     articulations_ = new AnalysisMatrix(sequences[2]);
     dynamicsRow_ = sequences[5];
-    input >> tempo_;
-    input >> title_;
-    input >> composer_;
+
+    string tempo_str;
+    getline(input, tempo_str);
+    tempo_ = stoi(tempo_str);
+    getline(input, title_);
+    getline(input, composer_);
+
 }
 
 void SerialismGenerator::initializeRandom(){
