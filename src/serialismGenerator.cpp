@@ -48,12 +48,12 @@ SerialismGenerator::SerialismGenerator(string inputfile):
         }
     }
     // Right Hand rows
-    string rightRows;
-    getline(input, rightRows);
-    stringstream ss1{rightRows};
+    string s;
+    getline(input, s);
+    stringstream ss{s};
     for (size_t num = 0; num < 12; ++ num){
         string row;
-        ss1 >> row;
+        ss >> row;
         if (rowTypes.find(row) != rowTypes.end())
         {
             rhRows_.push_back(Row(rowTypes[row], sequences[3][num]));
@@ -64,15 +64,16 @@ SerialismGenerator::SerialismGenerator(string inputfile):
             exit(1);
         }
     }
+
     // Left Hand Rows
-    string leftRows;
-    getline(input, leftRows);
-    stringstream ss2{leftRows};
-    ss2 << leftRows;
+    s.clear();
+    ss.clear();
+    getline(input, s);
+    ss << s;
     for (size_t num = 0; num < 12; ++num)
     {
         string row;
-        ss2 >> row;
+        ss >> row;
         if (rowTypes.find(row) != rowTypes.end()){
             lhRows_.push_back(Row(rowTypes[row], sequences[4][num]));
         } else {
