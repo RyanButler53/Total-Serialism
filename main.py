@@ -26,14 +26,16 @@ def cleanNums(num_string:str, field_name:str):
     split = num_string.split()
     try:
         nums = [int(n) for n in split]
-        if sorted(nums) == list(range(1,13)):
+        if sorted(nums) == list(range(12)):
             return nums
+        elif split == []:
+            pass
         else:
-            print(f"Need exactly 12 unique numbers 1-12 in {field_name}")
+            print(f"Need exactly 12 unique numbers 0-11 in {field_name}")
 
     except ValueError as error:
         print(f"Error converting numbers to string in {field_name}")
-    nums = list(range(0,12))
+    nums = list(range(12))
     random.shuffle(nums)
     return nums
 
@@ -47,6 +49,8 @@ def cleanRows(row_str:str, field_name:str):
             return split
         else:
             print(f"At least one invalid character in {field_name}")
+    elif split == []:
+        pass
     else:
         print(f"Need exactly 12 rows in {field_name}")
 
@@ -90,7 +94,7 @@ class MainWindow(QMainWindow):
             boxLayout = QHBoxLayout()
             boxLayout.addWidget(QLabel(f"{label}: "))
             input = QLineEdit()
-            input.setPlaceholderText("1 2 3 4 5 6 7 8 9 10 11 12")
+            input.setPlaceholderText("0 1 2 3 4 5 6 7 8 9 10 11")
             # randomButton = QPushButton("Random")
             # randomButton.clicked.connect(self.shuffle12)
             #link to something
@@ -197,8 +201,13 @@ class MainWindow(QMainWindow):
         
         with open("params.txt", "w") as f:
             f.writelines(text_strings)
+        title_filename = ""
+        title_split = title.split()
+        for word in title_split[:-1]: 
+            title_filename += (word + "_")
+        title_filename += title_split[-1]
 
-        subprocess.call(["sh", "score.sh", f"{title}", "params.txt"])
+        subprocess.call(["sh", "score.sh", f"{title_filename}", "params.txt"])
         
     def shuffle12(self):
         nums = list(range(0,12))
