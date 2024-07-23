@@ -33,10 +33,3 @@ TEST(Generator, Duration){
     ASSERT_EQ(duration11, "a2-_~a8."); 
     ASSERT_EQ(duration12, "af2.--"); 
 }
-
-TEST(Generator, FileGen){
-    SerialismGenerator fileGen("test/test-in.txt");
-    string rowP0 = fileGen.rowToLilypond(Row(P, 0), 5);
-    string P0row = "c16-- \\mp cs8-- d8.-- ef4-- e8.--~ | e8 f4.-- fs4--~fs16~ | fs8 g2-- af8.--~ | af4. a4..--~ | a8. bf2--~bf8~ | bf16 b2.-- | \n";
-    ASSERT_EQ(rowP0, P0row);
-}

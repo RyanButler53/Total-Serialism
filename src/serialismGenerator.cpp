@@ -2,6 +2,7 @@
 #include <chrono>
 #include <iostream>
 #include <fstream>
+#include <regex>
 #include <sstream>
 #include <cmath>
 #include <unordered_map>
@@ -16,7 +17,7 @@ SerialismGenerator::SerialismGenerator():
 }
 
 SerialismGenerator::SerialismGenerator(long seed):
-    seed_{seed},boulezFactor_{0.5}
+    seed_{seed},boulezFactor_{0} // 0.5
     {
     initializeRandom();
 }
@@ -57,23 +58,20 @@ SerialismGenerator::SerialismGenerator(string inputfile):
         if (rowTypes.find(row) != rowTypes.end())
         {
             rhRows_.push_back(Row(rowTypes[row], sequences[3][num]));
-        }
-        else
-        {
+        } else {
             cerr << "Invalid Row: " << row << endl;
             exit(1);
         }
     }
 
     // Left Hand Rows
-    s.clear();
-    ss.clear();
-    getline(input, s);
-    ss << s;
+    string s2;
+    getline(input, s2);
+    stringstream ss2{s2};
     for (size_t num = 0; num < 12; ++num)
-    {
+    { 
         string row;
-        ss >> row;
+        ss2 >> row;
         if (rowTypes.find(row) != rowTypes.end()){
             lhRows_.push_back(Row(rowTypes[row], sequences[4][num]));
         } else {
@@ -90,7 +88,10 @@ SerialismGenerator::SerialismGenerator(string inputfile):
     dynamicsRow_ = sequences[5];
 
     string tempo_str;
+    string ts_str;
     getline(input, tempo_str);
+    getline(input, ts_str);
+    ts_ = TimeSignature(ts_str);
     tempo_ = stoi(tempo_str);
     getline(input, title_);
     getline(input, composer_);
@@ -126,7 +127,7 @@ void SerialismGenerator::initializeRandom(){
         short lhtype = rtypeDist(rng_);
         lhRows_.push_back(Row(RowType(lhtype), lhRowNums[rowInd]));
     }
-        // Tempo
+    // Tempo
     std::uniform_int_distribution tempoDist{40, 240};
     tempo_ = tempoDist(rng_);
 
@@ -134,7 +135,14 @@ void SerialismGenerator::initializeRandom(){
     pitches_ = new AnalysisMatrix(pitchRow);
     rhythms_ = new AnalysisMatrix(rhythmRow);
     articulations_ = new AnalysisMatrix(articulationRow);
-
+    const std::vector < std::string > validTimes{
+                                     "1/4","3/8", "2/4", "5/8",
+                                     "3/4", "7/4", "15/8","13/8",
+                                     "6/8", "12/8", "6/4", "3/2",
+                                     "7/8", "4/4", "9/8", "5/4", "11/8"
+                                 };
+    std::uniform_int_distribution tsDist{0, 16};
+    ts_ = TimeSignature(validTimes[tsDist(rng_)]);
     title_ = "Random Composition";
     composer_ = "Seed = " + to_string(seed_);
 }
@@ -146,13 +154,15 @@ SerialismGenerator::~SerialismGenerator()
     delete articulations_;
 }
 
-string SerialismGenerator::fullDuration(short duration, string boulezJitter, string pitch, string articulation){
-    string absPitch = pitch + boulezJitter;
-    switch (duration) {
+string SerialismGenerator::fullDuration(short duration, string jitter, string pitch, string articulation){
+    string absPitch = pitch + jitter;
+    assert(duration > 0);
+    switch (duration)
+    { // Might be a better way of handling this recursively.
     case 1:
         return absPitch  + "16"  + articulation;
     case 2: 
-        return absPitch + "8" + articulation ;
+        return absPitch + "8" + articulation;
     case 3: 
         return absPitch  + "8." + articulation;
     case 4: 
@@ -173,13 +183,23 @@ string SerialismGenerator::fullDuration(short duration, string boulezJitter, str
         return absPitch + "2" + articulation + "~" + absPitch + "8.";   
     case 12:
         return absPitch + "2." + articulation;
-    default:
-        return "";
+    case 13:
+        return absPitch + "2." + articulation + "~" + absPitch + "16";
+    case 14:
+        return absPitch + "2.." + articulation;
+    case 15:
+        return absPitch + "2..." + articulation;
+    case 16:
+        return absPitch + "1" + articulation;
+    default: // 17+ 16ths left. Most 16ths allowed is 30 per measure
+        string first16 = absPitch + "1" + articulation + "~";
+        return first16 + fullDuration(duration - 16, jitter, pitch, articulation);
     }
     return "";
 }
 
-string SerialismGenerator::rowToLilypond(Row r, short dynamic){
+
+string SerialismGenerator::rowToLilypond(Row r, short dynamic, short& leftoverDuration){
     // Get the piches, rhythms and articulations for the row. 
     vector<short> pitches = pitches_->getRow(r);
     vector<short> rhythms = rhythms_->getRow(r);
@@ -191,72 +211,108 @@ string SerialismGenerator::rowToLilypond(Row r, short dynamic){
     }
 
     // 16th notes remaining in the measure
-    short availableDuration = 13;
+    const short totalDuration = ts_.num16ths();
     string lilypondCode = "";
-    // cout << boolalpha;
     for (size_t note = 0; note < 12; ++note)
     {
         short noteDuration = rhythms[note];
         string pitch = pitchMap_[pitches[note]];
         string articulation = articulationMap_[articulations[note]];
         string jitter = boulezJitter();
-        if (noteDuration < availableDuration)
+        if (noteDuration < leftoverDuration)
         { // fit entire note in measure
-            lilypondCode += fullDuration(noteDuration, jitter, pitch, articulation);
+            lilypondCode += fullDuration(noteDuration, jitter, pitch, articulation); // clean up with lambdas????
             lilypondCode += " ";
-            availableDuration -= noteDuration;
+            leftoverDuration -= noteDuration;
         }
-        else if (noteDuration == availableDuration)
+        else if (noteDuration == leftoverDuration)
         { // End of bar case.
             lilypondCode += fullDuration(noteDuration, jitter, pitch, articulation);
-            lilypondCode += " | ";
-            availableDuration = 13;
-        }
-        else
-        { // Split note into 2 bars case
-            lilypondCode += fullDuration(availableDuration, jitter, pitch, articulation);
-            short remaining = noteDuration - availableDuration; // total - used
-            lilypondCode += "~ | ";
-            lilypondCode += fullDuration(remaining, jitter, pitch, "");
-            lilypondCode += " ";
-            availableDuration = 13 - remaining;
+            lilypondCode += " |\n";
+            leftoverDuration = totalDuration;
+        } else { // Split note into n bars case
+            // Use up the rest of the duration in the current bar. 
+            lilypondCode += fullDuration(leftoverDuration, jitter, pitch, articulation);
+            short remaining = noteDuration - leftoverDuration; // total - used
+            lilypondCode += "~ |\n";
+            // There is still more than a full bar of duration left.
+            while (remaining > totalDuration) {
+                lilypondCode += fullDuration(totalDuration, jitter, pitch, articulation);
+                remaining -= totalDuration;
+                lilypondCode += "~ |\n";
+            }
+            if (totalDuration == remaining) { // exactly one bar left
+                lilypondCode += fullDuration(remaining, jitter, pitch, articulation);
+                lilypondCode += " |\n";
+                leftoverDuration = totalDuration;
+            } else { // less than 1 bar left. 
+                lilypondCode += fullDuration(remaining, jitter, pitch, articulation);
+                lilypondCode += " ";
+                leftoverDuration = totalDuration - remaining;
+            }
         }
 
+        // Add Dynamic if necessary
         if (note == 0 and dynamic >= 0){
+            clearSfz(lilypondCode);
             size_t codelen = lilypondCode.length();
-            if (lilypondCode.substr(codelen - 2) == "z ")
+            if (lilypondCode.substr(codelen - 3) == " |\n")
             {
-                lilypondCode.erase(lilypondCode.length() - 5);
+                lilypondCode.erase(codelen- 3);
+                lilypondCode += dynamicMap_[dynamic] + " |\n";
+            } else if (lilypondCode.substr(codelen - 1) == "\n"){
+                lilypondCode.erase(codelen- 2);
+                lilypondCode += dynamicMap_[dynamic] + " |\n";
+
+            } else {
+                lilypondCode += dynamicMap_[dynamic] + " ";
             }
-            lilypondCode += dynamicMap_[dynamic] + " ";
         }
     }
+
     lilypondCode += "\n";
     return lilypondCode;
 }
 
 void SerialismGenerator::generatePiece(bool rh, vector<string>& lilypondCode){
-    if (rh) {
-        string staffStart = "<< \\new Staff \\fixed c'{\\clef treble \\time 13/16 \\tempo 4 = ";
-        staffStart += to_string(tempo_);
-        lilypondCode.push_back(staffStart + "\n");
+
+    // Staff Header
+    string timeSigStr = to_string(ts_.getNumBeats()) + "/" + to_string(ts_.getBeatLen());
+    if (rh)
+    {
+        stringstream staffStart;
+        staffStart << "<< \\new Staff \\fixed c'{\\clef treble \\time " << timeSigStr << " \\tempo 4 = " << tempo_ << "\n";
+        
+        lilypondCode.push_back(staffStart.str());
     } else {
-        string staffStart = "    \\new Staff \\fixed c{\\clef bass \\time 13/16\n";
-        lilypondCode.push_back(staffStart);
+        stringstream staffStart;
+        
+        staffStart << "    \\new Staff \\fixed c{\\clef bass \\time " << timeSigStr << "\n";
+        lilypondCode.push_back(staffStart.str());
     }
-    for (size_t rowInd = 0; rowInd < 12; ++rowInd) {
+
+    // Notes
+    short leftover16ths = ts_.num16ths();
+    for (size_t rowInd = 0; rowInd < 12; ++rowInd) { // Change this to have varying length pieces
         short dynamic = -1;
         string lilypondRow;
-        if (rh)
-        {
+        if (rh) {
             dynamic = dynamicsRow_[rowInd];
-            lilypondRow = rowToLilypond(rhRows_[rowInd], dynamic);
+            lilypondRow = rowToLilypond(rhRows_[rowInd], dynamic,leftover16ths);
         } else {
-            lilypondRow = rowToLilypond(lhRows_[rowInd], dynamic);
+            lilypondRow = rowToLilypond(lhRows_[rowInd], dynamic, leftover16ths);
         }
         lilypondCode.push_back(lilypondRow);
     }
-    lilypondCode.push_back("         \\fine}\n");
+    
+    // End of piece. Clean up the remainder at the end of the piece
+    if (leftover16ths == ts_.num16ths()){ // no leftover 16ths.
+        lilypondCode.push_back("\n \\fine}\n");
+    } else {
+        string remainingPiece = fullDuration(leftover16ths, "", "r", "");
+        lilypondCode.back().append(remainingPiece + "|\n \\fine}\n");
+    }
+
     if (!rh) {
         lilypondCode.push_back(">>");
     }
@@ -266,7 +322,7 @@ string SerialismGenerator::header(){
     string header = "\\version \"2.24.1\"\n\\language \"english\"\n\n";
     header += "\\header {\n   title = \"";
     header += title_;
-    header += "\"\n   subtitle = \"Algorithmic Composition\"\n   instrument = \"Piano\"\n   ";
+    header += "\"\n   subtitle = \"Algorithmic Composition\"\n   instrument = \"Piano\"\n   "; // may get changed
     header += "composer = \"";
     header += composer_;
     header += "\"\n";
@@ -299,4 +355,15 @@ std::string SerialismGenerator::boulezJitter(){
         break;
     }
     return "";
+}
+
+
+void SerialismGenerator::clearSfz(std::string& str) {
+    const string from = "\\sfz";
+    const string to = "";
+    size_t start_pos = 0;
+    while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length(); // Move past the last replaced substring
+    }
 }
