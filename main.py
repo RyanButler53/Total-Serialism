@@ -13,7 +13,7 @@ from PyQt6.QtWidgets import (
 )
 import subprocess
 import random
-#Later UI will have inputting the whole graphical language. 
+#Later UI will have inputting the whole graphical language. (That UI is here!)
 
 def toString(l):
     s = ""
@@ -38,6 +38,21 @@ def cleanNums(num_string:str, field_name:str):
     nums = list(range(12))
     random.shuffle(nums)
     return nums
+
+def validTS(timeSig):
+    allTS = [
+            "1/4","3/8", "2/4", "5/8",
+            "3/4", "7/4", "15/8","13/8",
+            "6/8", "12/8", "6/4", "3/2",
+            "7/8", "4/4", "9/8", "5/4", "11/8"
+            ]
+    if timeSig == "":
+        return random.choice(allTS)
+    elif timeSig not in allTS:
+        print(f"Time Signature must be one PYTHON of \n{allTS}")
+        return "4/4"
+    else:
+        return timeSig
 
 def cleanRows(row_str:str, field_name:str):
     """Cleans a list of strings"""
@@ -128,6 +143,14 @@ class MainWindow(QMainWindow):
         self.slider = slider
         self.leftLayout.addLayout(sliderBox)
 
+        timeSigBox = QHBoxLayout()
+        timeSigBox.addWidget(QLabel("Time Signature: "))
+        self.timeSig = QLineEdit()
+        timeSigBox.addWidget(self.timeSig)
+        self.timeSig.setPlaceholderText("4/4")
+
+        self.leftLayout.addLayout(timeSigBox)
+
         titleBox = QHBoxLayout()
         titleBox.addWidget(QLabel("Title: "))
         self.title = QLineEdit()
@@ -172,7 +195,7 @@ class MainWindow(QMainWindow):
         title.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
         return title
     
-    def customMusic(self,input):
+    def customMusic(self):
         """Calls the script with  """
         text_strings = []
         for field_name, box in self.leftNumberBoxes.items():
@@ -187,15 +210,20 @@ class MainWindow(QMainWindow):
             row_str = toString(rows)
             text_strings.append(row_str+"\n")
 
-            tempo = str(self.slider.value())
-            title = self.title.text()
-            if (title == ""):
-                title = "Total Serialist Piece"
-            composer = self.composerBox.text()
-            if composer == "":
-                composer = "The Algorithm"
+        tempo = str(self.slider.value())
+
+        timeSignature = self.timeSig.text()
+        timeSignature = validTS(timeSignature)
+            
+        title = self.title.text()
+        if (title == ""):
+            title = "Total Serialist Piece"
+        composer = self.composerBox.text()
+        if composer == "":
+            composer = "The Algorithm"
 
         text_strings.append(tempo+ "\n")
+        text_strings.append(timeSignature + "\n")
         text_strings.append(title + "\n")
         text_strings.append(composer+ "\n")
         

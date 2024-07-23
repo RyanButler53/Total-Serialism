@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.30.0)
 project(Total-Serialism)
 
 set(CMAKE_CXX_STANDARD 23)
@@ -13,7 +13,7 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-set(GCC_UBSAN_COMPILE_FLAGS "-fsanitize=undefined -fsanitize=address")
+set(GCC_UBSAN_COMPILE_FLAGS "-fsanitize=undefined -fsanitize=address -g")
 set(GCC_UBSAN_LINK_FLAGS    "-fsanitize=undefined -fsanitize=address")
 
 set(CMAKE_CXX_FLAGS "${GCC_UBSAN_COMPILE_FLAGS}")
@@ -27,6 +27,7 @@ add_executable(
     src/totalSerialism.cpp
     src/serialismGenerator.cpp
     src/analysisMatrix.cpp
+    src/timeSignature.cpp
     )
 
 # Tests
@@ -37,10 +38,17 @@ add_executable(
     )
 
 add_executable(
+        timeSignature-test 
+        src/timeSignature-test.cpp
+        src/timeSignature.cpp
+        )
+
+add_executable(
     serialismGenerator-test
     src/serialismGenerator-test.cpp
     src/serialismGenerator.cpp
     src/analysisMatrix.cpp
+    src/timeSignature.cpp
     )
 
 target_link_libraries(
@@ -53,6 +61,10 @@ target_link_libraries(
     GTest::gtest_main
     )
     
+target_link_libraries(
+    timeSignature-test
+    GTest::gtest_main
+    )
 
 include(GoogleTest)
 gtest_discover_tests(analysisMatrix-test)

@@ -2,7 +2,9 @@
 #include <fstream>
 #include <string>
 #include <thread>
+#include <regex>
 #include "analysisMatrix.hpp"
+#include "timeSignature.hpp"
 #include "serialismGenerator.hpp"
 
 using namespace std;
@@ -46,12 +48,13 @@ int main(int argc, char** argv){
     };
 
     // Do right and left in parallel
-    std::thread right(gen, true, std::ref(rightCode));
+    // std::thread right(gen, true, std::ref(rightCode));
+    gen(true, rightCode);
     gen(false, leftCode);
 
     // Continue working on the main thread if right hand isn't finished
     outputFile << header;
-    right.join();
+    // right.join();
 
     // Write to file
     for (auto &line : rightCode) {
