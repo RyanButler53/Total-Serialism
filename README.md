@@ -17,9 +17,6 @@ This repo contains code for a Total Serial Music generator
 
 `python3 main.py` or `./run`
 
-There are 2 non rigorous test suites: 
-`build/analysisMatrix-test` and `build/serialismGenerator-test`
-
 If you don't have pyqt installed, you can specify a seed for randomness with 
 
 `sh score.sh <seed>`.
@@ -28,6 +25,20 @@ Alternatively, you can specify an input file and output filename. The input file
 form as below or it will not work. Then run 
 
 `sh score.sh <output_filename>, <input_filename>`
+
+### Tests: 
+
+There are a 3 non rigorous unit tests written using google test. They can be run with the script
+
+`sh unitTests.sh`
+
+There is also a longer fuzz testing script. Fuzz testing leverages the lilypond compiler's error messages:
+
+`sh fuzzTest.sh <numTests>`
+
+It checks if there are no errors or warnings from the lilypond compiler. The lilypond compiler is slow and this test takes some time to run. 
+The number of tests defaults to 10. 
+
 
 ### Notes:
 
@@ -53,5 +64,4 @@ The_Algorithm // Composer.
 - Multiple Instruments
 - gui Help screen
 - Dialog box on incorrect gui input
-- Automated Fuzz testing
 - Midi?
