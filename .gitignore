@@ -38,6 +38,7 @@ totalSerialism
 test/
 .vscode/
 build/
+fuzz/
 
 # Lilypond output files and pdfs
 *.ly

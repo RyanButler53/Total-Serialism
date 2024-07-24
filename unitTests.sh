@@ -1,0 +1,3 @@
+build/analysisMatrix-test
+build/timeSignature-test
+build/serialismGenerator-test

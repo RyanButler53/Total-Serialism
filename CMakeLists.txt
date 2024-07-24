@@ -38,10 +38,10 @@ add_executable(
     )
 
 add_executable(
-        timeSignature-test 
-        src/timeSignature-test.cpp
-        src/timeSignature.cpp
-        )
+    timeSignature-test 
+    src/timeSignature-test.cpp
+    src/timeSignature.cpp
+    )
 
 add_executable(
     serialismGenerator-test
@@ -51,6 +51,9 @@ add_executable(
     src/timeSignature.cpp
     )
 
+# TESTING
+
+# Unit Tests
 target_link_libraries(
     analysisMatrix-test
     GTest::gtest_main
@@ -69,3 +72,10 @@ target_link_libraries(
 include(GoogleTest)
 gtest_discover_tests(analysisMatrix-test)
 gtest_discover_tests(serialismGenerator-test)
+gtest_discover_tests(timeSignature-test)
+
+# Fuzz Test:
+add_executable(
+    fuzzEval
+    src/fuzzEval.cpp
+    )
