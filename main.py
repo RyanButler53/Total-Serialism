@@ -9,11 +9,18 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QHBoxLayout,
     QSlider,
+    QComboBox,
     QWidget,
 )
 import subprocess
 import random
-#Later UI will have inputting the whole graphical language. (That UI is here!)
+
+TIME_SIGNATURES = [  "4/4",
+            "1/4","3/8", "2/4", "5/8", "6/8",
+            "3/4", "7/8", "9/8", "5/4", "11/8",
+             "12/8", "6/4", "3/2", "13/8",
+            "7/4", "15/8",
+            ]
 
 def toString(l):
     s = ""
@@ -38,21 +45,6 @@ def cleanNums(num_string:str, field_name:str):
     nums = list(range(12))
     random.shuffle(nums)
     return nums
-
-def validTS(timeSig):
-    allTS = [
-            "1/4","3/8", "2/4", "5/8",
-            "3/4", "7/4", "15/8","13/8",
-            "6/8", "12/8", "6/4", "3/2",
-            "7/8", "4/4", "9/8", "5/4", "11/8"
-            ]
-    if timeSig == "":
-        return random.choice(allTS)
-    elif timeSig not in allTS:
-        print(f"Time Signature must be one PYTHON of \n{allTS}")
-        return "4/4"
-    else:
-        return timeSig
 
 def cleanRows(row_str:str, field_name:str):
     """Cleans a list of strings"""
@@ -145,9 +137,10 @@ class MainWindow(QMainWindow):
 
         timeSigBox = QHBoxLayout()
         timeSigBox.addWidget(QLabel("Time Signature: "))
-        self.timeSig = QLineEdit()
+        self.timeSig = QComboBox()
+        self.timeSig.addItems(TIME_SIGNATURES)
         timeSigBox.addWidget(self.timeSig)
-        self.timeSig.setPlaceholderText("4/4")
+        # self.timeSig.setPlaceholderText("4/4")
 
         self.leftLayout.addLayout(timeSigBox)
 
@@ -212,8 +205,7 @@ class MainWindow(QMainWindow):
 
         tempo = str(self.slider.value())
 
-        timeSignature = self.timeSig.text()
-        timeSignature = validTS(timeSignature)
+        timeSignature = self.timeSig.currentText()
             
         title = self.title.text()
         if (title == ""):
