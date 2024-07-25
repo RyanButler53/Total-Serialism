@@ -38,6 +38,12 @@ add_executable(
     )
 
 add_executable(
+    note-test 
+    src/note-test.cpp
+    src/note.cpp
+    )
+
+add_executable(
     timeSignature-test 
     src/timeSignature-test.cpp
     src/timeSignature.cpp
@@ -68,11 +74,16 @@ target_link_libraries(
     timeSignature-test
     GTest::gtest_main
     )
+target_link_libraries(
+    note-test
+    GTest::gtest_main
+    )
 
 include(GoogleTest)
 gtest_discover_tests(analysisMatrix-test)
 gtest_discover_tests(serialismGenerator-test)
 gtest_discover_tests(timeSignature-test)
+gtest_discover_tests(note-test)
 
 # Fuzz Test:
 add_executable(
