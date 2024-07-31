@@ -35,7 +35,6 @@ serialismGenerator-test
 totalSerialism
 
 # Tests and Vscode:
-test/
 .vscode/
 build/
 fuzz/

@@ -1,3 +1,5 @@
+#ifndef NOTE_HPP_INCLUDED
+#define NOTE_HPP_INCLUDED
 #include <string>
 
 class Note
@@ -23,13 +25,17 @@ private:
 
     Pitch pitch_;
     int octave_;
+    std::string str_;
 
 public:
     Note(std::string pitch, int octave);
     ~Note() = default;
 
-    bool operator<(const Note &other) const ;
+    std::string str();
+    bool operator<(const Note &other) const;
     bool operator==(const Note &other)const ;
     bool operator!=(const Note &other) const;
     bool operator>(const Note &other) const;
 };
+
+#endif // NOTE_HPP_INCLUDED

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.30.0)
+cmake_minimum_required(VERSION 3.24.0)
 project(Total-Serialism)
 
 set(CMAKE_CXX_STANDARD 23)
@@ -28,6 +28,9 @@ add_executable(
     src/serialismGenerator.cpp
     src/analysisMatrix.cpp
     src/timeSignature.cpp
+    src/instrument.cpp
+    src/note.cpp
+    src/piano.cpp
     )
 
 # Tests

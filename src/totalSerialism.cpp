@@ -9,8 +9,6 @@
 
 using namespace std;
 
-void printCommands();
-
 int main(int argc, char** argv){
     SerialismGenerator* generator;
     string outputFilename = "";
@@ -37,40 +35,38 @@ int main(int argc, char** argv){
 
     ofstream outputFile(outputFilename);
     string header = generator->header();
-
-    vector<string> rightCode;
-    vector<string> leftCode;
+    std::string scoreBox = generator->scoreBox();
+    // vector<string> rightCode;
+    // vector<string> leftCode;
+    vector<string> lilypondCode;
     // Parallelize!
 
-    auto gen = [&generator](bool rh, vector<string>& lilypondCode)
-    {
-        generator->generatePiece(rh, lilypondCode);
-    };
+    // auto gen = [&generator](bool rh, vector<string>& lilypondCode)
+    // {
+    //     generator->generatePiece(rh, lilypondCode);
+    // };
 
     // Do right and left in parallel
     // std::thread right(gen, true, std::ref(rightCode));
-    gen(true, rightCode);
-    gen(false, leftCode);
+    // gen(true, rightCode);
+    // gen(false, leftCode);
+    generator->generatePiece(lilypondCode);
 
     // Continue working on the main thread if right hand isn't finished
     outputFile << header;
     // right.join();
 
     // Write to file
-    for (auto &line : rightCode) {
+    for (auto &line : lilypondCode) {
         outputFile << line;
     }
-    for (auto& line:leftCode) {
-        outputFile << line;
-    }
+    // outputFile << "\n";
+    // for (auto &line : leftCode)
+    // {
+    //     outputFile << line;
+    // }
+    // outputFile << scoreBox;
 
     delete generator;
     return 0;
-}
-
-void printCommands(){
-    cout << "Command Line options: " << endl;
-    cout << "-s [SEED]: Sets the seed for random music to SEED. Cannot specify output or input files" << endl;
-    cout << "-i [INPUT-FILENAME]: Sets the input filename for generating sheet music." << endl;
-    cout << "-o [OUTPUT-FILENAME]: Specifies the output name of the score. " << endl;
 }

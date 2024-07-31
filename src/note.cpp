@@ -1,7 +1,7 @@
 #include "note.hpp"
 
 using namespace std;
-Note::Note(string pitch, int octave): octave_{octave}
+Note::Note(string pitch, int octave): octave_{octave},str_{pitch}
 {
     if (pitch == "c"){
         pitch_ = Note::Pitch::C;
@@ -30,6 +30,20 @@ Note::Note(string pitch, int octave): octave_{octave}
     } else {
         pitch_ = Note::Pitch::INVALID;
     }
+    // Set Pitch String
+    if (octave > 0){
+        for (size_t x = 0; x < octave; ++octave){
+            str_ += "'";
+        }
+    } else if (octave < 0){
+        for (size_t x = 0; x < octave; ++octave){
+            str_ += ",";
+        } 
+    }
+}
+
+string Note::str(){
+    return str_;
 }
 
 bool Note::operator<(const Note& other) const {
