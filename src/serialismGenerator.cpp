@@ -155,6 +155,7 @@ void SerialismGenerator::initializeRandom(){
 
     instrumentNames_.push_back("Piano");
     allInstruments_.push_back(new Piano(pitches_, rhythms_, articulations_, dynamicsRow_, ts_, rhRows, lhRows));
+    allInstruments_.push_back(new Cello(pitches_, rhythms_, articulations_, dynamicsRow_, ts_, lhRows));
 }
 
 SerialismGenerator::~SerialismGenerator()
@@ -170,45 +171,11 @@ SerialismGenerator::~SerialismGenerator()
 
 void SerialismGenerator::generatePiece(vector<string>& lilypondCode){
     lilypondCode.push_back(header());
-
-    allInstruments_[0]->generateCode(lilypondCode);
+    // Parallelize Here
+    for (Instrument*& instrument : allInstruments_){
+        instrument->generateCode(lilypondCode);
+    }
     lilypondCode.push_back(scoreBox());
-    //     // Staff Header
-    //     string timeSigStr = to_string(ts_.getNumBeats()) + "/" + to_string(ts_.getBeatLen());
-    //     if (rh)
-    //     {
-    //         stringstream staffStart;
-    //         staffStart << "right = \\fixed c'{\\clef treble \\global \n";
-
-    //         lilypondCode.push_back(staffStart.str());
-    //     } else {
-    //         stringstream staffStart;
-
-    //         staffStart << "left = \\fixed c{\\clef bass \\global \n";
-    //         lilypondCode.push_back(staffStart.str());
-    //     }
-
-    //     // Notes
-    //     short leftover16ths = ts_.num16ths();
-    //     for (size_t rowInd = 0; rowInd < 12; ++rowInd) { // Change this to have varying length pieces
-    //         short dynamic = -1;
-    //         string lilypondRow;
-    //         if (rh) {
-    //             dynamic = dynamicsRow_[rowInd];
-    //             lilypondRow = rowToLilypond(rhRows_[rowInd], dynamic,leftover16ths);
-    //         } else {
-    //             lilypondRow = rowToLilypond(lhRows_[rowInd], dynamic, leftover16ths);
-    //         }
-    //         lilypondCode.push_back(lilypondRow);
-    //     }
-
-    //     // End of piece. Clean up the remainder at the end of the piece
-    //     if (leftover16ths == ts_.num16ths()){ // no leftover 16ths.
-    //         lilypondCode.push_back("\n \\fine}\n");
-    //     } else {
-    //         string remainingPiece = fullDuration(leftover16ths, "", "r", "");
-    //         lilypondCode.back().append(remainingPiece + "|\n \\fine}\n");
-    //     }
 }
 
 string SerialismGenerator::header(){
@@ -252,20 +219,11 @@ std::string SerialismGenerator::boulezJitter(){
     return "";
 }
 
-
-// void SerialismGenerator::clearSfz(std::string& str) {
-//     const string from = "\\sfz";
-//     const string to = "";
-//     size_t start_pos = 0;
-//     while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
-//         str.replace(start_pos, from.length(), to);
-//         start_pos += to.length(); // Move past the last replaced substring
-//     }
-// }
-
 std::string SerialismGenerator::scoreBox(){
-    std::string scoreBox = "\\score {";
-    scoreBox += "\\new PianoStaff \\with {instrumentName = \"Piano\"} {\n\t\t<<";
-    scoreBox += "\n\t\t\\new Staff {\\right }\n\t\t\\new Staff {\\left } \n\t\t>>\n\t}\n}";
+    std::string scoreBox = "\\score {\n\t<<\n";
+    for (Instrument*& instrument : allInstruments_){
+        scoreBox += instrument->scoreBox();
+    }
+    scoreBox += "\n\t>>\n}";
     return scoreBox;
 }

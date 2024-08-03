@@ -46,6 +46,13 @@ void Piano::generateCode(vector<string>& lilypondCode){
     }
 }
 
-string Piano::staffHeader(vector<string>& lilypondCode){
+// Piano class is different and staffHeader isn't useful for it. 
+string Piano::staffHeader(){
     return "right = \\fixed c'{\\clef treble \\global \n";
+}
+
+string Piano::scoreBox(){
+    string scoreBox = "\t\\new PianoStaff \\with {instrumentName = \"Piano\"} {\n\t\t<<";
+    scoreBox += "\n\t\t\\new Staff {\\right }\n\t\t\\new Staff {\\left } \n\t\t>>\n\t}\n";
+    return scoreBox;
 }

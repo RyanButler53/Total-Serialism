@@ -20,8 +20,10 @@ public:
     Piano(AnalysisMatrix* pitches, AnalysisMatrix* rhythms, AnalysisMatrix* articulations, std::vector<short>& dynamics, TimeSignature ts, std::vector<Row> RhRows, std::vector<Row> LHRows);
     ~Piano() = default;
 
+    // Pure virtual functions
     virtual void generateCode(std::vector<std::string>& lilypondCode);
-    std::string staffHeader(std::vector<std::string> &lilypondCode);
+    std::string staffHeader();
+    std::string scoreBox();
 };
 
 #endif //PIANO_HPP_INCLUDED

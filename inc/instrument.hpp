@@ -33,8 +33,9 @@ class Instrument{
 
         std::string rowToLilypond(Row r, short dynamic, short& leftover);
         virtual void generateCode(std::vector<std::string> &lilypondCode) = 0; // Pure Virtual?
-        virtual std::string staffHeader(std::vector<std::string> &lilypondCode) = 0;
-        
+        virtual std::string staffHeader() = 0;
+        virtual std::string scoreBox() = 0;
+
         // Utility Functions
         void clearSfz(std::string &str);
         std::string fullDuration(short duration, std::string jitter, std::string pitch, std::string articulation);

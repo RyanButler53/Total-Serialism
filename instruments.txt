@@ -21,14 +21,17 @@ piccolo
 flute
 
 
-Path to this ticet: 
+Path to this ticket: 
 Figure out how to use the score box DONE
 Reformat the lilypond code to get the old output DONE 
 Create instrument and piano class to allow for extendible output DONE 
 Make time signatures work again DONE
-Create Cello class and make it work for a piano cello duet
+Create Cello class and make it work for a piano cello duet DONE
+Redo Score Box code DONE
 Make randomness and other inputs work correctly again
+Make file inputs work correctly again
 Factor out the Instrument arguments by finishing the Instrument Factory class
 Update GUI to allow for multiple instruments
-Update cmakelists.tst 
+Make the rest of the instruments
+Update cmakelists.txt 
 

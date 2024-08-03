@@ -19,6 +19,12 @@ set(GCC_UBSAN_LINK_FLAGS    "-fsanitize=undefined -fsanitize=address")
 set(CMAKE_CXX_FLAGS "${GCC_UBSAN_COMPILE_FLAGS}")
 set(CMAKE_EXE_LINKER_FLAGS "${GCC_UBSAN_LINK_FLAGS}")
 
+set(INSTRUMENT_SRC 
+    src/instrument.cpp
+    src/piano.cpp
+    src/cello.cpp)
+
+
 include_directories(inc)
 
 # Production
@@ -28,9 +34,8 @@ add_executable(
     src/serialismGenerator.cpp
     src/analysisMatrix.cpp
     src/timeSignature.cpp
-    src/instrument.cpp
     src/note.cpp
-    src/piano.cpp
+    ${INSTRUMENT_SRC}
     )
 
 # Tests

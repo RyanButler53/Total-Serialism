@@ -2,11 +2,12 @@
 #include <vector>
 #include <random>
 #include <mutex>
-#include "instrument.hpp"
-#include "piano.hpp"
 #include "instrumentFactory.hpp"
 #include "timeSignature.hpp"
 #include "analysisMatrix.hpp"
+#include "instrument.hpp"
+#include "piano.hpp"
+#include "cello.hpp"
 
 #ifndef SERIALISM_GENERATOR_HPP_INCLUDED
 #define SERIALISM_GENERATOR_HPP_INCLUDED
@@ -94,8 +95,6 @@ public:
     std::string header();
 
     std::string boulezJitter();
-
-    // void clearSfz(std::string &str);
 
     std::string scoreBox();
 };
