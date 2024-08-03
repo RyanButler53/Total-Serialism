@@ -145,14 +145,16 @@ void SerialismGenerator::initializeRandom(){
                                      "7/8", "4/4", "9/8", "5/4", "11/8"
                                  };
 
-    instrumentNames_.push_back("Piano");
-    allInstruments_.push_back(new Piano(pitches_, rhythms_, articulations_, dynamicsRow_, rhRows, lhRows));
+
 
     std::uniform_int_distribution tsDist{0, 16};
-    // ts_ = TimeSignature(validTimes[tsDist(rng_)]);
-    ts_ = TimeSignature("4/4");
+    ts_ = TimeSignature(validTimes[tsDist(rng_)]);
+
     title_ = "Random Composition";
     composer_ = "Seed = " + to_string(seed_);
+
+    instrumentNames_.push_back("Piano");
+    allInstruments_.push_back(new Piano(pitches_, rhythms_, articulations_, dynamicsRow_, ts_, rhRows, lhRows));
 }
 
 SerialismGenerator::~SerialismGenerator()
@@ -165,50 +167,6 @@ SerialismGenerator::~SerialismGenerator()
         delete i;
     }
 }
-
-// string SerialismGenerator::fullDuration(short duration, string jitter, string pitch, string articulation){
-//     string absPitch = pitch + jitter;
-//     assert(duration > 0);
-//     switch (duration)
-//     { // Might be a better way of handling this recursively.
-//     case 1:
-//         return absPitch  + "16"  + articulation;
-//     case 2: 
-//         return absPitch + "8" + articulation;
-//     case 3: 
-//         return absPitch  + "8." + articulation;
-//     case 4: 
-//         return absPitch  + "4" + articulation;
-//     case 5:
-//         return absPitch + "4" + articulation + "~" + absPitch + "16";
-//     case 6:
-//         return absPitch + "4." + articulation;
-//     case 7:
-//         return absPitch + "4.." + articulation;
-//     case 8:
-//         return absPitch + "2" + articulation;
-//     case 9:
-//         return absPitch + "2" + articulation + "~" + absPitch + "16";
-//     case 10:
-//         return absPitch + "2" + articulation + "~" + absPitch + "8";
-//     case 11:
-//         return absPitch + "2" + articulation + "~" + absPitch + "8.";   
-//     case 12:
-//         return absPitch + "2." + articulation;
-//     case 13:
-//         return absPitch + "2." + articulation + "~" + absPitch + "16";
-//     case 14:
-//         return absPitch + "2.." + articulation;
-//     case 15:
-//         return absPitch + "2..." + articulation;
-//     case 16:
-//         return absPitch + "1" + articulation;
-//     default: // 17+ 16ths left. Most 16ths allowed is 30 per measure
-//         string first16 = absPitch + "1" + articulation + "~";
-//         return first16 + fullDuration(duration - 16, jitter, pitch, articulation);
-//     }
-//     return "";
-// }
 
 void SerialismGenerator::generatePiece(vector<string>& lilypondCode){
     lilypondCode.push_back(header());

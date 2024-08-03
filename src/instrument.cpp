@@ -2,7 +2,8 @@
 
 using namespace std;
 
-Instrument::Instrument(AnalysisMatrix *pitch, AnalysisMatrix *rhythm, AnalysisMatrix *articulation, std::vector<short> dynamics) : pitches_{pitch}, rhythms_{rhythm}, articulations_{articulation}, dynamicsRow_{dynamics} {}
+Instrument::Instrument(AnalysisMatrix *pitch, AnalysisMatrix *rhythm, AnalysisMatrix *articulation, std::vector<short> dynamics, TimeSignature ts) : 
+pitches_{pitch}, rhythms_{rhythm}, articulations_{articulation}, dynamicsRow_{dynamics}, ts_{ts} {}
 
 string Instrument::rowToLilypond(Row r, short dynamic, short& leftoverDuration){
     // Get the piches, rhythms and articulations for the row. 
@@ -15,7 +16,7 @@ string Instrument::rowToLilypond(Row r, short dynamic, short& leftoverDuration){
     }
 
     // 16th notes remaining in the measure
-    const short totalDuration = 16; // ts_.num16ths();
+    const short totalDuration = ts_.num16ths();
     string lilypondCode = "";
     for (size_t note = 0; note < 12; ++note)
     {

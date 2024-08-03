@@ -2,6 +2,7 @@
 #ifndef INSTRUMENT_HPP_INCLUDED
 #define INSTRUMENT_HPP_INCLUDED
 #include "analysisMatrix.hpp"
+#include "timeSignature.hpp"
 
 #include <string>
 
@@ -14,6 +15,7 @@ class Instrument{
         AnalysisMatrix* rhythms_;
         AnalysisMatrix* articulations_;
         std::vector<short> dynamicsRow_;
+        TimeSignature ts_;
 
         // Everything can access the pitch, articulation and dynamic mappings
         const std::vector<std::string> pitchMap_{"c","cs","d","ef","e","f","fs","g","af","a","bf","b"};
@@ -26,7 +28,7 @@ class Instrument{
     public:
 
         // Constructors
-        Instrument(AnalysisMatrix* pitches, AnalysisMatrix* rhythms, AnalysisMatrix* articulations, std::vector<short> dynamics);
+        Instrument(AnalysisMatrix* pitches, AnalysisMatrix* rhythms, AnalysisMatrix* articulations, std::vector<short> dynamics, TimeSignature ts);
         virtual ~Instrument() = default;
 
         std::string rowToLilypond(Row r, short dynamic, short& leftover);
