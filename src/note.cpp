@@ -32,11 +32,11 @@ Note::Note(string pitch, int octave): octave_{octave},str_{pitch}
     }
     // Set Pitch String
     if (octave > 0){
-        for (size_t x = 0; x < octave; ++octave){
+        for (size_t x = 0; x < octave; ++x){
             str_ += "'";
         }
     } else if (octave < 0){
-        for (size_t x = 0; x < octave; ++octave){
+        for (size_t x = 0; x < std::abs(octave); ++x){
             str_ += ",";
         } 
     }

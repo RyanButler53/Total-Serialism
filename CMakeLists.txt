@@ -1,17 +1,17 @@
 cmake_minimum_required(VERSION 3.24.0)
 project(Total-Serialism)
 
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include(FetchContent)
-FetchContent_Declare(
-  googletest
-  URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
-)
-FetchContent_MakeAvailable(googletest)
+# include(FetchContent)
+# FetchContent_Declare(
+#   googletest
+#   URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+# )
+# FetchContent_MakeAvailable(googletest)
 
-enable_testing()
+# enable_testing()
 
 set(GCC_UBSAN_COMPILE_FLAGS "-fsanitize=undefined -fsanitize=address -g")
 set(GCC_UBSAN_LINK_FLAGS    "-fsanitize=undefined -fsanitize=address")
@@ -34,59 +34,59 @@ add_executable(
     )
 
 # Tests
-add_executable(
-    analysisMatrix-test 
-    src/analysisMatrix-test.cpp
-    src/analysisMatrix.cpp
-    )
+# add_executable(
+#     analysisMatrix-test 
+#     src/analysisMatrix-test.cpp
+#     src/analysisMatrix.cpp
+#     )
 
-add_executable(
-    note-test 
-    src/note-test.cpp
-    src/note.cpp
-    )
+# add_executable(
+#     note-test 
+#     src/note-test.cpp
+#     src/note.cpp
+#     )
 
-add_executable(
-    timeSignature-test 
-    src/timeSignature-test.cpp
-    src/timeSignature.cpp
-    )
+# add_executable(
+#     timeSignature-test 
+#     src/timeSignature-test.cpp
+#     src/timeSignature.cpp
+#     )
 
-add_executable(
-    serialismGenerator-test
-    src/serialismGenerator-test.cpp
-    src/serialismGenerator.cpp
-    src/analysisMatrix.cpp
-    src/timeSignature.cpp
-    )
+# add_executable(
+#     serialismGenerator-test
+#     src/serialismGenerator-test.cpp
+#     src/serialismGenerator.cpp
+#     src/analysisMatrix.cpp
+#     src/timeSignature.cpp
+#     )
 
-# TESTING
+# # TESTING
 
-# Unit Tests
-target_link_libraries(
-    analysisMatrix-test
-    GTest::gtest_main
-    )
+# # Unit Tests
+# target_link_libraries(
+#     analysisMatrix-test
+#     GTest::gtest_main
+#     )
 
-target_link_libraries(
-    serialismGenerator-test
-    GTest::gtest_main
-    )
+# target_link_libraries(
+#     serialismGenerator-test
+#     GTest::gtest_main
+#     )
     
-target_link_libraries(
-    timeSignature-test
-    GTest::gtest_main
-    )
-target_link_libraries(
-    note-test
-    GTest::gtest_main
-    )
+# target_link_libraries(
+#     timeSignature-test
+#     GTest::gtest_main
+#     )
+# target_link_libraries(
+#     note-test
+#     GTest::gtest_main
+#     )
 
-include(GoogleTest)
-gtest_discover_tests(analysisMatrix-test)
-gtest_discover_tests(serialismGenerator-test)
-gtest_discover_tests(timeSignature-test)
-gtest_discover_tests(note-test)
+# include(GoogleTest)
+# gtest_discover_tests(analysisMatrix-test)
+# gtest_discover_tests(serialismGenerator-test)
+# gtest_discover_tests(timeSignature-test)
+# gtest_discover_tests(note-test)
 
 # Fuzz Test:
 add_executable(

@@ -21,7 +21,7 @@ public:
     ~Piano() = default;
 
     virtual void generateCode(std::vector<std::string>& lilypondCode);
-    std::string staffHeader();
+    std::string staffHeader(std::vector<std::string> &lilypondCode);
 };
 
 #endif //PIANO_HPP_INCLUDED

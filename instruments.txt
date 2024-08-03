@@ -21,3 +21,13 @@ piccolo
 flute
 
 
+Path to this ticet: 
+Figure out how to use the score box DONE
+Reformat the lilypond code to get the old output DONE 
+Create instrument and piano class to allow for extendible output DONE 
+Make time signatures work again
+Create Cello class and make it work for a piano cello duet
+Make randomness and other inputs work correctly again
+Update GUI to allow for multiple instruments
+Update cmakelists.tst 
+

@@ -24,8 +24,9 @@ void Piano::generateCode(vector<string>& lilypondCode){
         string remainingPiece = fullDuration(leftover16ths, "", "r", "");
         rightCode.back().append(remainingPiece + "|\n \\fine}\n");
     }
-
-    leftCode.push_back("right = \\fixed c'{\\clef treble \\global \n");
+    cout << leftover16ths << endl;
+    leftover16ths = 16;
+    leftCode.push_back("left = \\fixed c'{\\clef treble \\global \n");
     for (size_t row = 0; row < 12; ++row){
         lilypondRow = rowToLilypond(LHrows_[row], -1, leftover16ths);
         leftCode.push_back(lilypondRow);

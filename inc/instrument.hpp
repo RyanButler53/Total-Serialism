@@ -27,7 +27,7 @@ class Instrument{
 
         // Constructors
         Instrument(AnalysisMatrix* pitches, AnalysisMatrix* rhythms, AnalysisMatrix* articulations, std::vector<short> dynamics);
-        ~Instrument() = default;
+        virtual ~Instrument() = default;
 
         std::string rowToLilypond(Row r, short dynamic, short& leftover);
         virtual void generateCode(std::vector<std::string> &lilypondCode) = 0; // Pure Virtual?

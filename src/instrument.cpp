@@ -77,3 +77,59 @@ string Instrument::rowToLilypond(Row r, short dynamic, short& leftoverDuration){
     lilypondCode += "\n";
     return lilypondCode;
 }
+
+string Instrument::fullDuration(short duration, string jitter, string pitch, string articulation){
+    string absPitch = pitch + jitter;
+    assert(duration > 0);
+    switch (duration)
+    { // Might be a better way of handling this recursively.
+    case 1:
+        return absPitch  + "16"  + articulation;
+    case 2: 
+        return absPitch + "8" + articulation;
+    case 3: 
+        return absPitch  + "8." + articulation;
+    case 4: 
+        return absPitch  + "4" + articulation;
+    case 5:
+        return absPitch + "4" + articulation + "~" + absPitch + "16";
+    case 6:
+        return absPitch + "4." + articulation;
+    case 7:
+        return absPitch + "4.." + articulation;
+    case 8:
+        return absPitch + "2" + articulation;
+    case 9:
+        return absPitch + "2" + articulation + "~" + absPitch + "16";
+    case 10:
+        return absPitch + "2" + articulation + "~" + absPitch + "8";
+    case 11:
+        return absPitch + "2" + articulation + "~" + absPitch + "8.";   
+    case 12:
+        return absPitch + "2." + articulation;
+    case 13:
+        return absPitch + "2." + articulation + "~" + absPitch + "16";
+    case 14:
+        return absPitch + "2.." + articulation;
+    case 15:
+        return absPitch + "2..." + articulation;
+    case 16:
+        return absPitch + "1" + articulation;
+    default: // 17+ 16ths left. Most 16ths allowed is 30 per measure
+        string first16 = absPitch + "1" + articulation + "~";
+        return first16 + fullDuration(duration - 16, jitter, pitch, articulation);
+    }
+    return "";
+}
+
+void Instrument::clearSfz(std::string& str) {
+    const string from = "\\sfz";
+    const string to = "";
+    size_t start_pos = 0;
+    while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length(); // Move past the last replaced substring
+    }
+}
+
+
