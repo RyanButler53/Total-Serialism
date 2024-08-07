@@ -62,13 +62,7 @@ int main(int argc, char** argv){
     for (auto &line : lilypondCode) {
         outputFile << line;
     }
-    // outputFile << "\n";
-    // for (auto &line : leftCode)
-    // {
-    //     outputFile << line;
-    // }
-    // outputFile << scoreBox;
-
+    
     delete generator;
     return 0;
 }

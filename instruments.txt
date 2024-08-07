@@ -16,9 +16,9 @@ Create Cello class and make it work for a piano cello duet DONE
 Redo Score Box code DONE
 Make randomness work DONE
 Factor out the Instrument arguments by finishing the Instrument Factory class DONE
-Make file inputs work correctly again
+Make file inputs work correctly again DONE
 Update GUI to allow for multiple instruments
-Make the rest of the instruments
+Make the rest of the instruments (Woodwinds done)
 Update cmakelists.txt 
 
 SUN BERRY FARMS APPLE JUICE

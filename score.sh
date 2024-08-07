@@ -4,7 +4,7 @@ then # specify input and output
     out_filename=$1;
     in_filename=$2;
     build/totalSerialism $out_filename.ly $in_filename;
-    lilypond -f pdf -l NONE $out_filename.ly; # -o folder 
+    lilypond -f pdf  $out_filename.ly; # -o folder -l NONE
     finalFile=$(basename $out_filename).pdf
     rm params.txt 2> /dev/null
 elif [ $numArgs == 1 ];

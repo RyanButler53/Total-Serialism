@@ -35,8 +35,8 @@ SerialismGenerator::SerialismGenerator(string inputfile):
         {"I", RowType(I)},
         {"RI", RowType(RI)}};
 
-    // Pitch, Rhythm, Articulation, Right Hand, Left Hand, Dynamics
-    vector<vector<short>> sequences{6};
+    // Pitch, Rhythm, Articulation Dynamics
+    vector<vector<short>> sequences{4};
     for (auto& seq : sequences)
     {
         string s;
@@ -49,45 +49,13 @@ SerialismGenerator::SerialismGenerator(string inputfile):
             seq.push_back(value);
         }
     }
-    // Right Hand rows
-    string s;
-    getline(input, s);
-    stringstream ss{s};
-    for (size_t num = 0; num < 12; ++ num){
-        string row;
-        ss >> row;
-        if (rowTypes.find(row) != rowTypes.end())
-        {
-            // rhRows_.push_back(Row(rowTypes[row], sequences[3][num]));
-        } else {
-            cerr << "Invalid Row: " << row << endl;
-            exit(1);
-        }
-    }
-
-    // Left Hand Rows
-    string s2;
-    getline(input, s2);
-    stringstream ss2{s2};
-    for (size_t num = 0; num < 12; ++num)
-    { 
-        string row;
-        ss2 >> row;
-        if (rowTypes.find(row) != rowTypes.end()){
-            // lhRows_.push_back(Row(rowTypes[row], sequences[4][num]));
-        } else {
-            cerr << "Invalid Row: " << row << endl;
-            exit(1);
-        }
-    }
-
-    // TODO: Elminate repeated for loop
-
+    
     pitches_ = new AnalysisMatrix(sequences[0]);
     rhythms_ = new AnalysisMatrix(sequences[1]);
     articulations_ = new AnalysisMatrix(sequences[2]);
-    dynamicsRow_ = sequences[5];
+    dynamicsRow_ = sequences[3];
 
+    // Read in tempo, time sig, title, composer
     string tempo_str;
     string ts_str;
     getline(input, tempo_str);
@@ -97,6 +65,68 @@ SerialismGenerator::SerialismGenerator(string inputfile):
     getline(input, title_);
     getline(input, composer_);
 
+    // Initialize Factory
+    factory_ = InstrumentFactory(pitches_, rhythms_, articulations_, dynamicsRow_, ts_);
+
+    // Read in instruments
+    string numIns;
+    getline(input, numIns);
+    size_t numInstruments = stoi(numIns);
+    for (size_t instrument_i = 0; instrument_i < numInstruments; ++instrument_i) {
+        string name;
+        getline(input, name);
+        instrumentNames_.push_back(name);
+        if (name == "piano") { // or harp
+            vector<vector<Row>> pianoRows;
+            for (size_t i = 0; i < 2; ++i)
+            {
+                vector<Row> rows;
+                vector<short> rowNums;
+                string s;
+                getline(input, s);
+                stringstream ss{s};
+                for (size_t num = 0; num < 12; ++num)
+                {
+                    short value;
+                    ss >> value;
+                    rowNums.push_back(value);
+                }
+                string s2;
+                getline(input, s2);
+                stringstream ss2{s};
+                for (size_t num = 0; num < 12; ++num)
+                {
+                    string type;
+                    ss2 >> type;
+                    rows.push_back(Row(rowTypes[type], rowNums[num]));
+                }
+                pianoRows.push_back(rows);
+            }
+            instruments_.push_back(factory_.createInstrument(pianoRows[0], pianoRows[1]));
+        } else {
+            vector<Row> rows;
+            vector<short> rowNums;
+            string s;
+            getline(input, s);
+            stringstream ss{s};
+            for (size_t num = 0; num < 12; ++num)
+            {
+                short value;
+                ss >> value;
+                rowNums.push_back(value);
+            }
+            string s2;
+            getline(input, s2);
+            stringstream ss2{s};
+            for (size_t num = 0; num < 12; ++num)
+            {
+                string type;
+                ss2 >> type;
+                rows.push_back(Row(rowTypes[type], rowNums[num]));
+            }
+            instruments_.push_back(factory_.createInstrument(name, rows));
+        }
+    }
 }
 
 void SerialismGenerator::initializeRandom(){
