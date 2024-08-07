@@ -1,3 +1,3 @@
 build/analysisMatrix-test
 build/timeSignature-test
-build/serialismGenerator-test
+build/note-test

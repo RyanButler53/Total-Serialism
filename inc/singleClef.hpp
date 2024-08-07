@@ -1,3 +1,6 @@
+#ifndef SINGLE_CLEF_HPP_INCLUDED
+#define SINGLE_CLEF_HPP_INCLUDED
+
 #include "instrument.hpp"
 
 class SingleClefInstrument : public Instrument
@@ -13,4 +16,5 @@ public:
     void generateCode(std::vector<std::string> &lilypondCode);
 };
 
+#endif // SINGLE_CLEF_HPP_INCLUDED
 
