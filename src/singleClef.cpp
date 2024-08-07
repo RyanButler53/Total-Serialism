@@ -1,10 +1,13 @@
-#include "cello.hpp"
+#include "singleClef.hpp"
 
 using namespace std;
-Cello::Cello(AnalysisMatrix *pitches, AnalysisMatrix *rhythms, AnalysisMatrix *articulations, std::vector<short> &dynamics, TimeSignature ts, std::vector<Row> rows) : 
-Instrument(pitches, rhythms, articulations, dynamics, ts), rows_{rows} {};
+SingleClefInstrument::SingleClefInstrument(InstrumentData data, std::vector<Row> rows) : Instrument(data), rows_{rows} {}
 
-void Cello::generateCode(vector<string>& lilypondCode){
+SingleClefInstrument::~SingleClefInstrument(){
+    
+}
+
+void SingleClefInstrument::generateCode(vector<string>& lilypondCode){
     short leftover16ths = ts_.num16ths();
     string lilypondRow = staffHeader();
     lilypondCode.push_back(lilypondRow);
@@ -21,11 +24,4 @@ void Cello::generateCode(vector<string>& lilypondCode){
         string remainingPiece = fullDuration(leftover16ths, "", "r", "");
         lilypondCode.back().append(remainingPiece + "|\n \\fine}\n");
     }
-}
-
-string Cello::staffHeader(){
-    return "cello = \\fixed c{\\clef bass \\global \n";
-}
-string Cello::scoreBox(){
-    return "\n\t\\new Staff \\with {instrumentName = \"Cello\"} { \\cello }";
 }

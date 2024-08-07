@@ -3,8 +3,8 @@
 
 using namespace std;
 
-Piano::Piano(AnalysisMatrix *pitches, AnalysisMatrix *rhythms, AnalysisMatrix *articulations, std::vector<short> &dynamics, TimeSignature ts, std::vector<Row> RHrows,std::vector<Row> LHrows) : 
-    Instrument(pitches, rhythms, articulations, dynamics, ts), RHrows_{RHrows}, LHrows_{LHrows} {};
+Piano::Piano(InstrumentData data, std::vector<Row> RHrows,std::vector<Row> LHrows) : 
+    Instrument(data), RHrows_{RHrows}, LHrows_{LHrows} {};
 
 void Piano::generateCode(vector<string>& lilypondCode){
     std::vector<string> rightCode;
@@ -24,6 +24,7 @@ void Piano::generateCode(vector<string>& lilypondCode){
         string remainingPiece = fullDuration(leftover16ths, "", "r", "");
         rightCode.back().append(remainingPiece + "|\n \\fine}\n");
     }
+    // Reset
     leftover16ths = ts_.num16ths();
     leftCode.push_back("left = \\fixed c'{\\clef treble \\global \n");
     for (size_t row = 0; row < 12; ++row){

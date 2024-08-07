@@ -2,7 +2,7 @@ Piano (rh/lh)
 Trombone
 Vibraphone
 acoustic guitar
-harp
+harp (rh/lh)
 violin
 viola
 cello
@@ -28,10 +28,11 @@ Create instrument and piano class to allow for extendible output DONE
 Make time signatures work again DONE
 Create Cello class and make it work for a piano cello duet DONE
 Redo Score Box code DONE
-Make randomness and other inputs work correctly again
+Make randomness work DONE
+Factor out the Instrument arguments by finishing the Instrument Factory class DONE
 Make file inputs work correctly again
-Factor out the Instrument arguments by finishing the Instrument Factory class
 Update GUI to allow for multiple instruments
 Make the rest of the instruments
 Update cmakelists.txt 
 
+SUN BERRY FARMS APPLE JUICE

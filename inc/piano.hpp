@@ -17,7 +17,7 @@ private:
 
 
 public:
-    Piano(AnalysisMatrix* pitches, AnalysisMatrix* rhythms, AnalysisMatrix* articulations, std::vector<short>& dynamics, TimeSignature ts, std::vector<Row> RhRows, std::vector<Row> LHRows);
+    Piano(InstrumentData data, std::vector<Row> RhRows, std::vector<Row> LHRows);
     ~Piano() = default;
 
     // Pure virtual functions

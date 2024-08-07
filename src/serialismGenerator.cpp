@@ -4,6 +4,7 @@
 #include <fstream>
 #include <regex>
 #include <sstream>
+#include <algorithm>
 #include <cmath>
 #include <unordered_map>
 
@@ -112,23 +113,6 @@ void SerialismGenerator::initializeRandom(){
     shuffle(rowNums.begin(), rowNums.end(), rng_);
     dynamicsRow_ = rowNums; // Member Variable
 
-    // Row Numbers RH/LH
-    vector<Row> rhRows;
-    vector<Row> lhRows;
-    shuffle(rowNums.begin(), rowNums.end(), rng_);
-    vector<short> rhRowNums = rowNums;
-    shuffle(rowNums.begin(), rowNums.end(), rng_);
-    vector<short> lhRowNums = rowNums;
-    // Row Types
-    std::uniform_int_distribution<short> rtypeDist{0, 3};
-    for (size_t rowInd = 0; rowInd < 12; ++rowInd)
-    {
-        short rhtype = rtypeDist(rng_);
-        rhRows.push_back(Row(RowType(rhtype), rhRowNums[rowInd]));
-        short lhtype = rtypeDist(rng_);
-        lhRows.push_back(Row(RowType(lhtype), lhRowNums[rowInd]));
-    }
-
 
     // Tempo
     std::uniform_int_distribution tempoDist{40, 240};
@@ -153,9 +137,42 @@ void SerialismGenerator::initializeRandom(){
     title_ = "Random Composition";
     composer_ = "Seed = " + to_string(seed_);
 
-    instrumentNames_.push_back("Piano");
-    allInstruments_.push_back(new Piano(pitches_, rhythms_, articulations_, dynamicsRow_, ts_, rhRows, lhRows));
-    allInstruments_.push_back(new Cello(pitches_, rhythms_, articulations_, dynamicsRow_, ts_, lhRows));
+    instrumentNames_.push_back("piano");
+    instrumentNames_.push_back("violin");
+    instrumentNames_.push_back("cello");
+    instrumentNames_.push_back("bass");
+    instrumentNames_.push_back("viola");
+   
+    // Assign Rows
+    std::uniform_int_distribution<short> rtypeDist{0, 3};
+    size_t numRowsNeeded = std::count(instrumentNames_.begin(), instrumentNames_.end(), "piano");
+    numRowsNeeded += instrumentNames_.size();
+    for (size_t row_i = 0; row_i < numRowsNeeded; ++row_i)
+    {
+        shuffle(rowNums.begin(), rowNums.end(), rng_);
+        std::vector<Row> row;
+        for (short &rowNum : rowNums)
+        {
+            short rtype = rtypeDist(rng_);
+            row.push_back(Row(RowType(rtype), rowNum));
+        }
+        instrumentRows_.push_back(row);
+    }
+
+    factory_ = InstrumentFactory(pitches_, rhythms_, articulations_, dynamicsRow_, ts_);
+    size_t row_i = 0;
+    for (std::string& name : instrumentNames_){
+        if (name == "piano") { // Or Harp
+            std::vector<Row> rh = instrumentRows_[row_i];
+            std::vector<Row> lh = instrumentRows_[row_i + 1];
+            instruments_.push_back(factory_.createInstrument(rh, lh));
+            ++row_i;
+        } else {
+            std::vector<Row> row = instrumentRows_[row_i];
+            instruments_.push_back(factory_.createInstrument(name, row));
+        }
+        ++row_i;
+    }
 }
 
 SerialismGenerator::~SerialismGenerator()
@@ -164,7 +181,7 @@ SerialismGenerator::~SerialismGenerator()
     delete pitches_;
     delete rhythms_;
     delete articulations_;
-    for (Instrument*& i : allInstruments_){
+    for (Instrument*& i : instruments_){
         delete i;
     }
 }
@@ -172,7 +189,7 @@ SerialismGenerator::~SerialismGenerator()
 void SerialismGenerator::generatePiece(vector<string>& lilypondCode){
     lilypondCode.push_back(header());
     // Parallelize Here
-    for (Instrument*& instrument : allInstruments_){
+    for (Instrument*& instrument : instruments_){
         instrument->generateCode(lilypondCode);
     }
     lilypondCode.push_back(scoreBox());
@@ -221,7 +238,7 @@ std::string SerialismGenerator::boulezJitter(){
 
 std::string SerialismGenerator::scoreBox(){
     std::string scoreBox = "\\score {\n\t<<\n";
-    for (Instrument*& instrument : allInstruments_){
+    for (Instrument*& instrument : instruments_){
         scoreBox += instrument->scoreBox();
     }
     scoreBox += "\n\t>>\n}";

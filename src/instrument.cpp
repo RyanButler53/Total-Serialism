@@ -2,8 +2,11 @@
 
 using namespace std;
 
-Instrument::Instrument(AnalysisMatrix *pitch, AnalysisMatrix *rhythm, AnalysisMatrix *articulation, std::vector<short> dynamics, TimeSignature ts) : 
-pitches_{pitch}, rhythms_{rhythm}, articulations_{articulation}, dynamicsRow_{dynamics}, ts_{ts} {}
+Instrument::Instrument(InstrumentData data) : 
+pitches_{data.pitches_}, 
+rhythms_{data.rhythms_}, 
+articulations_{data.articulations_},
+dynamicsRow_{data.dynamicsRow_}, ts_{data.ts_} {}
 
 string Instrument::rowToLilypond(Row r, short dynamic, short& leftoverDuration){
     // Get the piches, rhythms and articulations for the row. 
