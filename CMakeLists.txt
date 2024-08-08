@@ -25,7 +25,8 @@ set(INSTRUMENT_SRC
     src/singleClef.cpp
     src/piano.cpp
     src/strings.cpp
-    src/woodwinds.cpp)
+    src/woodwinds.cpp
+    src/brass.cpp)
 
 
 include_directories(inc)

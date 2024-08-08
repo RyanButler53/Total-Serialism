@@ -2,6 +2,7 @@
 #include "piano.hpp"
 #include "strings.hpp"
 #include "woodwinds.hpp"
+#include "brass.hpp"
 
 InstrumentFactory::InstrumentFactory(AnalysisMatrix *pitches, AnalysisMatrix *rhythms, AnalysisMatrix *articulations, std::vector<short> dynamics, TimeSignature ts) : 
 data_{pitches, rhythms, articulations, dynamics, ts}{}
@@ -29,6 +30,14 @@ Instrument* InstrumentFactory::createInstrument(std::string name, std::vector<Ro
         return new Clarinet(data_, rows);
     } else if (name == "piccolo") {
         return new Piccolo(data_, rows);
+    } else if (name == "trombone") {
+        return new Trombone(data_, rows);
+    } else if (name == "trumpet") {
+        return new Trumpet(data_, rows);
+    } else if (name == "frenchhorn") {
+        return new FrenchHorn(data_, rows);
+    } else if (name == "tuba") {
+        return new Tuba(data_, rows);
     } else if (name == "flute") {
         return new Flute(data_, rows);
     } else {

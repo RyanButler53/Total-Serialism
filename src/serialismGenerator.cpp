@@ -167,12 +167,20 @@ void SerialismGenerator::initializeRandom(){
     title_ = "Random Composition";
     composer_ = "Seed = " + to_string(seed_);
 
-    instrumentNames_.push_back("piano");
-    instrumentNames_.push_back("violin");
-    instrumentNames_.push_back("cello");
-    instrumentNames_.push_back("bass");
-    instrumentNames_.push_back("viola");
-   
+
+    std::uniform_int_distribution<size_t> instrumentDist{1, instrumentList_.size()};
+
+    size_t numIns = instrumentDist(rng_);
+    vector<size_t> instrumentIndexes(instrumentList_.size());
+    std::iota(instrumentIndexes.begin(), instrumentIndexes.end(), 0);
+    shuffle(instrumentIndexes.begin(), instrumentIndexes.end(), rng_);
+    std::sort(instrumentIndexes.begin(), instrumentIndexes.begin()+numIns);
+    for (size_t i = 0; i < numIns; i++)
+    {
+        size_t instrument_i = instrumentIndexes[i];
+        instrumentNames_.push_back(instrumentList_[instrument_i]);
+    }
+
     // Assign Rows
     std::uniform_int_distribution<short> rtypeDist{0, 3};
     size_t numRowsNeeded = std::count(instrumentNames_.begin(), instrumentNames_.end(), "piano");
@@ -229,13 +237,18 @@ string SerialismGenerator::header(){
     string header = "\\version \"2.24.1\"\n\\language \"english\"\n\n";
     header += "\\header {\n   title = \"";
     header += title_;
-    header += "\"\n   subtitle = \"Algorithmic Composition\"\n   instrument = \"Piano\"\n   "; // may get changed
+    header += "\"\n   subtitle = \"Algorithmic Composition\"\n   instrument = \"Score\"\n   ";
     header += "composer = \"";
     header += composer_;
     header += "\"\n";
     header += "  tagline = ##f}\n\n";
     header += "global = { \\time " + ts_.str() + " \\tempo 4 = ";
     header += to_string(tempo_) + "}\n\n";
+    if (instrumentNames_.size() > 11){
+        header += "\\paper{\n\t#(set-paper-size \"11x17\")\n}";
+    } else{
+        header += "\\paper{\n\t#(set-paper-size \"letter\")\n}";
+    }
     return header;
 }
 

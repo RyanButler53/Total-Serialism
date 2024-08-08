@@ -1,6 +1,7 @@
 #include <string>
 #include <vector>
 #include <random>
+#include <array>
 #include <mutex>
 #include "instrumentFactory.hpp"
 #include "timeSignature.hpp"
@@ -8,6 +9,8 @@
 #include "instrument.hpp"
 #include "piano.hpp"
 #include "strings.hpp"
+#include "woodwinds.hpp"
+#include "brass.hpp"
 
 #ifndef SERIALISM_GENERATOR_HPP_INCLUDED
 #define SERIALISM_GENERATOR_HPP_INCLUDED
@@ -27,6 +30,12 @@ private:
     const std::vector<std::string> pitchMap_{"c","cs","d","ef","e","f","fs","g","af","a","bf","b"};
     const std::vector<std::string> articulationMap_{"->", "-^", "-_", "-!", "-.", "--", "->-.", "-^\\sfz", "", "->-!", "\\sfz", "-^-!"};
     const std::vector<std::string> dynamicMap_{"\\ppppp", "\\pppp", "\\ppp", "\\pp", "\\p", "\\mp", "\\mf", "\\f", "\\ff", "\\fff", "\\ffff", "\\fffff"};
+    std::vector<std::string> instrumentList_{
+        "piano", 
+        "violin", "viola", "cello", "bass", 
+        "oboe", "bassoon", "clarinet", "piccolo", "flute", 
+        "trombone", "trumpet", "frenchhorn", "tuba"
+    };
 
     TimeSignature ts_;
     std::string title_;

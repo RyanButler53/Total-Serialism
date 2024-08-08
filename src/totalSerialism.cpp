@@ -37,9 +37,7 @@ int main(int argc, char** argv){
 
     ofstream outputFile(outputFilename);
     string header = generator->header();
-    std::string scoreBox = generator->scoreBox();
-    // vector<string> rightCode;
-    // vector<string> leftCode;
+
     vector<string> lilypondCode;
     // Parallelize!
 
@@ -53,10 +51,6 @@ int main(int argc, char** argv){
     // gen(true, rightCode);
     // gen(false, leftCode);
     generator->generatePiece(lilypondCode);
-
-    // Continue working on the main thread if right hand isn't finished
-    outputFile << header;
-    // right.join();
 
     // Write to file
     for (auto &line : lilypondCode) {
