@@ -1,6 +1,0 @@
-harp (rh/lh)
-
-Left for this ticket: 
-Update GUI to allow for multiple instruments
-Next Steps:
-Allow for multiple of one instrument (ie, violin quartet)
