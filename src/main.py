@@ -1,3 +1,5 @@
+# gui
+
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QApplication,
@@ -5,15 +7,19 @@ from PyQt6.QtWidgets import (
     QMainWindow,
     QLabel,
     QPushButton,
-    QTabWidget,
     QVBoxLayout,
     QHBoxLayout,
-    QSlider,
     QComboBox,
     QWidget,
+    QScrollArea,
+    QFrame
 )
+from PyQt6 import QtGui
+
 import subprocess
 import random
+
+# Constants
 
 TIME_SIGNATURES = [  "4/4",
             "1/4","3/8", "2/4", "5/8", "6/8",
@@ -21,6 +27,19 @@ TIME_SIGNATURES = [  "4/4",
              "12/8", "6/4", "3/2", "13/8",
             "7/4", "15/8",
             ]
+
+SINGLE_CLEF = [  "violin", "viola", "cello", "bass",
+        "oboe", "bassoon", "clarinet", "piccolo", "flute", 
+        "trombone", "trumpet", "frenchhorn", "tuba"]
+
+MULTI_CLEF = ["piano"]#, "harp"]
+
+PARAM_NAMES = ["Pitch Row", "Rhythm Row", "Articulation Row",
+               "Dynamics Row", "Title", "Composer", "Tempo", "Time Signature"]
+
+INSTRUMENT_FIELDS = ["Instrument Name", "Row Numbers", "Row Types"]
+
+MULTI_CLEF_FIELDS = ["Instrument Name", "Right Hand Row Numbers", "Right Hand Row Types", "Left Hand Row Numbers", "Left Hand Row Numbers" ]
 
 def toString(l):
     s = ""
@@ -47,7 +66,7 @@ def cleanNums(num_string:str, field_name:str):
     return nums
 
 def cleanRows(row_str:str, field_name:str):
-    """Cleans a list of strings"""
+    """Cleans a list of strings for rows and returns a valid list of rows"""
     row_str.upper()
     split = row_str.split()
     validStrings = ["P", "R", "I", "RI"]
@@ -62,165 +81,252 @@ def cleanRows(row_str:str, field_name:str):
         print(f"Need exactly 12 rows in {field_name}")
 
     return [random.choice(validStrings) for _ in range(12)]
-    
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.piece_params()
+        self.intialize_instruments()
 
-        self.setWindowTitle("Total Serialism Sheet Music Generator")
-        self.setFixedWidth(500)
-        # self.setHeight(200)
+        self.full_layout = QHBoxLayout()
+        self.full_layout.addLayout(self.param_layout)
+        self.full_layout.addLayout(self.instruments_layout)
 
-        self.left_layout()
-        self.right_layout()
-
-        left = QWidget()
-        left.setLayout(self.leftLayout)
-
-        right = QWidget()
-        right.setLayout(self.rightLayout)
-
-        tabs = QTabWidget()
-        tabs.setTabPosition(QTabWidget.TabPosition.North)
-        tabs.setMovable(False)
-
-        tabs.addTab(left,"Manually Input Files")
-        tabs.addTab(right, "Random Music")
-
-        self.setCentralWidget(tabs)
-
-    def left_layout(self):
-
-        self.leftLayout = QVBoxLayout()
-        title = self.make_title("Custom Total Serial Music")
-        self.leftLayout.addWidget(title)
-
-        self.leftNumberBoxes = {} #Maps label to input field and random button
-        for label in ["Pitch Row", "Rhythm Row", "Articulation Row", "Dynamic Row", "Right Hand Row Numbers", "Left Hand Row Numbers"]:
-            boxLayout = QHBoxLayout()
-            boxLayout.addWidget(QLabel(f"{label}: "))
-            input = QLineEdit()
-            input.setPlaceholderText("0 1 2 3 4 5 6 7 8 9 10 11")
-            # randomButton = QPushButton("Random")
-            # randomButton.clicked.connect(self.shuffle12)
-            #link to something
-            self.leftNumberBoxes[label] = input#,randomButton
-            boxLayout.addWidget(input)
-            # boxLayout.addWidget(randomButton)
-            self.leftLayout.addLayout(boxLayout)
-        
-        self.leftRowBoxes = {}
-        for label in ["Right Hand Row Types", "Left Hand Row Types"]:
-            boxLayout = QHBoxLayout()
-            boxLayout.addWidget(QLabel(f"{label}: "))
-            input = QLineEdit()
-            # randomButton = QPushButton("Random")
-            input.setPlaceholderText("P I R RI P I R RI P I R RI")
-
-            # Link the random button to something else. 
-            self.leftRowBoxes[label] = input#,randomButton
-            boxLayout.addWidget(input)
-            # boxLayout.addWidget(randomButton)
-            self.leftLayout.addLayout(boxLayout)
-
-        # Slider
-        sliderBox = QHBoxLayout()
-        sliderBox.addWidget(QLabel("Tempo: 40"))
-        slider = QSlider(Qt.Orientation.Horizontal)
-        slider.setRange(40,240)
-        slider.setSingleStep(1)
-        sliderBox.addWidget(slider)
-        sliderBox.addWidget(QLabel("240"))
-        self.slider = slider
-        self.leftLayout.addLayout(sliderBox)
-
-        timeSigBox = QHBoxLayout()
-        timeSigBox.addWidget(QLabel("Time Signature: "))
-        self.timeSig = QComboBox()
-        self.timeSig.addItems(TIME_SIGNATURES)
-        timeSigBox.addWidget(self.timeSig)
-        # self.timeSig.setPlaceholderText("4/4")
-
-        self.leftLayout.addLayout(timeSigBox)
-
-        titleBox = QHBoxLayout()
-        titleBox.addWidget(QLabel("Title: "))
-        self.title = QLineEdit()
-        titleBox.addWidget(self.title)
-        self.leftLayout.addLayout(titleBox)
-
-        composerBox = QHBoxLayout()
-        composerBox.addWidget(QLabel("Composer: "))
-        self.composerBox = QLineEdit()
-        composerBox.addWidget(self.composerBox)
-        self.leftLayout.addLayout(composerBox)
-
-        generateButton = QPushButton("Generate")
-        generateButton.clicked.connect(self.customMusic)
-
-
-        self.leftLayout.addWidget(generateButton)
-
-    def right_layout(self):
-
-        self.rightLayout = QVBoxLayout()
-        title = self.make_title("Random Music")
-        self.rightLayout.addWidget(title)
-        
-        seedLayout = QHBoxLayout()
-        self.seed = QLineEdit()
-        seedLayout.addWidget(QLabel("Random Seed"))
-        seedLayout.addWidget(self.seed)
-
-        generateButton = QPushButton("Generate")
-        generateButton.clicked.connect(self.randomMusic)
-
-        self.rightLayout.addLayout(seedLayout)
-        self.rightLayout.addWidget(generateButton)
-        
-    def make_title(self,text):
-        """Makes a reasonable size title"""
-        title = QLabel(text)
-        font = title.font()
-        font.setPointSize(20)
-        title.setFont(font)
-        title.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
-        return title
+        self.widget = QWidget()
+        self.widget.setLayout(self.full_layout)
+        self.setCentralWidget(self.widget)
     
-    def customMusic(self):
-        """Calls the script with  """
-        text_strings = []
-        for field_name, box in self.leftNumberBoxes.items():
-            nums_str = box.text()
-            nums = cleanNums(nums_str, field_name)
-            nums_str = toString(nums)
-            text_strings.append(nums_str+ "\n")
+    # Piece Parameters Side
+    def piece_params(self):
+        """Function to call all the parts of the piece params side
+        Initializes the QVbox that holds the entire piece params part"""
+        self.param_layout = QVBoxLayout()
+        self.param_title()
+        self.param_labels()
+        self.generate_button()
+        return 
 
-        for field_name,box in self.leftRowBoxes.items():
-            row_str = box.text()
-            rows = cleanRows(row_str, field_name)
-            row_str = toString(rows)
-            text_strings.append(row_str+"\n")
+    def param_title(self):
+        """Gets the title and adds it to the piece params"""
+        title = self.make_title("Piece Parameters")
+        self.param_layout.addWidget(title)
+        
+    def param_labels(self):
+        """Gets both the labels and input fields for the piece params
+        Combines them into a QHbox and adds to piece params QVBox """
+        
+        labels = QVBoxLayout()
+        data = QVBoxLayout()
+        self.param_dict = {}
+        for label_name in PARAM_NAMES:
+            labels.addWidget(QLabel(label_name))
+            entry_box = QLineEdit()
+            data.addWidget(entry_box)
+            self.param_dict[label_name] = entry_box
 
-        tempo = str(self.slider.value())
+        # Set placehold text when appropriate
+        for param_name in PARAM_NAMES[:4]:
+            self.param_dict[param_name].setPlaceholderText("0 1 2 3 4 5 6 7 8 9 10 11")
 
-        timeSignature = self.timeSig.currentText()
+        self.param_dict["Time Signature"].setPlaceholderText("4/4")
+
+        # Add to full parameter layout
+        self.param_label_pairs = QHBoxLayout()
+        self.param_label_pairs.addLayout(labels)
+        self.param_label_pairs.addLayout(data)
+        self.param_layout.addLayout(self.param_label_pairs)
+
+    def generate_button(self):
+        """Creates the Generate Piece button and links it to the generate function"""
+        self.gen_button = QPushButton("Generate Piece")
+        self.gen_button.clicked.connect(self.generate)
+        self.param_layout.addWidget(self.gen_button)
+
+    # Instruments side
+    def intialize_instruments(self):
+        """Initializes a layout for the whole layout side and
+        calls all functions to initialize it. """
+        self.instruments_layout = QVBoxLayout()
+        self.ins_title()
+        self.ins_add_remove_button()
+        self.ins_data()
+        
+    def ins_title(self):
+        """Makes a title for the instruments side of the gui"""
+        title = self.make_title("Instruments")
+        self.instruments_layout.addWidget(title)
+
+    def ins_add_remove_button(self):
+        """Adds buttons to add or remove instruments"""
+        button_layout = QHBoxLayout()
+
+        # Add and link buttons
+        self.single_clef_button = QPushButton("Add Single Clef Instrument")
+        self.single_clef_button.clicked.connect(self.add_single_clef)
+        self.multi_clef_button = QPushButton("Add Multi Clef Instrument")
+        self.multi_clef_button.clicked.connect(self.add_multi_clef)
+
+        button_layout.addWidget(self.single_clef_button)
+        button_layout.addWidget(self.multi_clef_button)
+
+        self.instruments_layout.addLayout(button_layout)
+        
+    def ins_data(self):
+        """Creates a scroll area that has one instrument data box. """
+        self.instrument_scroll = QScrollArea() # Actually do the scrolling
+        self.instrument_widget = QWidget() # auxiliary widget to scroll on 
+        # QVbox laout with all instruments
+        self.instruments = QVBoxLayout() 
+        self.instruments.setSpacing(30)
+       
+        # Instrument Data holds a list of dictionaries where each 
+        # dict has the field mapping to a QLineEdit box with the data
+        self.instrument_data = [] 
+
+        # Start with piano violin duet
+        self.add_multi_clef() 
+        self.add_single_clef()
+
+        # Adjust Scroll Settings
+        self.instrument_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
+        self.instrument_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.instrument_scroll.setWidgetResizable(True)
+
+        # Link up widget to scroll
+        self.instrument_widget.setLayout(self.instruments)
+        self.instrument_scroll.setWidget(self.instrument_widget)
+        self.instruments_layout.addWidget(self.instrument_scroll)
+
+    # Controlling Functions
+    
+    def add_single_clef(self):
+        """Adds an instrument"""
+        instrument_layout = QHBoxLayout()
+        instrument_layout.setSpacing(5)
+        labels = QVBoxLayout()
+        data = QVBoxLayout()
+        instrument_dict = {}
+        for label_name in INSTRUMENT_FIELDS:
+            labels.addWidget(QLabel(label_name))
             
-        title = self.title.text()
-        if (title == ""):
+        instrument_name = QComboBox()
+        data.addWidget(instrument_name)
+        instrument_name.addItems(SINGLE_CLEF)
+        instrument_dict["Instrument Name"] = instrument_name
+
+        # Set up row numbers and types. Add appropriate placeholder data
+        row_nums = QLineEdit()
+        data.addWidget(row_nums)
+        instrument_dict["Row Numbers"] = row_nums
+        row_nums.setPlaceholderText(f"0 1 2 3 4 5 6 7 8 9 10 11")
+
+        row_types = QLineEdit()
+        data.addWidget(row_types)
+        instrument_dict["Row Types"] = row_types
+        row_types.setPlaceholderText(f"P I R RI P I R RI P I R RI")
+
+        # Add labels and data to the instrument layout
+        instrument_layout.addLayout(labels)
+        instrument_layout.addLayout(data)
+
+        self.instrument_data.append(instrument_dict)
+        self.instruments.addLayout(instrument_layout)
+
+    def add_multi_clef(self):
+        instrument_layout = QHBoxLayout()
+        instrument_layout.setSpacing(5)
+        labels = QVBoxLayout()
+        data = QVBoxLayout()
+        instrument_dict = {}
+        for label_name in MULTI_CLEF_FIELDS:
+            labels.addWidget(QLabel(label_name))
+            
+        instrument_name = QComboBox()
+        data.addWidget(instrument_name)
+        instrument_name.addItems(MULTI_CLEF)
+        instrument_dict["Instrument Name"] = instrument_name
+
+        # Set up row numbers and types. Add appropriate placeholder data
+        for hand in ["Right", "Left"]:
+            row_nums = QLineEdit()
+            data.addWidget(row_nums)
+            instrument_dict[f"{hand} Hand Row Numbers"] = row_nums
+            row_nums.setPlaceholderText(f"0 1 2 3 4 5 6 7 8 9 10 11")
+
+            row_types = QLineEdit()
+            data.addWidget(row_types)
+            instrument_dict[f"{hand} Hand Row Types"] = row_types
+            row_types.setPlaceholderText(f"P I R RI P I R RI P I R RI")
+
+        # Add labels and data to the instrument layout
+        instrument_layout.addLayout(labels)
+        instrument_layout.addLayout(data)
+        # widget.setStyleSheet("border: 1px solid black;") # Try to get a border around each instrument
+
+        self.instrument_data.append(instrument_dict)
+        self.instruments.addLayout(instrument_layout)
+
+    def generate(self):
+        """
+        Extract all the data and write it to a file called params.txt 
+        Launches the subprocess to generate the music"""
+        text_strings = []
+        for field_name in PARAM_NAMES[:4]:
+            text = self.param_dict[field_name].text()
+            text_strings.append(toString(cleanNums(text, field_name)))
+
+        # handle tempo
+        try:
+            tempo = int(self.param_dict["Tempo"].text())
+            if tempo < 40:
+                tempo = '40'
+            elif tempo > 240:
+                tempo = '240'
+            else:
+                tempo = str(tempo)
+        except ValueError as error:
+            tempo = '140'
+        text_strings.append(tempo)
+
+        # time signature
+        if self.param_dict["Time Signature"] in TIME_SIGNATURES:
+            text_strings.append(self.param_dict["Time Signature"] )
+        else:
+            text_strings.append("4/4")
+
+                    
+        title = self.param_dict["Title"].text()
+        if title == "":
             title = "Total Serialist Piece"
-        composer = self.composerBox.text()
+        text_strings.append(title)
+
+        composer = self.param_dict["Composer"].text()
         if composer == "":
             composer = "The Algorithm"
+        text_strings.append(composer)
 
-        text_strings.append(tempo+ "\n")
-        text_strings.append(timeSignature + "\n")
-        text_strings.append(title + "\n")
-        text_strings.append(composer+ "\n")
+        # INSTRUMENTS
+        text_strings.append(len(self.instrument_data))
+        for instrument_dict in self.instrument_data:
+            name = instrument_dict["Instrument Name"].currentText()
+            text_strings.append(name)
+
+            if name in MULTI_CLEF:
+                for hand in ["Right", "Left"]:
+                    row_nums = instrument_dict[f"{hand} Hand Row Numbers"].text()
+                    row_types = instrument_dict[f"{hand} Hand Row Types"].text()
+                    text_strings.append(toString(cleanNums(row_nums, name)))
+                    text_strings.append(toString(cleanRows(row_types,name )))
+            else:
+                row_nums = instrument_dict["Row Numbers"].text()
+                row_types = instrument_dict["Row Types"].text()
+                text_strings.append(toString(cleanNums(row_nums, name)))
+                text_strings.append(toString(cleanRows(row_types, name)))
         
-        with open("params.txt", "w") as f:
-            f.writelines(text_strings)
+        with open("params.txt", 'w') as f:
+            for line in text_strings:
+                print(line, file=f)
+
         title_filename = ""
         title_split = title.split()
         for word in title_split[:-1]: 
@@ -228,24 +334,23 @@ class MainWindow(QMainWindow):
         title_filename += title_split[-1]
 
         subprocess.call(["sh", "score.sh", f"{title_filename}", "params.txt"])
-        
-    def shuffle12(self):
-        nums = list(range(0,12))
-        random.shuffle(nums)
-        return toString(nums)
 
-    def randomMusic(self):
-        seed = self.seed.text()
-        try: #Check if seed is an integer
-            seed = int(seed)
-            subprocess.call(["sh", "score.sh", str(seed)])
-        except ValueError as error:
-            subprocess.call(["sh", "score.sh"])
-        
+
+    # Utility Functions
+    def make_title(self,text) -> QLabel:
+            """Makes a reasonable size title
+            Returns a QLabel object"""
+            title = QLabel(text)
+            font = title.font()
+            font.setPointSize(20)
+            title.setFont(font)
+            title.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
+            return title
+
+
+
 app = QApplication([])
 window = MainWindow()
 window.show()  
 
 app.exec()
-
-
