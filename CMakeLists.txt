@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.30.0)
+cmake_minimum_required(VERSION 3.24.0)
 project(Total-Serialism)
 
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(FetchContent)
@@ -19,6 +19,16 @@ set(GCC_UBSAN_LINK_FLAGS    "-fsanitize=undefined -fsanitize=address")
 set(CMAKE_CXX_FLAGS "${GCC_UBSAN_COMPILE_FLAGS}")
 set(CMAKE_EXE_LINKER_FLAGS "${GCC_UBSAN_LINK_FLAGS}")
 
+set(INSTRUMENT_SRC 
+    src/instrumentFactory.cpp
+    src/instrument.cpp
+    src/singleClef.cpp
+    src/piano.cpp
+    src/strings.cpp
+    src/woodwinds.cpp
+    src/brass.cpp)
+
+
 include_directories(inc)
 
 # Production
@@ -28,6 +38,8 @@ add_executable(
     src/serialismGenerator.cpp
     src/analysisMatrix.cpp
     src/timeSignature.cpp
+    src/note.cpp
+    ${INSTRUMENT_SRC}
     )
 
 # Tests
@@ -38,16 +50,14 @@ add_executable(
     )
 
 add_executable(
-    timeSignature-test 
-    src/timeSignature-test.cpp
-    src/timeSignature.cpp
+    note-test 
+    src/note-test.cpp
+    src/note.cpp
     )
 
 add_executable(
-    serialismGenerator-test
-    src/serialismGenerator-test.cpp
-    src/serialismGenerator.cpp
-    src/analysisMatrix.cpp
+    timeSignature-test 
+    src/timeSignature-test.cpp
     src/timeSignature.cpp
     )
 
@@ -58,21 +68,20 @@ target_link_libraries(
     analysisMatrix-test
     GTest::gtest_main
     )
-
-target_link_libraries(
-    serialismGenerator-test
-    GTest::gtest_main
-    )
     
 target_link_libraries(
     timeSignature-test
     GTest::gtest_main
     )
+target_link_libraries(
+    note-test
+    GTest::gtest_main
+    )
 
 include(GoogleTest)
 gtest_discover_tests(analysisMatrix-test)
-gtest_discover_tests(serialismGenerator-test)
 gtest_discover_tests(timeSignature-test)
+gtest_discover_tests(note-test)
 
 # Fuzz Test:
 add_executable(

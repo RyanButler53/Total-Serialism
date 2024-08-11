@@ -26,6 +26,7 @@ enum class TimeSig
 class TimeSignature
 {
 private:
+    std::string str_;
     unsigned int numBeats_;
     unsigned int beatLen_;
 
@@ -34,6 +35,7 @@ public:
     explicit TimeSignature(std::string ts);
     ~TimeSignature() = default;
 
+    std::string str() const;
     bool isValid() const;
     short num16ths() const;
     unsigned int getNumBeats()const;
