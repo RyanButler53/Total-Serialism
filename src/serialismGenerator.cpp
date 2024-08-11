@@ -76,7 +76,7 @@ SerialismGenerator::SerialismGenerator(string inputfile):
         string name;
         getline(input, name);
         instrumentNames_.push_back(name);
-        if (name == "piano") { // or harp
+        if (name == "piano" or name == "harp") { // or harp
             vector<vector<Row>> pianoRows;
             for (size_t i = 0; i < 2; ++i)
             {
@@ -102,7 +102,7 @@ SerialismGenerator::SerialismGenerator(string inputfile):
                 }
                 pianoRows.push_back(rows);
             }
-            instruments_.push_back(factory_.createInstrument(pianoRows[0], pianoRows[1]));
+            instruments_.push_back(factory_.createInstrument(name, pianoRows[0], pianoRows[1]));
         } else {
             vector<Row> rows;
             vector<short> rowNums;
@@ -200,10 +200,10 @@ void SerialismGenerator::initializeRandom(){
     factory_ = InstrumentFactory(pitches_, rhythms_, articulations_, dynamicsRow_, ts_);
     size_t row_i = 0;
     for (std::string& name : instrumentNames_){
-        if (name == "piano") { // Or Harp
+        if (name == "piano" or name == "harp") { // Or Harp
             std::vector<Row> rh = instrumentRows_[row_i];
             std::vector<Row> lh = instrumentRows_[row_i + 1];
-            instruments_.push_back(factory_.createInstrument(rh, lh));
+            instruments_.push_back(factory_.createInstrument(name, rh, lh));
             ++row_i;
         } else {
             std::vector<Row> row = instrumentRows_[row_i];
@@ -245,9 +245,9 @@ string SerialismGenerator::header(){
     header += "global = { \\time " + ts_.str() + " \\tempo 4 = ";
     header += to_string(tempo_) + "}\n\n";
     if (instrumentNames_.size() > 11){
-        header += "\\paper{\n\t#(set-paper-size \"11x17\")\n}";
+        header += "\\paper{\n\t#(set-paper-size \"11x17\")\n}\n\n";
     } else{
-        header += "\\paper{\n\t#(set-paper-size \"letter\")\n}";
+        header += "\\paper{\n\t#(set-paper-size \"letter\")\n}\n\n";
     }
     return header;
 }

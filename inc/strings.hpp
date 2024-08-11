@@ -9,7 +9,7 @@
 class Violin : public SingleClefInstrument
 {
 private:
-    std::vector<Row> rows_;
+    // std::vector<Row> rows_;
     const Note lowerBound_ = Note("g", 0);
     const Note upperBound_ = Note("a", 4);
     std::string instrumentName_ = "Violin";

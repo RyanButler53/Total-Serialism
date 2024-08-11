@@ -32,10 +32,10 @@ SINGLE_CLEF = [  "violin", "viola", "cello", "bass",
         "oboe", "bassoon", "clarinet", "piccolo", "flute", 
         "trombone", "trumpet", "frenchhorn", "tuba"]
 
-MULTI_CLEF = ["piano"]#, "harp"]
+MULTI_CLEF = ["piano", "harp"]
 
 PARAM_NAMES = ["Pitch Row", "Rhythm Row", "Articulation Row",
-               "Dynamics Row", "Title", "Composer", "Tempo", "Time Signature"]
+               "Dynamics Row","Tempo", "Time Signature", "Title", "Composer"]
 
 INSTRUMENT_FIELDS = ["Instrument Name", "Row Numbers", "Row Types"]
 
@@ -85,6 +85,9 @@ def cleanRows(row_str:str, field_name:str):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+
+        self.setFixedWidth(900)
+        self.setFixedHeight(400)
         self.piece_params()
         self.intialize_instruments()
 
@@ -101,6 +104,7 @@ class MainWindow(QMainWindow):
         """Function to call all the parts of the piece params side
         Initializes the QVbox that holds the entire piece params part"""
         self.param_layout = QVBoxLayout()
+        self.param_layout.setSpacing(20)
         self.param_title()
         self.param_labels()
         self.generate_button()

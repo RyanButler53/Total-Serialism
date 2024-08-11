@@ -1,5 +1,5 @@
 #include "instrumentFactory.hpp"
-#include "piano.hpp"
+#include "pianoharp.hpp"
 #include "strings.hpp"
 #include "woodwinds.hpp"
 #include "brass.hpp"
@@ -7,7 +7,7 @@
 InstrumentFactory::InstrumentFactory(AnalysisMatrix *pitches, AnalysisMatrix *rhythms, AnalysisMatrix *articulations, std::vector<short> dynamics, TimeSignature ts) : 
 data_{pitches, rhythms, articulations, dynamics, ts}{}
 
-Instrument* InstrumentFactory::createInstrument(std::string name, std::vector<Row> rows){
+SingleClefInstrument* InstrumentFactory::createInstrument(std::string name, std::vector<Row> rows){
     if (name == "violin"){
         return new Violin(data_, rows);
     } else if (name == "viola") {
@@ -45,6 +45,10 @@ Instrument* InstrumentFactory::createInstrument(std::string name, std::vector<Ro
         return nullptr;
     }
 }
-Instrument* InstrumentFactory::createInstrument(std::vector<Row> rhRows, std::vector<Row> lhRows){
-    return new Piano(data_, rhRows, lhRows);
+MultiClefInstrument* InstrumentFactory::createInstrument(std::string name, std::vector<Row> rhRows, std::vector<Row> lhRows){
+    if (name == "piano"){
+        return new Piano(data_, rhRows, lhRows);
+    } else {
+        return new Harp(data_, rhRows, lhRows);
+    }
 }

@@ -1,16 +1,17 @@
 #include "singleClef.hpp"
 
 using namespace std;
-SingleClefInstrument::SingleClefInstrument(InstrumentData data, std::vector<Row> rows) : Instrument(data), rows_{rows} {}
+SingleClefInstrument::SingleClefInstrument(InstrumentData data, std::vector<Row> rows) : 
+                    Instrument(data), rows_{rows} {}
 
-SingleClefInstrument::~SingleClefInstrument(){
-    
-}
+SingleClefInstrument::~SingleClefInstrument(){}
 
 void SingleClefInstrument::generateCode(vector<string>& lilypondCode){
     short leftover16ths = ts_.num16ths();
     string lilypondRow = staffHeader();
     lilypondCode.push_back(lilypondRow);
+    
+    // Generate the notes
     for (size_t row = 0; row < 12; ++row)
     {
         lilypondRow = rowToLilypond(rows_[row], dynamicsRow_[row], leftover16ths);
