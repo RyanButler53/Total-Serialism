@@ -24,9 +24,7 @@ set(INSTRUMENT_SRC
     src/instrument.cpp
     src/singleClef.cpp
     src/multiClef.cpp
-    src/strings.cpp
-    src/woodwinds.cpp
-    src/brass.cpp
+    src/instrumentDefinitions.cpp
     src/pianoharp.cpp)
 
 

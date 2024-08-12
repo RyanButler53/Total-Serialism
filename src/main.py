@@ -187,10 +187,6 @@ class MainWindow(QMainWindow):
         # dict has the field mapping to a QLineEdit box with the data
         self.instrument_data = [] 
 
-        # Start with piano violin duet
-        self.add_multi_clef() 
-        self.add_single_clef()
-
         # Adjust Scroll Settings
         self.instrument_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
         self.instrument_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)

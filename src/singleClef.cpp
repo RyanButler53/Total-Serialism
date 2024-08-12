@@ -1,8 +1,18 @@
 #include "singleClef.hpp"
 
 using namespace std;
-SingleClefInstrument::SingleClefInstrument(InstrumentData data, std::vector<Row> rows) : 
-                    Instrument(data), rows_{rows} {}
+SingleClefInstrument::SingleClefInstrument(InstrumentData data, SingleClefData SCdata): 
+                    Instrument(data), 
+                    rows_{SCdata.rows_},
+                    displayName_{SCdata.displayName_}, 
+                    variableName_{SCdata.variableName_}, 
+                    clef_{SCdata.clef_}, 
+                    octave_{SCdata.octave_},
+                    num_{SCdata.num_}{
+                        for (size_t i = 0; i < num_ - 1; ++i){
+                            variableName_ += "X"; //differentiate between names
+                        }
+                    }
 
 SingleClefInstrument::~SingleClefInstrument(){}
 
@@ -25,4 +35,18 @@ void SingleClefInstrument::generateCode(vector<string>& lilypondCode){
         string remainingPiece = fullDuration(leftover16ths, "", "r", "");
         lilypondCode.back().append(remainingPiece + "|\n \\fine}\n");
     }
+}
+
+std::string SingleClefInstrument::staffHeader(){
+    string header = variableName_;
+    header += " = \\fixed " + octave_ + "{\\clef " + clef_;
+    header += " \\global \n";
+    return header;
+}
+
+std::string SingleClefInstrument::scoreBox(){
+    string num = to_string(num_);
+    string scoreBox = "\n\t\\new Staff \\with {instrumentName = \"";
+    scoreBox += displayName_ +" " +  to_string(num_) + "\" } { \\" + variableName_+ " }";
+    return scoreBox;
 }

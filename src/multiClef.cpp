@@ -1,8 +1,18 @@
 #include "multiClef.hpp"
 
 using namespace std;
-MultiClefInstrument::MultiClefInstrument(InstrumentData data, std::vector<Row> rhrows, std::vector<Row> lhrows) : 
-Instrument(data), rhRows_{rhrows}, lhRows_{lhrows}{}
+MultiClefInstrument::MultiClefInstrument(InstrumentData data, MultiClefData MCdata) : 
+                    Instrument(data),
+                    rhRows_{MCdata.rhRows_},
+                    lhRows_{MCdata.lhRows_},
+                    displayName_{MCdata.displayName_},
+                    variableName_{MCdata.variableName_},
+                    num_{MCdata.num_}{
+                        for (size_t i = 0; i < num_ - 1; ++i){
+                            variableName_ += "X";
+                        }
+                    }
+
 
 MultiClefInstrument::~MultiClefInstrument(){}
 
@@ -51,4 +61,22 @@ void MultiClefInstrument::generateCode(vector<string>& lilypondCode){
     for (auto& l : leftCode){
         lilypondCode.push_back(l);
     }
+}
+
+string MultiClefInstrument::staffHeader(){
+    string header = variableName_ + "_right";
+    header += " = \\fixed c''{\\clef treble \\global \n |";
+    header += variableName_ + "_left";
+    header += " = \\fixed c {\\clef bass \\global \n";
+    return header;
+}
+
+// Variable names will look like rightXX_hand 
+string MultiClefInstrument::scoreBox() {
+    string scoreBox = "\t\\new PianoStaff \\with {instrumentName = \"";
+    scoreBox += displayName_ +" "+ to_string(num_) + "\"} {\n\t\t<<";
+    scoreBox += "\n\t\t\\new Staff {\\" + variableName_ + "_right"+ " }";
+    scoreBox += "\n\t\t\\new Staff {\\" + variableName_ + "_left" + " }";
+    scoreBox += " \n\t\t>>\n\t}\n";
+    return scoreBox;
 }

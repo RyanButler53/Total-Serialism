@@ -12,14 +12,10 @@ private:
 
     const Note lowerBound_ = Note("a", -3);
     const Note upperBound_ = Note("c", 4);
-    std::string instrumentName_ = "Piano";
 
 public:
-    Piano(InstrumentData data, std::vector<Row> RhRows, std::vector<Row> LHRows);
+    Piano(InstrumentData data, std::vector<Row> RhRows, std::vector<Row> LHRows, int num);
 
-    // Pure virtual functions
-    std::string staffHeader();
-    std::string scoreBox();
 };
 
 class Harp : public MultiClefInstrument 
@@ -28,14 +24,10 @@ private:
 
     const Note lowerBound_ = Note("c", -2);
     const Note upperBound_ = Note("g", 3);
-    std::string instrumentName_ = "Piano";
 
 public:
-    Harp(InstrumentData data, std::vector<Row> RhRows, std::vector<Row> LHRows);
+    Harp(InstrumentData data, std::vector<Row> RhRows, std::vector<Row> LHRows, int num);
 
-    // Pure virtual functions
-    std::string staffHeader();
-    std::string scoreBox();
 };
 
 #endif //PIANO_HARP_HPP_INCLUDED

@@ -6,6 +6,8 @@
 #include "singleClef.hpp"
 #include "multiClef.hpp"
 #include "timeSignature.hpp"
+#include "instrumentDefinitions.hpp"
+#include "pianoharp.hpp"
 #include <string> 
 #include <memory>
 /**
@@ -24,8 +26,8 @@ class InstrumentFactory {
       ~InstrumentFactory() = default;
 
       // Overload Create Instrument to handle single and multi clef instruments
-      SingleClefInstrument *createInstrument(std::string instrumentName, std::vector<Row> rows);
-      MultiClefInstrument *createInstrument(std::string instrumentName, std::vector<Row> rhRows, std::vector<Row> lhRows);
+      SingleClefInstrument *createInstrument(std::string instrumentName, std::vector<Row> rows, int num);
+      MultiClefInstrument *createInstrument(std::string instrumentName, std::vector<Row> rhRows, std::vector<Row> lhRows, int num);
 };
 
 #endif // INSTRUMENT_FACTORY_HPP_INCUDED
