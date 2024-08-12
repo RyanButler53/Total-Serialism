@@ -1,20 +1,26 @@
-#include "piano.hpp"
-#include "instrument.hpp"
+#include "multiClef.hpp"
 
 using namespace std;
+MultiClefInstrument::MultiClefInstrument(InstrumentData data, std::vector<Row> rhrows, std::vector<Row> lhrows) : 
+Instrument(data), rhRows_{rhrows}, lhRows_{lhrows}{}
 
-Piano::Piano(InstrumentData data, std::vector<Row> RHrows,std::vector<Row> LHrows) : 
-    Instrument(data), RHrows_{RHrows}, LHrows_{LHrows} {};
+MultiClefInstrument::~MultiClefInstrument(){}
 
-void Piano::generateCode(vector<string>& lilypondCode){
+void MultiClefInstrument::generateCode(vector<string>& lilypondCode){
     std::vector<string> rightCode;
     std::vector<string> leftCode;
     short leftover16ths = ts_.num16ths();
     string lilypondRow;
     // Generate Right then left in series (later in parallel)
-    rightCode.push_back("right = \\fixed c'{\\clef treble \\global \n");
+
+    string staffHeaders = staffHeader();
+    size_t pos = staffHeaders.find("|");
+    string rightHeader = staffHeaders.substr(0, pos);
+    string leftHeader = staffHeaders.substr(pos+1);// +1 to skip | delimiter
+
+    rightCode.push_back(rightHeader);
     for (size_t row = 0; row < 12; ++row){
-        lilypondRow = rowToLilypond(RHrows_[row], dynamicsRow_[row], leftover16ths);
+        lilypondRow = rowToLilypond(rhRows_[row], dynamicsRow_[row], leftover16ths);
         rightCode.push_back(lilypondRow);
     }
 
@@ -24,11 +30,11 @@ void Piano::generateCode(vector<string>& lilypondCode){
         string remainingPiece = fullDuration(leftover16ths, "", "r", "");
         rightCode.back().append(remainingPiece + "|\n \\fine}\n");
     }
-    // Reset
+    // Reset and generate the left hand. 
     leftover16ths = ts_.num16ths();
-    leftCode.push_back("left = \\fixed c'{\\clef treble \\global \n");
+    leftCode.push_back(leftHeader);
     for (size_t row = 0; row < 12; ++row){
-        lilypondRow = rowToLilypond(LHrows_[row], -1, leftover16ths);
+        lilypondRow = rowToLilypond(lhRows_[row], -1, leftover16ths);
         leftCode.push_back(lilypondRow);
     }
 
@@ -45,15 +51,4 @@ void Piano::generateCode(vector<string>& lilypondCode){
     for (auto& l : leftCode){
         lilypondCode.push_back(l);
     }
-}
-
-// Piano class is different and staffHeader isn't useful for it. 
-string Piano::staffHeader(){
-    return "right = \\fixed c'{\\clef treble \\global \n";
-}
-
-string Piano::scoreBox(){
-    string scoreBox = "\t\\new PianoStaff \\with {instrumentName = \"Piano\"} {\n\t\t<<";
-    scoreBox += "\n\t\t\\new Staff {\\right }\n\t\t\\new Staff {\\left } \n\t\t>>\n\t}\n";
-    return scoreBox;
 }

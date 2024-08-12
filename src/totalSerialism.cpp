@@ -6,7 +6,7 @@
 #include "analysisMatrix.hpp"
 #include "timeSignature.hpp"
 #include "instrument.hpp"
-#include "piano.hpp"
+#include "pianoharp.hpp"
 #include "serialismGenerator.hpp"
 
 using namespace std;

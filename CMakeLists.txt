@@ -23,10 +23,11 @@ set(INSTRUMENT_SRC
     src/instrumentFactory.cpp
     src/instrument.cpp
     src/singleClef.cpp
-    src/piano.cpp
+    src/multiClef.cpp
     src/strings.cpp
     src/woodwinds.cpp
-    src/brass.cpp)
+    src/brass.cpp
+    src/pianoharp.cpp)
 
 
 include_directories(inc)

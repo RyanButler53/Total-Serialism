@@ -7,7 +7,7 @@
 #include "timeSignature.hpp"
 #include "analysisMatrix.hpp"
 #include "instrument.hpp"
-#include "piano.hpp"
+#include "pianoharp.hpp"
 #include "strings.hpp"
 #include "woodwinds.hpp"
 #include "brass.hpp"

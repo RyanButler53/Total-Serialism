@@ -3,6 +3,8 @@
 
 #include "note.hpp"
 #include "instrument.hpp"
+#include "singleClef.hpp"
+#include "multiClef.hpp"
 #include "timeSignature.hpp"
 #include <string> 
 #include <memory>
@@ -21,9 +23,9 @@ class InstrumentFactory {
       InstrumentFactory(AnalysisMatrix *pitches, AnalysisMatrix *rhythms, AnalysisMatrix *articulations, std::vector<short> dynamics, TimeSignature ts);
       ~InstrumentFactory() = default;
 
-      // Overload Create Instrument to handle Piano
-      Instrument *createInstrument(std::string instrumentName, std::vector<Row> rows);
-      Instrument *createInstrument(std::vector<Row> rhRows, std::vector<Row> lhRows);
+      // Overload Create Instrument to handle single and multi clef instruments
+      SingleClefInstrument *createInstrument(std::string instrumentName, std::vector<Row> rows);
+      MultiClefInstrument *createInstrument(std::string instrumentName, std::vector<Row> rhRows, std::vector<Row> lhRows);
 };
 
 #endif // INSTRUMENT_FACTORY_HPP_INCUDED
