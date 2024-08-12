@@ -3,14 +3,13 @@
 #include <random>
 #include <array>
 #include <mutex>
+#include <tuple>
 #include "instrumentFactory.hpp"
 #include "timeSignature.hpp"
 #include "analysisMatrix.hpp"
 #include "instrument.hpp"
 #include "pianoharp.hpp"
-#include "strings.hpp"
-#include "woodwinds.hpp"
-#include "brass.hpp"
+#include "instrumentDefinitions.hpp"
 
 #ifndef SERIALISM_GENERATOR_HPP_INCLUDED
 #define SERIALISM_GENERATOR_HPP_INCLUDED
@@ -31,7 +30,7 @@ private:
     const std::vector<std::string> articulationMap_{"->", "-^", "-_", "-!", "-.", "--", "->-.", "-^\\sfz", "", "->-!", "\\sfz", "-^-!"};
     const std::vector<std::string> dynamicMap_{"\\ppppp", "\\pppp", "\\ppp", "\\pp", "\\p", "\\mp", "\\mf", "\\f", "\\ff", "\\fff", "\\ffff", "\\fffff"};
     std::vector<std::string> instrumentList_{
-        "piano", 
+        "piano", "harp",
         "violin", "viola", "cello", "bass", 
         "oboe", "bassoon", "clarinet", "piccolo", "flute", 
         "trombone", "trumpet", "frenchhorn", "tuba"
@@ -45,7 +44,7 @@ private:
     AnalysisMatrix* articulations_;
 
     std::vector<Instrument*> instruments_;
-    std::vector<std::string> instrumentNames_;
+    std::vector<std::tuple<std::string, int>> instrumentNames_;
     std::vector<std::vector<Row>> instrumentRows_;
 
     long seed_;
