@@ -6,6 +6,7 @@
 struct MultiClefData{
     std::vector<Row> rhRows_;
     std::vector<Row> lhRows_;
+    std::vector<short> dynamic_;
     std::string displayName_;
     std::string variableName_; 
     int num_;
@@ -16,6 +17,7 @@ class MultiClefInstrument : public Instrument
   private:
     std::vector<Row> rhRows_;
     std::vector<Row> lhRows_;
+    std::vector<short> dynamics_;
     std::string variableName_;
     std::string displayName_;
     int num_;

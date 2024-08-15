@@ -10,7 +10,6 @@ struct InstrumentData
     AnalysisMatrix* pitches_;
     AnalysisMatrix* rhythms_;
     AnalysisMatrix* articulations_;
-    std::vector<short> dynamicsRow_;
     TimeSignature ts_;
 };
 
@@ -22,7 +21,6 @@ class Instrument{
         AnalysisMatrix* pitches_;
         AnalysisMatrix* rhythms_;
         AnalysisMatrix* articulations_;
-        std::vector<short> dynamicsRow_;
         TimeSignature ts_;
 
         // Everything can access the pitch, articulation and dynamic mappings

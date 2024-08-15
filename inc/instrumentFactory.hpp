@@ -22,12 +22,12 @@ class InstrumentFactory {
 
   public:
       InstrumentFactory() = default;
-      InstrumentFactory(AnalysisMatrix *pitches, AnalysisMatrix *rhythms, AnalysisMatrix *articulations, std::vector<short> dynamics, TimeSignature ts);
+      InstrumentFactory(AnalysisMatrix *pitches, AnalysisMatrix *rhythms, AnalysisMatrix *articulations,TimeSignature ts);
       ~InstrumentFactory() = default;
 
       // Overload Create Instrument to handle single and multi clef instruments
-      SingleClefInstrument *createInstrument(std::string instrumentName, std::vector<Row> rows, int num);
-      MultiClefInstrument *createInstrument(std::string instrumentName, std::vector<Row> rhRows, std::vector<Row> lhRows, int num);
+      SingleClefInstrument *createInstrument(std::string instrumentName, std::vector<Row> rows, std::vector<short> dynamics,int num);
+      MultiClefInstrument *createInstrument(std::string instrumentName, std::vector<Row> rhRows, std::vector<Row> lhRows, std::vector<short> dynamics, int num);
 };
 
 #endif // INSTRUMENT_FACTORY_HPP_INCUDED

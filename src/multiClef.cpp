@@ -5,6 +5,7 @@ MultiClefInstrument::MultiClefInstrument(InstrumentData data, MultiClefData MCda
                     Instrument(data),
                     rhRows_{MCdata.rhRows_},
                     lhRows_{MCdata.lhRows_},
+                    dynamics_{MCdata.dynamic_},
                     displayName_{MCdata.displayName_},
                     variableName_{MCdata.variableName_},
                     num_{MCdata.num_}{
@@ -29,8 +30,10 @@ void MultiClefInstrument::generateCode(vector<string>& lilypondCode){
     string leftHeader = staffHeaders.substr(pos+1);// +1 to skip | delimiter
 
     rightCode.push_back(rightHeader);
-    for (size_t row = 0; row < 12; ++row){
-        lilypondRow = rowToLilypond(rhRows_[row], dynamicsRow_[row], leftover16ths);
+    size_t numRows = rhRows_.size();
+    for (size_t row = 0; row < numRows; ++row)
+    {
+        lilypondRow = rowToLilypond(rhRows_[row], dynamics_[row], leftover16ths);
         rightCode.push_back(lilypondRow);
     }
 
@@ -43,7 +46,7 @@ void MultiClefInstrument::generateCode(vector<string>& lilypondCode){
     // Reset and generate the left hand. 
     leftover16ths = ts_.num16ths();
     leftCode.push_back(leftHeader);
-    for (size_t row = 0; row < 12; ++row){
+    for (size_t row = 0; row < numRows; ++row){
         lilypondRow = rowToLilypond(lhRows_[row], -1, leftover16ths);
         leftCode.push_back(lilypondRow);
     }

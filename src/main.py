@@ -28,18 +28,19 @@ TIME_SIGNATURES = [  "4/4",
             "7/4", "15/8",
             ]
 
-SINGLE_CLEF = [  "violin", "viola", "cello", "bass",
+SINGLE_CLEF = ["violin", "viola", "cello", "bass",
         "oboe", "bassoon", "clarinet", "piccolo", "flute", 
         "trombone", "trumpet", "frenchhorn", "tuba"]
 
 MULTI_CLEF = ["piano", "harp"]
 
 PARAM_NAMES = ["Pitch Row", "Rhythm Row", "Articulation Row",
-               "Dynamics Row","Tempo", "Time Signature", "Title", "Composer"]
+               "Tempo", "Time Signature", "Title", "Composer", "Number of Rows"]
 
-INSTRUMENT_FIELDS = ["Instrument Name", "Row Numbers", "Row Types"]
+INSTRUMENT_FIELDS = ["Instrument Name", "Row Numbers", "Row Types", "Dynamics Row"]
 
-MULTI_CLEF_FIELDS = ["Instrument Name", "Right Hand Row Numbers", "Right Hand Row Types", "Left Hand Row Numbers", "Left Hand Row Numbers" ]
+MULTI_CLEF_FIELDS = ["Instrument Name", "Right Hand Row Numbers", "Right Hand Row Types", 
+                     "Left Hand Row Numbers", "Left Hand Row Numbers", "Dynamics Row"]
 
 def toString(l):
     s = ""
@@ -47,7 +48,7 @@ def toString(l):
         s += f"{x} "
     return s[:-1]
 
-def cleanNums(num_string:str, field_name:str):
+def clean12Nums(num_string:str, field_name:str):
     """Cleans the input and returns a cleaned list of numbers"""
     split = num_string.split()
     try:
@@ -65,12 +66,36 @@ def cleanNums(num_string:str, field_name:str):
     random.shuffle(nums)
     return nums
 
-def cleanRows(row_str:str, field_name:str):
+def cleanAnyNums(num_string:str, field_name:str, count:int):
+    """Cleans any string of numbers and doesn't require the
+    input to be the numbers between 0-11. Requires the 
+    number of numbers in the string to be equal to count
+    """
+    split = num_string.split()
+    try:
+        nums = [int(n) for n in split]
+        if split == []:
+            pass
+        elif all(map(lambda x: 0 <= x < 12, nums)):
+            return nums
+        else:
+            print(f"Need exactly {count} numbers between 0 and 11 in {field_name}")
+
+    except ValueError as error:
+        print(f"Error converting numbers to string in {field_name}")
+
+    # If there are exactly 12 numbers then do the 0-11 perfect random
+    if count == 12:
+        return clean12Nums("","")
+    else: # otherwise just fill it with random stuff.
+        return [random.choice(range(12)) for _ in range(count)]
+
+def cleanRows(row_str:str, field_name:str, count:int):
     """Cleans a list of strings for rows and returns a valid list of rows"""
     row_str.upper()
     split = row_str.split()
     validStrings = ["P", "R", "I", "RI"]
-    if len(split) == 12:
+    if len(split) == count:
         if all([x in validStrings for x in split]):
             return split
         else:
@@ -78,9 +103,9 @@ def cleanRows(row_str:str, field_name:str):
     elif split == []:
         pass
     else:
-        print(f"Need exactly 12 rows in {field_name}")
+        print(f"Need exactly {count} row types in {field_name}")
 
-    return [random.choice(validStrings) for _ in range(12)]
+    return [random.choice(validStrings) for _ in range(count)]
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -133,6 +158,7 @@ class MainWindow(QMainWindow):
             self.param_dict[param_name].setPlaceholderText("0 1 2 3 4 5 6 7 8 9 10 11")
 
         self.param_dict["Time Signature"].setPlaceholderText("4/4")
+        self.param_dict["Number of Rows"].setPlaceholderText("12")
 
         # Add to full parameter layout
         self.param_label_pairs = QHBoxLayout()
@@ -218,12 +244,17 @@ class MainWindow(QMainWindow):
         row_nums = QLineEdit()
         data.addWidget(row_nums)
         instrument_dict["Row Numbers"] = row_nums
-        row_nums.setPlaceholderText(f"0 1 2 3 4 5 6 7 8 9 10 11")
+        row_nums.setPlaceholderText("0 1 2 3 4 5 6 7 8 9 10 11")
 
         row_types = QLineEdit()
         data.addWidget(row_types)
         instrument_dict["Row Types"] = row_types
-        row_types.setPlaceholderText(f"P I R RI P I R RI P I R RI")
+        row_types.setPlaceholderText("P I R RI P I R RI P I R RI")
+
+        dynamics = QLineEdit()
+        data.addWidget(dynamics)
+        instrument_dict["Dynamics Row"] = dynamics
+        dynamics.setPlaceholderText("0 1 2 3 4 5 6 7 8 9 10 11")
 
         # Add labels and data to the instrument layout
         instrument_layout.addLayout(labels)
@@ -251,12 +282,17 @@ class MainWindow(QMainWindow):
             row_nums = QLineEdit()
             data.addWidget(row_nums)
             instrument_dict[f"{hand} Hand Row Numbers"] = row_nums
-            row_nums.setPlaceholderText(f"0 1 2 3 4 5 6 7 8 9 10 11")
+            row_nums.setPlaceholderText("0 1 2 3 4 5 6 7 8 9 10 11")
 
             row_types = QLineEdit()
             data.addWidget(row_types)
             instrument_dict[f"{hand} Hand Row Types"] = row_types
-            row_types.setPlaceholderText(f"P I R RI P I R RI P I R RI")
+            row_types.setPlaceholderText("P I R RI P I R RI P I R RI")
+
+        dynamics = QLineEdit()
+        data.addWidget(dynamics)
+        instrument_dict["Dynamics Row"] = dynamics
+        dynamics.setPlaceholderText("0 1 2 3 4 5 6 7 8 9 10 11")
 
         # Add labels and data to the instrument layout
         instrument_layout.addLayout(labels)
@@ -271,9 +307,9 @@ class MainWindow(QMainWindow):
         Extract all the data and write it to a file called params.txt 
         Launches the subprocess to generate the music"""
         text_strings = []
-        for field_name in PARAM_NAMES[:4]:
+        for field_name in PARAM_NAMES[:3]:
             text = self.param_dict[field_name].text()
-            text_strings.append(toString(cleanNums(text, field_name)))
+            text_strings.append(toString(clean12Nums(text, field_name)))
 
         # handle tempo
         try:
@@ -293,7 +329,6 @@ class MainWindow(QMainWindow):
             text_strings.append(self.param_dict["Time Signature"] )
         else:
             text_strings.append("4/4")
-
                     
         title = self.param_dict["Title"].text()
         if title == "":
@@ -305,7 +340,18 @@ class MainWindow(QMainWindow):
             composer = "The Algorithm"
         text_strings.append(composer)
 
+        count = self.param_dict["Number of Rows"].text()
+        try:
+            count = int(count)
+        except ValueError as error:
+            count = 12
+        text_strings.append(str(count))
+
         # INSTRUMENTS
+        if self.instrument_data == []:
+            print("No Instruments")
+            return
+        
         text_strings.append(len(self.instrument_data))
         for instrument_dict in self.instrument_data:
             name = instrument_dict["Instrument Name"].currentText()
@@ -315,13 +361,16 @@ class MainWindow(QMainWindow):
                 for hand in ["Right", "Left"]:
                     row_nums = instrument_dict[f"{hand} Hand Row Numbers"].text()
                     row_types = instrument_dict[f"{hand} Hand Row Types"].text()
-                    text_strings.append(toString(cleanNums(row_nums, name)))
-                    text_strings.append(toString(cleanRows(row_types,name )))
+                    text_strings.append(toString(cleanAnyNums(row_nums, name, count)))
+                    text_strings.append(toString(cleanRows(row_types,name, count)))
             else:
                 row_nums = instrument_dict["Row Numbers"].text()
                 row_types = instrument_dict["Row Types"].text()
-                text_strings.append(toString(cleanNums(row_nums, name)))
-                text_strings.append(toString(cleanRows(row_types, name)))
+                text_strings.append(toString(cleanAnyNums(row_nums, name,count)))
+                text_strings.append(toString(cleanRows(row_types, name,count)))
+
+            dynamics_row = instrument_dict["Dynamics Row"].text()
+            text_strings.append(toString(cleanAnyNums(dynamics_row, "Dynamics Row", count)))
         
         with open("params.txt", 'w') as f:
             for line in text_strings:
@@ -334,7 +383,6 @@ class MainWindow(QMainWindow):
         title_filename += title_split[-1]
 
         subprocess.call(["sh", "score.sh", f"{title_filename}", "params.txt"])
-
 
     # Utility Functions
     def make_title(self,text) -> QLabel:

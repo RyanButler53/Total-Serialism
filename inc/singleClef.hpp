@@ -8,7 +8,8 @@ struct SingleClefData
 {
     std::vector<Row> rows_;
     std::string displayName_;
-    std::string variableName_; 
+    std::string variableName_;
+    std::vector<short> dynamicsRow_;
     std::string clef_;
     std::string octave_;
     int num_;
@@ -21,6 +22,7 @@ class SingleClefInstrument : public Instrument
     std::vector<Row> rows_;
     std::string displayName_;
     std::string variableName_;
+    std::vector<short> dynamicsRow_;
     std::string clef_;
     std::string octave_;
     int num_;

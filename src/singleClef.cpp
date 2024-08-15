@@ -6,6 +6,7 @@ SingleClefInstrument::SingleClefInstrument(InstrumentData data, SingleClefData S
                     rows_{SCdata.rows_},
                     displayName_{SCdata.displayName_}, 
                     variableName_{SCdata.variableName_}, 
+                    dynamicsRow_{SCdata.dynamicsRow_},
                     clef_{SCdata.clef_}, 
                     octave_{SCdata.octave_},
                     num_{SCdata.num_}{
@@ -16,13 +17,13 @@ SingleClefInstrument::SingleClefInstrument(InstrumentData data, SingleClefData S
 
 SingleClefInstrument::~SingleClefInstrument(){}
 
-void SingleClefInstrument::generateCode(vector<string>& lilypondCode){
+void SingleClefInstrument::generateCode(vector<string>& lilypondCode) {
     short leftover16ths = ts_.num16ths();
     string lilypondRow = staffHeader();
     lilypondCode.push_back(lilypondRow);
     
     // Generate the notes
-    for (size_t row = 0; row < 12; ++row)
+    for (size_t row = 0; row < rows_.size(); ++row)
     {
         lilypondRow = rowToLilypond(rows_[row], dynamicsRow_[row], leftover16ths);
         lilypondCode.push_back(lilypondRow);
@@ -37,14 +38,14 @@ void SingleClefInstrument::generateCode(vector<string>& lilypondCode){
     }
 }
 
-std::string SingleClefInstrument::staffHeader(){
+std::string SingleClefInstrument::staffHeader() {
     string header = variableName_;
     header += " = \\fixed " + octave_ + "{\\clef " + clef_;
     header += " \\global \n";
     return header;
 }
 
-std::string SingleClefInstrument::scoreBox(){
+std::string SingleClefInstrument::scoreBox() {
     string num = to_string(num_);
     string scoreBox = "\n\t\\new Staff \\with {instrumentName = \"";
     scoreBox += displayName_ +" " +  to_string(num_) + "\" } { \\" + variableName_+ " }";

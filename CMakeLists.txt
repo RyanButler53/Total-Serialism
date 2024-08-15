@@ -32,7 +32,7 @@ include_directories(inc)
 
 # Production
 add_executable(
-    totalSerialism 
+    TotalSerialism 
     src/totalSerialism.cpp
     src/serialismGenerator.cpp
     src/analysisMatrix.cpp

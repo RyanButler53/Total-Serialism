@@ -6,7 +6,7 @@ Instrument::Instrument(InstrumentData data) :
 pitches_{data.pitches_}, 
 rhythms_{data.rhythms_}, 
 articulations_{data.articulations_},
-dynamicsRow_{data.dynamicsRow_}, ts_{data.ts_} {}
+ts_{data.ts_} {}
 
 string Instrument::rowToLilypond(Row r, short dynamic, short& leftoverDuration){
     // Get the piches, rhythms and articulations for the row. 

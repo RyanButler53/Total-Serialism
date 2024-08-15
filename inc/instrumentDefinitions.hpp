@@ -14,7 +14,7 @@ private:
     const Note upperBound_ = Note("a", 4);
 
 public:
-    Violin(InstrumentData data, std::vector<Row> rows, int num);
+    Violin(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num);
     ~Violin() = default;
 
 };
@@ -26,7 +26,7 @@ private:
     const Note upperBound_ = Note("g", 2);
 
 public:
-    Viola(InstrumentData data, std::vector<Row> rows, int num);
+    Viola(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num);
     ~Viola() = default;
 };
 
@@ -38,7 +38,7 @@ private:
     const Note upperBound_ = Note("e", 3);
 
 public:
-    Cello(InstrumentData data, std::vector<Row> rows, int num);
+    Cello(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num);
     ~Cello() = default;
 };
 
@@ -50,7 +50,7 @@ private:
     const Note upperBound_ = Note("d", 3);
 
 public:
-    Bass(InstrumentData data, std::vector<Row> rows, int num);
+    Bass(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num);
     ~Bass() = default;
 };
 
@@ -63,7 +63,7 @@ private:
     const Note upperBound_ = Note("af", 2);
 
 public:
-    AltoSax(InstrumentData data, std::vector<Row> rows, int num);
+    AltoSax(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num);
     ~AltoSax() = default;
 };
 
@@ -74,7 +74,7 @@ private:
     const Note upperBound_ = Note("e", 2);
 
 public:
-    TenorSax(InstrumentData data, std::vector<Row> rows, int num);
+    TenorSax(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num);
     ~TenorSax() = default;
 };
 
@@ -85,7 +85,7 @@ private:
     const Note upperBound_ = Note("af", 2);
 
 public:
-    BariSax(InstrumentData data, std::vector<Row> rows, int num);
+    BariSax(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num);
     ~BariSax() = default;
 
 };
@@ -98,7 +98,7 @@ private:
     const Note upperBound_ = Note("g", 3);
 
 public:
-    Oboe(InstrumentData data, std::vector<Row> rows, int num);
+    Oboe(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num);
     ~Oboe() = default;
 };
 
@@ -110,7 +110,7 @@ private:
     const Note upperBound_ = Note("g", 2);
 
 public:
-    Bassoon(InstrumentData data, std::vector<Row> rows, int num);
+    Bassoon(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num);
     ~Bassoon() = default;
 };
 
@@ -122,7 +122,7 @@ private:
     const Note upperBound_ = Note("bf", 3);
 
 public:
-    Clarinet(InstrumentData data, std::vector<Row> rows, int num);
+    Clarinet(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num);
     ~Clarinet() = default;
 };
 
@@ -134,7 +134,7 @@ private:
     const Note upperBound_ = Note("c", 5);
 
 public:
-    Piccolo(InstrumentData data, std::vector<Row> rows, int num);
+    Piccolo(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num);
     ~Piccolo() = default;
 };
 
@@ -146,7 +146,7 @@ private:
     const Note upperBound_ = Note("f", 3);
 
 public:
-    Flute(InstrumentData data, std::vector<Row> rows, int num);
+    Flute(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num);
     ~Flute() = default;
 };
 
@@ -159,7 +159,7 @@ private:
     const Note upperBound_{"f", 2};
 
 public:
-    Trombone(InstrumentData data, std::vector<Row> rows, int num);
+    Trombone(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num);
     ~Trombone() = default;
 };
 
@@ -170,7 +170,7 @@ private:
     const Note upperBound_ = Note("d", 3);
 
 public:
-    Trumpet(InstrumentData data, std::vector<Row> rows, int num);
+    Trumpet(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num);
     ~Trumpet() = default;
 };
 
@@ -180,7 +180,7 @@ private:
     const Note lowerBound_ = Note("a", -2);
     const Note upperBound_ = Note("f", 2);
 public:
-    FrenchHorn(InstrumentData data, std::vector<Row> rows, int num);
+    FrenchHorn(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num);
     ~FrenchHorn() = default;
 };
 
@@ -191,7 +191,7 @@ private:
     const Note upperBound_ = Note("f", 1);
 
 public:
-    Tuba(InstrumentData data, std::vector<Row> rows, int num);
+    Tuba(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num);
     ~Tuba() = default;
 };
 

@@ -3,7 +3,9 @@
 #include <random>
 #include <array>
 #include <mutex>
+#include <unordered_map>
 #include <tuple>
+
 #include "instrumentFactory.hpp"
 #include "timeSignature.hpp"
 #include "analysisMatrix.hpp"
@@ -25,7 +27,6 @@ private:
     std::mutex boulezMutex_;
     InstrumentFactory factory_;
 
-    std::vector<short> dynamicsRow_;
     const std::vector<std::string> pitchMap_{"c","cs","d","ef","e","f","fs","g","af","a","bf","b"};
     const std::vector<std::string> articulationMap_{"->", "-^", "-_", "-!", "-.", "--", "->-.", "-^\\sfz", "", "->-!", "\\sfz", "-^-!"};
     const std::vector<std::string> dynamicMap_{"\\ppppp", "\\pppp", "\\ppp", "\\pp", "\\p", "\\mp", "\\mf", "\\f", "\\ff", "\\fff", "\\ffff", "\\fffff"};
@@ -35,6 +36,11 @@ private:
         "oboe", "bassoon", "clarinet", "piccolo", "flute", 
         "trombone", "trumpet", "frenchhorn", "tuba"
     };
+    std::unordered_map<std::string, RowType> rowTypes_{
+        {"P", RowType(P)},
+        {"R", RowType(R)},
+        {"I", RowType(I)},
+        {"RI", RowType(RI)}};
 
     TimeSignature ts_;
     std::string title_;
@@ -47,6 +53,7 @@ private:
     std::vector<std::tuple<std::string, int>> instrumentNames_;
     std::vector<std::vector<Row>> instrumentRows_;
 
+    size_t numRows_;
     long seed_;
     short tempo_;
     float boulezFactor_;
@@ -63,11 +70,17 @@ public:
 
     void generatePiece(std::vector<std::string> &lilypondCode);
 
-    std::string header();
+    std::string header() const;
 
     std::string boulezJitter();
 
     std::string scoreBox();
+
+    // Utility Functions
+
+    std::vector<short> getRowNums(std::fstream& input) const;
+
+    std::vector<Row> getRowTypes(std::fstream &input, std::vector<short> rowNums) const;
 };
 
 #endif

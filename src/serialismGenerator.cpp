@@ -6,7 +6,6 @@
 #include <sstream>
 #include <algorithm>
 #include <cmath>
-#include <unordered_map>
 
 using namespace std;
 
@@ -18,7 +17,7 @@ SerialismGenerator::SerialismGenerator():
 }
 
 SerialismGenerator::SerialismGenerator(long seed):
-    seed_{seed},boulezFactor_{0} // 0.5
+    numRows_{12}, seed_{seed},boulezFactor_{0} // 0.5
     {
     initializeRandom();
 }
@@ -29,14 +28,9 @@ SerialismGenerator::SerialismGenerator(string inputfile):
     // Set up rng, fileinput and row mapping
     rng_ = mt19937(seed_);
     fstream input = fstream(inputfile);
-    std::unordered_map<string, RowType> rowTypes{
-        {"P", RowType(P)},
-        {"R", RowType(R)},
-        {"I", RowType(I)},
-        {"RI", RowType(RI)}};
 
-    // Pitch, Rhythm, Articulation Dynamics
-    vector<vector<short>> sequences{4};
+    // Pitch, Rhythm, Articulation
+    vector<vector<short>> sequences{3};
     for (auto& seq : sequences)
     {
         string s;
@@ -53,20 +47,22 @@ SerialismGenerator::SerialismGenerator(string inputfile):
     pitches_ = new AnalysisMatrix(sequences[0]);
     rhythms_ = new AnalysisMatrix(sequences[1]);
     articulations_ = new AnalysisMatrix(sequences[2]);
-    dynamicsRow_ = sequences[3];
 
     // Read in tempo, time sig, title, composer
     string tempo_str;
     string ts_str;
+    string numRows_str;
     getline(input, tempo_str);
     getline(input, ts_str);
     ts_ = TimeSignature(ts_str);
     tempo_ = stoi(tempo_str);
     getline(input, title_);
     getline(input, composer_);
+    getline(input, numRows_str);
+    numRows_ = stoi(numRows_str);
 
     // Initialize Factory
-    factory_ = InstrumentFactory(pitches_, rhythms_, articulations_, dynamicsRow_, ts_);
+    factory_ = InstrumentFactory(pitches_, rhythms_, articulations_, ts_);
 
     // Read in instruments
     std::unordered_map<std::string, int> instrumentMap;
@@ -80,59 +76,25 @@ SerialismGenerator::SerialismGenerator(string inputfile):
             instrumentMap[name] = 1;
         } else {
             instrumentMap[name] += 1;
-        }
+        }   
         instrumentNames_.push_back({name,instrumentMap[name]});
-        if (name == "piano" or name == "harp") { // or harp
-            vector<vector<Row>> pianoRows;
+        if (name == "piano" or name == "harp") {
+            vector<vector<Row>> pianoRows{2};
             for (size_t i = 0; i < 2; ++i)
             {
-                vector<Row> rows;
-                vector<short> rowNums;
-                string s;
-                getline(input, s);
-                stringstream ss{s};
-                for (size_t num = 0; num < 12; ++num)
-                {
-                    short value;
-                    ss >> value;
-                    rowNums.push_back(value);
-                }
-                string s2;
-                getline(input, s2);
-                stringstream ss2{s2};
-                for (size_t num = 0; num < 12; ++num)
-                {
-                    string type;
-                    ss2 >> type;
-                    rows.push_back(Row(rowTypes[type], rowNums[num]));
-                }
-                pianoRows.push_back(rows);
+                vector<short> rowNums = getRowNums(input);
+                vector<Row> rows = getRowTypes(input, rowNums);
+                pianoRows[i] = rows;
             }
+            vector<short> dynamics = getRowNums(input);
             int num = instrumentMap[name];
-            instruments_.push_back(factory_.createInstrument(name, pianoRows[0], pianoRows[1], num));
+            instruments_.push_back(factory_.createInstrument(name, pianoRows[0], pianoRows[1], dynamics, num));
         } else {
-            vector<Row> rows;
-            vector<short> rowNums;
-            string s;
-            getline(input, s);
-            stringstream ss{s};
-            for (size_t num = 0; num < 12; ++num)
-            {
-                short value;
-                ss >> value;
-                rowNums.push_back(value);
-            }
-            string s2;
-            getline(input, s2);
-            stringstream ss2{s};
-            for (size_t num = 0; num < 12; ++num)
-            {
-                string type;
-                ss2 >> type;
-                rows.push_back(Row(rowTypes[type], rowNums[num]));
-            }
+            vector<short> rowNums = getRowNums(input);
+            vector<Row> rows = getRowTypes(input, rowNums);
+            vector<short> dynamics = getRowNums(input);
             int num = instrumentMap[name];
-            instruments_.push_back(factory_.createInstrument(name, rows,num));
+            instruments_.push_back(factory_.createInstrument(name, rows,dynamics, num));
         }
     }
 }
@@ -149,8 +111,6 @@ void SerialismGenerator::initializeRandom(){
     std::shuffle(rowNums.begin(), rowNums.end(), rng_);
     vector<short> articulationRow = rowNums;
     std::shuffle(rowNums.begin(), rowNums.end(), rng_);
-    dynamicsRow_ = rowNums; // Member Variable
-
 
     // Tempo
     std::uniform_int_distribution tempoDist{40, 240};
@@ -205,20 +165,32 @@ void SerialismGenerator::initializeRandom(){
         }
         instrumentRows_.push_back(row);
     }
+    // Individual Dynamic Rows
+    vector<vector<short>> dynamicRows;
+    for (size_t i = 0; i < numIns; ++i){
+        std::shuffle(rowNums.begin(), rowNums.end(), rng_);
+        vector<short> row = rowNums;
+        dynamicRows.push_back(row);
+    }
 
-    factory_ = InstrumentFactory(pitches_, rhythms_, articulations_, dynamicsRow_, ts_);
+    factory_ = InstrumentFactory(pitches_, rhythms_, articulations_, ts_);
     size_t row_i = 0;
-    for (auto& [name, num] : instrumentNames_){
+    size_t dynamic_i = 0;
+    for (auto &[name, num] : instrumentNames_)
+    {
         if (name == "piano" or name == "harp") { // Or Harp
             std::vector<Row> rh = instrumentRows_[row_i];
             std::vector<Row> lh = instrumentRows_[row_i + 1];
-            instruments_.push_back(factory_.createInstrument(name, rh, lh, num));
+            std::vector<short> dynamics = dynamicRows[dynamic_i];
+            instruments_.push_back(factory_.createInstrument(name, rh, lh, dynamics, num));
             ++row_i;
         } else {
             std::vector<Row> row = instrumentRows_[row_i];
-            instruments_.push_back(factory_.createInstrument(name, row, num));
+            std::vector<short> dynamics = dynamicRows[dynamic_i];
+            instruments_.push_back(factory_.createInstrument(name, row, dynamics, num));
         }
         ++row_i;
+        ++dynamic_i;
     }
 }
 
@@ -242,7 +214,7 @@ void SerialismGenerator::generatePiece(vector<string>& lilypondCode){
     lilypondCode.push_back(scoreBox());
 }
 
-string SerialismGenerator::header(){
+string SerialismGenerator::header() const {
     string header = "\\version \"2.24.1\"\n\\language \"english\"\n\n";
     header += "\\header {\n   title = \"";
     header += title_;
@@ -288,11 +260,38 @@ std::string SerialismGenerator::boulezJitter(){
     return "";
 }
 
-std::string SerialismGenerator::scoreBox(){
+std::string SerialismGenerator::scoreBox() {
     std::string scoreBox = "\\score {\n\t<<\n";
     for (Instrument*& instrument : instruments_){
         scoreBox += instrument->scoreBox();
     }
     scoreBox += "\n\t>>\n}";
     return scoreBox;
+}
+
+std::vector<short> SerialismGenerator::getRowNums(std::fstream& input) const {
+    vector<short> rowNums;
+    string s;
+    getline(input, s);
+    stringstream ss{s};
+    for (size_t num = 0; num < numRows_; ++num) {
+        short value;
+        ss >> value;
+        rowNums.push_back(value);
+    }
+    return rowNums;
+}
+std::vector<Row> SerialismGenerator::getRowTypes(std::fstream& input, std::vector<short> rowNums) const {
+    std::vector<Row> rows;
+    string s;
+    getline(input, s);
+    stringstream ss{s};
+    for (size_t num = 0; num < numRows_; ++num)
+    {
+        string type;
+        ss >> type;
+        // RowType t = rowTypes_[type];
+        rows.push_back(Row(rowTypes_.at(type), rowNums[num]));
+    }
+    return rows;
 }
