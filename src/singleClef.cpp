@@ -1,0 +1,53 @@
+#include "singleClef.hpp"
+
+using namespace std;
+SingleClefInstrument::SingleClefInstrument(InstrumentData data, SingleClefData SCdata): 
+                    Instrument(data), 
+                    rows_{SCdata.rows_},
+                    displayName_{SCdata.displayName_}, 
+                    variableName_{SCdata.variableName_}, 
+                    dynamicsRow_{SCdata.dynamicsRow_},
+                    clef_{SCdata.clef_}, 
+                    octave_{SCdata.octave_},
+                    num_{SCdata.num_}{
+                        for (size_t i = 0; i < num_ - 1; ++i){
+                            variableName_ += "X"; //differentiate between names
+                        }
+                    }
+
+SingleClefInstrument::~SingleClefInstrument(){}
+
+void SingleClefInstrument::generateCode(vector<string>& lilypondCode) {
+    short leftover16ths = ts_.num16ths();
+    string lilypondRow = staffHeader();
+    lilypondCode.push_back(lilypondRow);
+    
+    // Generate the notes
+    for (size_t row = 0; row < rows_.size(); ++row)
+    {
+        lilypondRow = rowToLilypond(rows_[row], dynamicsRow_[row], leftover16ths);
+        lilypondCode.push_back(lilypondRow);
+    }
+
+    // Leftover 16ths in the piece
+    if (leftover16ths == ts_.num16ths()){
+        lilypondCode.push_back("\n \\fine}\n");
+    } else {
+        string remainingPiece = fullDuration(leftover16ths, "", "r", "");
+        lilypondCode.back().append(remainingPiece + "|\n \\fine}\n");
+    }
+}
+
+std::string SingleClefInstrument::staffHeader() {
+    string header = variableName_;
+    header += " = \\fixed " + octave_ + "{\\clef " + clef_;
+    header += " \\global \n";
+    return header;
+}
+
+std::string SingleClefInstrument::scoreBox() {
+    string num = to_string(num_);
+    string scoreBox = "\n\t\\new Staff \\with {instrumentName = \"";
+    scoreBox += displayName_ +" " +  to_string(num_) + "\" } { \\" + variableName_+ " }";
+    return scoreBox;
+}

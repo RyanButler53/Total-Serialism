@@ -1,11 +1,12 @@
 #include "timeSignature.hpp"
 
-TimeSignature::TimeSignature(std::string ts)
+TimeSignature::TimeSignature(std::string ts):str_{ts}
 {
     // Split the ts string into numBeats and measureLength
     int slash = ts.find('/');
     numBeats_ = stoi(ts.substr(0, slash));
     beatLen_ = stoi(ts.substr(slash+ 1));
+
 }
 
 bool TimeSignature::isValid() const {
@@ -22,6 +23,10 @@ bool TimeSignature::isValid() const {
     } else {
         return false;
     }
+}
+
+std::string TimeSignature::str() const {
+    return str_;
 }
 
 short TimeSignature::num16ths() const{
