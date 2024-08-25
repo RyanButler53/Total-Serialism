@@ -25,7 +25,7 @@ private:
     std::mt19937 rng_;
     std::normal_distribution<double> boulezDist_;
     std::mutex boulezMutex_;
-    InstrumentFactory factory_;
+
 
     const std::vector<std::string> pitchMap_{"c","cs","d","ef","e","f","fs","g","af","a","bf","b"};
     const std::vector<std::string> articulationMap_{"->", "-^", "-_", "-!", "-.", "--", "->-.", "-^\\sfz", "", "->-!", "\\sfz", "-^-!"};
@@ -45,11 +45,16 @@ private:
     TimeSignature ts_;
     std::string title_;
     std::string composer_;
-    AnalysisMatrix *pitches_;
+
+    // Matrices
+    AnalysisMatrix* pitches_;
     AnalysisMatrix* rhythms_;
     AnalysisMatrix* articulations_;
 
+    // Factory and Instruments
+    InstrumentFactory* factory_;
     std::vector<Instrument*> instruments_;
+    
     std::vector<std::tuple<std::string, int>> instrumentNames_;
     std::vector<std::vector<Row>> instrumentRows_;
 

@@ -1,8 +1,8 @@
 #include "multiClef.hpp"
 
 using namespace std;
-MultiClefInstrument::MultiClefInstrument(InstrumentData data, MultiClefData MCdata) : 
-                    Instrument(data),
+MultiClefInstrument::MultiClefInstrument(InstrumentData data, BoulezData boulez, MultiClefData MCdata, Range range) : 
+                    Instrument(data, boulez, range),
                     rhRows_{MCdata.rhRows_},
                     lhRows_{MCdata.lhRows_},
                     dynamics_{MCdata.dynamic_},
@@ -40,7 +40,7 @@ void MultiClefInstrument::generateCode(vector<string>& lilypondCode){
     if (leftover16ths == ts_.num16ths()){ // no leftover 16ths.
         rightCode.push_back("\n \\fine}\n");
     } else {
-        string remainingPiece = fullDuration(leftover16ths, "", "r", "");
+        string remainingPiece = fullDuration(leftover16ths, "r", "");
         rightCode.back().append(remainingPiece + "|\n \\fine}\n");
     }
     // Reset and generate the left hand. 
@@ -54,7 +54,7 @@ void MultiClefInstrument::generateCode(vector<string>& lilypondCode){
     if (leftover16ths == ts_.num16ths()){ // no leftover 16ths.
         leftCode.push_back("\n \\fine}\n");
     } else {
-        string remainingPiece = fullDuration(leftover16ths, "", "r", "");
+        string remainingPiece = fullDuration(leftover16ths, "r", "");
         leftCode.back().append(remainingPiece + "|\n \\fine}\n");
     }
 

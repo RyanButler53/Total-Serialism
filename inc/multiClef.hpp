@@ -23,7 +23,7 @@ class MultiClefInstrument : public Instrument
     int num_;
 
   public:
-    MultiClefInstrument(InstrumentData data, MultiClefData MCdata);
+    MultiClefInstrument(InstrumentData data, BoulezData boulez, MultiClefData MCdata, Range r);
     virtual ~MultiClefInstrument();
 
     void generateCode(std::vector<std::string> &lilypondCode);

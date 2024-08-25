@@ -27,11 +27,22 @@ private:
     int octave_;
     std::string str_;
 
+    // Conversion Function
+    Pitch strToPitch(std::string s);
+
 public:
+    // Constructors
     Note(std::string pitch, int octave);
+    Note(Pitch pitch, int octave, std::string str);
+    Note(std::string note);
     ~Note() = default;
 
+    // Utility functions
     std::string str();
+    Note raise();
+    Note lower();
+
+    // Operators
     bool operator<(const Note &other) const;
     bool operator==(const Note &other)const ;
     bool operator!=(const Note &other) const;

@@ -2,11 +2,17 @@
 
 using namespace std;
 
-Instrument::Instrument(InstrumentData data) : 
+Instrument::Instrument(InstrumentData data, BoulezData boulez, Range r) : 
 pitches_{data.pitches_}, 
 rhythms_{data.rhythms_}, 
 articulations_{data.articulations_},
-ts_{data.ts_} {}
+ts_{data.ts_},
+rng_{boulez.rng_},
+boulezDist_{boulez.boulezDist_},
+boulezMutex_{boulez.boulezMutex_},
+low_{r.low_},
+high_{r.high_}
+{}
 
 string Instrument::rowToLilypond(Row r, short dynamic, short& leftoverDuration){
     // Get the piches, rhythms and articulations for the row. 
@@ -26,35 +32,36 @@ string Instrument::rowToLilypond(Row r, short dynamic, short& leftoverDuration){
         short noteDuration = rhythms[note];
         string pitch = pitchMap_[pitches[note]];
         string articulation = articulationMap_[articulations[note]];
-        string jitter = ""; //boulezJitter();
+        pitch += boulezJitter();
+        pitch = clamp(pitch);
         if (noteDuration < leftoverDuration)
         { // fit entire note in measure
-            lilypondCode += fullDuration(noteDuration, jitter, pitch, articulation); // clean up with lambdas????
+            lilypondCode += fullDuration(noteDuration, pitch, articulation); // clean up with lambdas????
             lilypondCode += " ";
             leftoverDuration -= noteDuration;
         }
         else if (noteDuration == leftoverDuration)
         { // End of bar case.
-            lilypondCode += fullDuration(noteDuration, jitter, pitch, articulation);
+            lilypondCode += fullDuration(noteDuration, pitch, articulation);
             lilypondCode += " |\n";
             leftoverDuration = totalDuration;
         } else { // Split note into n bars case
             // Use up the rest of the duration in the current bar. 
-            lilypondCode += fullDuration(leftoverDuration, jitter, pitch, articulation);
+            lilypondCode += fullDuration(leftoverDuration, pitch, articulation);
             short remaining = noteDuration - leftoverDuration; // total - used
             lilypondCode += "~ |\n";
             // There is still more than a full bar of duration left.
             while (remaining > totalDuration) {
-                lilypondCode += fullDuration(totalDuration, jitter, pitch, articulation);
+                lilypondCode += fullDuration(totalDuration, pitch, articulation);
                 remaining -= totalDuration;
                 lilypondCode += "~ |\n";
             }
             if (totalDuration == remaining) { // exactly one bar left
-                lilypondCode += fullDuration(remaining, jitter, pitch, articulation);
+                lilypondCode += fullDuration(remaining, pitch, articulation);
                 lilypondCode += " |\n";
                 leftoverDuration = totalDuration;
             } else { // less than 1 bar left. 
-                lilypondCode += fullDuration(remaining, jitter, pitch, articulation);
+                lilypondCode += fullDuration(remaining, pitch, articulation);
                 lilypondCode += " ";
                 leftoverDuration = totalDuration - remaining;
             }
@@ -66,7 +73,7 @@ string Instrument::rowToLilypond(Row r, short dynamic, short& leftoverDuration){
             size_t codelen = lilypondCode.length();
             if (lilypondCode.substr(codelen - 3) == " |\n")
             {
-                lilypondCode.erase(codelen- 3);
+                lilypondCode.erase(codelen - 3);
                 lilypondCode += dynamicMap_[dynamic] + " |\n";
             } else if (lilypondCode.substr(codelen - 1) == "\n"){
                 lilypondCode.erase(codelen- 2);
@@ -82,8 +89,7 @@ string Instrument::rowToLilypond(Row r, short dynamic, short& leftoverDuration){
     return lilypondCode;
 }
 
-string Instrument::fullDuration(short duration, string jitter, string pitch, string articulation){
-    string absPitch = pitch + jitter;
+string Instrument::fullDuration(short duration, string absPitch, string articulation){
     assert(duration > 0);
     switch (duration)
     { // Might be a better way of handling this recursively.
@@ -121,7 +127,7 @@ string Instrument::fullDuration(short duration, string jitter, string pitch, str
         return absPitch + "1" + articulation;
     default: // 17+ 16ths left. Most 16ths allowed is 30 per measure
         string first16 = absPitch + "1" + articulation + "~";
-        return first16 + fullDuration(duration - 16, jitter, pitch, articulation);
+        return first16 + fullDuration(duration - 16, absPitch, articulation);
     }
     return "";
 }
@@ -134,6 +140,48 @@ void Instrument::clearSfz(std::string& str) {
         str.replace(start_pos, from.length(), to);
         start_pos += to.length(); // Move past the last replaced substring
     }
+}
+
+std::string Instrument::clamp(std::string n){
+    Note note = Note(n);
+    if (note < low_) {
+        while (note < low_)
+        {
+            note = note.raise();
+        }
+    }
+    else if (note > high_)
+    {
+        while (note > high_){
+            note = note.lower();
+        }
+    }
+    return note.str();
+}
+
+std::string Instrument::boulezJitter(){
+
+    std::scoped_lock lock{boulezMutex_};
+    double value = boulezDist_(rng_);
+    int octave = std::round(value);
+    std::clamp(octave, -2, 2);
+    switch (octave)
+    {
+    case -2:
+        return ",,";
+    case -1:
+        return ",";
+    case 0:
+        return "";
+    case 1:
+        return "'";
+    case 2:
+        return "''";
+    default:
+        cerr << "Never Should reach here" << endl;
+        break;
+    }
+    return "";
 }
 
 
