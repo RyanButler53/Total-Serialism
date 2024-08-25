@@ -17,13 +17,13 @@ SerialismGenerator::SerialismGenerator():
 }
 
 SerialismGenerator::SerialismGenerator(long seed):
-    numRows_{12}, seed_{seed},boulezFactor_{0} // 0.5
+    numRows_{12}, seed_{seed},boulezFactor_{0.5}
     {
     initializeRandom();
 }
 
 SerialismGenerator::SerialismGenerator(string inputfile):
-    seed_{time(0)}, boulezFactor_(0.0)
+    seed_{time(0)}, boulezFactor_(0.5)
     {
     // Set up rng, fileinput and row mapping
     rng_ = mt19937(seed_);
@@ -31,7 +31,7 @@ SerialismGenerator::SerialismGenerator(string inputfile):
 
     // Pitch, Rhythm, Articulation
     vector<vector<short>> sequences{3};
-    for (auto& seq : sequences)
+    for (auto &seq : sequences)
     {
         string s;
         getline(input, s);
@@ -62,7 +62,9 @@ SerialismGenerator::SerialismGenerator(string inputfile):
     numRows_ = stoi(numRows_str);
 
     // Initialize Factory
-    factory_ = InstrumentFactory(pitches_, rhythms_, articulations_, ts_);
+    boulezDist_= std::normal_distribution<double>(0, 0);
+    BoulezData boulezData{rng_, boulezDist_, boulezMutex_};
+    factory_ = new InstrumentFactory(pitches_, rhythms_, articulations_, ts_, boulezData);
 
     // Read in instruments
     std::unordered_map<std::string, int> instrumentMap;
@@ -88,13 +90,13 @@ SerialismGenerator::SerialismGenerator(string inputfile):
             }
             vector<short> dynamics = getRowNums(input);
             int num = instrumentMap[name];
-            instruments_.push_back(factory_.createInstrument(name, pianoRows[0], pianoRows[1], dynamics, num));
+            instruments_.push_back(factory_->createInstrument(name, pianoRows[0], pianoRows[1], dynamics, num));
         } else {
             vector<short> rowNums = getRowNums(input);
             vector<Row> rows = getRowTypes(input, rowNums);
             vector<short> dynamics = getRowNums(input);
             int num = instrumentMap[name];
-            instruments_.push_back(factory_.createInstrument(name, rows,dynamics, num));
+            instruments_.push_back(factory_->createInstrument(name, rows,dynamics, num));
         }
     }
 }
@@ -126,8 +128,6 @@ void SerialismGenerator::initializeRandom(){
                                      "6/8", "12/8", "6/4", "3/2",
                                      "7/8", "4/4", "9/8", "5/4", "11/8"
                                  };
-
-
 
     std::uniform_int_distribution tsDist{0, 16};
     ts_ = TimeSignature(validTimes[tsDist(rng_)]);
@@ -172,8 +172,8 @@ void SerialismGenerator::initializeRandom(){
         vector<short> row = rowNums;
         dynamicRows.push_back(row);
     }
-
-    factory_ = InstrumentFactory(pitches_, rhythms_, articulations_, ts_);
+    BoulezData boulez{rng_, boulezDist_, boulezMutex_};
+    factory_ = new InstrumentFactory(pitches_, rhythms_, articulations_, ts_, boulez);
     size_t row_i = 0;
     size_t dynamic_i = 0;
     for (auto &[name, num] : instrumentNames_)
@@ -182,12 +182,12 @@ void SerialismGenerator::initializeRandom(){
             std::vector<Row> rh = instrumentRows_[row_i];
             std::vector<Row> lh = instrumentRows_[row_i + 1];
             std::vector<short> dynamics = dynamicRows[dynamic_i];
-            instruments_.push_back(factory_.createInstrument(name, rh, lh, dynamics, num));
+            instruments_.push_back(factory_->createInstrument(name, rh, lh, dynamics, num));
             ++row_i;
         } else {
             std::vector<Row> row = instrumentRows_[row_i];
             std::vector<short> dynamics = dynamicRows[dynamic_i];
-            instruments_.push_back(factory_.createInstrument(name, row, dynamics, num));
+            instruments_.push_back(factory_->createInstrument(name, row, dynamics, num));
         }
         ++row_i;
         ++dynamic_i;
@@ -196,13 +196,18 @@ void SerialismGenerator::initializeRandom(){
 
 SerialismGenerator::~SerialismGenerator()
 {
-    // clean up memory
+    // clean up matrices
     delete pitches_;
     delete rhythms_;
     delete articulations_;
+
+    // Clean up instruments
     for (Instrument*& i : instruments_){
         delete i;
     }
+
+    // Clean up factory
+    delete factory_;
 }
 
 void SerialismGenerator::generatePiece(vector<string>& lilypondCode){
@@ -290,7 +295,6 @@ std::vector<Row> SerialismGenerator::getRowTypes(std::fstream& input, std::vecto
     {
         string type;
         ss >> type;
-        // RowType t = rowTypes_[type];
         rows.push_back(Row(rowTypes_.at(type), rowNums[num]));
     }
     return rows;

@@ -3,6 +3,7 @@
 
 #include "instrument.hpp"
 #include <string>
+#include "note.hpp"
 
 struct SingleClefData
 {
@@ -28,12 +29,11 @@ class SingleClefInstrument : public Instrument
     int num_;
 
   public:
-    SingleClefInstrument(InstrumentData data, SingleClefData SCdata);
+    SingleClefInstrument(InstrumentData data, BoulezData boulez, SingleClefData SCdata, Range r);
     virtual ~SingleClefInstrument();
     void generateCode(std::vector<std::string> &lilypondCode);
     std::string staffHeader();
     std::string scoreBox();
 };
 
-#endif // SINGLE_CLEF_HPP_INCLUDED
-
+#endif

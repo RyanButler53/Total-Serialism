@@ -69,3 +69,22 @@ TEST(CompareNotes, DiffOctave){
     ASSERT_FALSE(bf < b);
     ASSERT_TRUE(a2 > b);
 }
+
+TEST(FromString, StringConstructor){
+    // Original Notes
+    Note c{"c", 3};
+    Note cs{"cs", 2};
+    Note d{"d", -1};
+    Note ef{"ef", 0};
+
+    // String Constructor
+    Note c2{"c'''"};
+    Note cs2{"cs''"};
+    Note d2{"d,"};
+    Note ef2{"ef"};
+
+    ASSERT_EQ(c, c2);
+    ASSERT_EQ(cs, cs2);
+    ASSERT_EQ(d, d2);
+    ASSERT_EQ(ef, ef2);
+}

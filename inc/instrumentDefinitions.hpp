@@ -7,191 +7,108 @@
 
 // Strings
 
-class Violin : public SingleClefInstrument
-{
-private:
-    const Note lowerBound_ = Note("g", 0);
-    const Note upperBound_ = Note("a", 4);
-
-public:
-    Violin(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num);
+class Violin : public SingleClefInstrument {
+  public:
+    Violin(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num, BoulezData boulez);
     ~Violin() = default;
 
 };
 
-class Viola : public SingleClefInstrument
-{
-private:
-    const Note lowerBound_ = Note("c", 0);
-    const Note upperBound_ = Note("g", 2);
-
-public:
-    Viola(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num);
+class Viola : public SingleClefInstrument {
+  public:
+    Viola(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num, BoulezData boulez);
     ~Viola() = default;
 };
 
 
-class Cello : public SingleClefInstrument
-{
-private:
-    const Note lowerBound_ = Note("c", -1);
-    const Note upperBound_ = Note("e", 3);
-
-public:
-    Cello(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num);
+class Cello : public SingleClefInstrument {
+  public:
+    Cello(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num, BoulezData boulez);
     ~Cello() = default;
 };
 
-
-class Bass : public SingleClefInstrument
-{
-private:
-    const Note lowerBound_ = Note("e", -1);
-    const Note upperBound_ = Note("d", 3);
-
-public:
-    Bass(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num);
+// Bass music sounds 1 octave lower than it is written
+class Bass : public SingleClefInstrument {
+  public:
+    Bass(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num, BoulezData boulez);
     ~Bass() = default;
 };
 
 // Woodwinds
 
-class AltoSax : public SingleClefInstrument
-{
-private:
-    const Note lowerBound_ = Note("cs", 0);
-    const Note upperBound_ = Note("af", 2);
-
-public:
-    AltoSax(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num);
+class AltoSax : public SingleClefInstrument {
+  public:
+    AltoSax(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num, BoulezData boulez);
     ~AltoSax() = default;
 };
 
-class TenorSax : public SingleClefInstrument
-{
-private:
-    const Note lowerBound_ = Note("af", -1);
-    const Note upperBound_ = Note("e", 2);
-
-public:
-    TenorSax(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num);
+class TenorSax : public SingleClefInstrument {
+  public:
+    TenorSax(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num, BoulezData boulez);
     ~TenorSax() = default;
 };
 
-class BariSax : public SingleClefInstrument
-{
-private:
-    const Note lowerBound_ = Note("cs", 0);
-    const Note upperBound_ = Note("af", 2);
-
-public:
-    BariSax(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num);
+class BariSax : public SingleClefInstrument {
+  public:
+    BariSax(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num, BoulezData boulez);
     ~BariSax() = default;
 
 };
 
-class Oboe : public SingleClefInstrument
-{
-private:
-    
-    const Note lowerBound_ = Note("bf", 0);
-    const Note upperBound_ = Note("g", 3);
-
-public:
-    Oboe(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num);
+class Oboe : public SingleClefInstrument {
+  public:
+    Oboe(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num, BoulezData boulez);
     ~Oboe() = default;
 };
 
-class Bassoon : public SingleClefInstrument
-{
-private:
-    
-    const Note lowerBound_ = Note("bf", -2);
-    const Note upperBound_ = Note("g", 2);
-
-public:
-    Bassoon(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num);
+class Bassoon : public SingleClefInstrument {
+  public:
+    Bassoon(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num, BoulezData boulez);
     ~Bassoon() = default;
 };
 
-class Clarinet : public SingleClefInstrument
-{
-private:
-    
-    const Note lowerBound_ = Note("d", 0);
-    const Note upperBound_ = Note("bf", 3);
-
-public:
-    Clarinet(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num);
+class Clarinet : public SingleClefInstrument {
+  public:
+    Clarinet(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num, BoulezData boulez);
     ~Clarinet() = default;
 };
 
-class Piccolo : public SingleClefInstrument
-{
-private:
-    
-    const Note lowerBound_ = Note("d", 2);
-    const Note upperBound_ = Note("c", 5);
-
-public:
-    Piccolo(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num);
+// Piccolo sounds one octave higher than written
+class Piccolo : public SingleClefInstrument {
+  public:
+    Piccolo(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num, BoulezData boulez);
     ~Piccolo() = default;
 };
 
-class Flute : public SingleClefInstrument
-{
-private:
-    
-    const Note lowerBound_ = Note("c", 1);
-    const Note upperBound_ = Note("f", 3);
-
-public:
-    Flute(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num);
+class Flute : public SingleClefInstrument {
+  public:
+    Flute(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num, BoulezData boulez);
     ~Flute() = default;
 };
 
 // Brass
 
-class Trombone : public SingleClefInstrument
-{
-private:
-    const Note lowerBound_{"e", -1};
-    const Note upperBound_{"f", 2};
-
-public:
-    Trombone(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num);
+class Trombone : public SingleClefInstrument {
+  public:
+    Trombone(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num, BoulezData boulez);
     ~Trombone() = default;
 };
 
-class Trumpet : public SingleClefInstrument
-{
-private:
-    const Note lowerBound_ = Note("e", 0);
-    const Note upperBound_ = Note("d", 3);
-
-public:
-    Trumpet(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num);
+class Trumpet : public SingleClefInstrument {
+  public:
+    Trumpet(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num, BoulezData boulez);
     ~Trumpet() = default;
 };
 
-class FrenchHorn : public SingleClefInstrument
-{
-private:
-    const Note lowerBound_ = Note("a", -2);
-    const Note upperBound_ = Note("f", 2);
-public:
-    FrenchHorn(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num);
+class FrenchHorn : public SingleClefInstrument {
+  public:
+    FrenchHorn(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num, BoulezData boulez);
     ~FrenchHorn() = default;
 };
 
-class Tuba : public SingleClefInstrument
-{
-private:
-    const Note lowerBound_ = Note("d", -1);
-    const Note upperBound_ = Note("f", 1);
-
-public:
-    Tuba(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num);
+class Tuba : public SingleClefInstrument {
+  public:
+    Tuba(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num, BoulezData boulez);
     ~Tuba() = default;
 };
 
