@@ -6,6 +6,8 @@
 #include "multiClef.hpp"
 #include "analysisMatrix.hpp"
 
+// Definitions for the two multiclf instruments: Piano and Harp. 
+
 class Piano : public MultiClefInstrument  {
   public:
     Piano(InstrumentData data, std::vector<Row> RhRows, std::vector<Row> LHRows, std::vector<short> dynamics,int num, BoulezData boulez);

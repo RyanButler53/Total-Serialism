@@ -5,13 +5,24 @@
 #include "singleClef.hpp"
 #include "note.hpp"
 
+/***********
+ * This file contains class declarations for all the instrments offered by
+ * this total serialist music generator.  It is divided up into 3 sections:  
+ * Strings, Woodwinds and Brass
+ * 
+ * Note that in serial style music, instruments don't transpose - generally
+ * the sheet music is "as written". The two exceptions are String Bass and Piccolo
+ * Bass sounds an octave lower than written and piccolo sounds an octave higher
+ * than written.  This is done since they transpose by octaves and this reduces
+ * ledger lines. 
+ ***********/
+
 // Strings
 
 class Violin : public SingleClefInstrument {
   public:
     Violin(InstrumentData data, std::vector<Row> rows, std::vector<short> dynamics, int num, BoulezData boulez);
     ~Violin() = default;
-
 };
 
 class Viola : public SingleClefInstrument {

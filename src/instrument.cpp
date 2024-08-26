@@ -34,38 +34,44 @@ string Instrument::rowToLilypond(Row r, short dynamic, short& leftoverDuration){
         string articulation = articulationMap_[articulations[note]];
         pitch += boulezJitter();
         pitch = clamp(pitch);
+        // "Curried" form of full duration since pitch and articulation are the same
+        auto fd = [this, &pitch, &articulation](short duration)
+        {
+            return fullDuration(duration, pitch, articulation);
+        };
+        
         if (noteDuration < leftoverDuration)
         { // fit entire note in measure
-            lilypondCode += fullDuration(noteDuration, pitch, articulation); // clean up with lambdas????
+            lilypondCode += fd(noteDuration);
             lilypondCode += " ";
             leftoverDuration -= noteDuration;
         }
         else if (noteDuration == leftoverDuration)
         { // End of bar case.
-            lilypondCode += fullDuration(noteDuration, pitch, articulation);
+            lilypondCode += fd(noteDuration);
             lilypondCode += " |\n";
             leftoverDuration = totalDuration;
         } else { // Split note into n bars case
             // Use up the rest of the duration in the current bar. 
-            lilypondCode += fullDuration(leftoverDuration, pitch, articulation);
+            lilypondCode += fd(leftoverDuration);
             short remaining = noteDuration - leftoverDuration; // total - used
             lilypondCode += "~ |\n";
             // There is still more than a full bar of duration left.
             while (remaining > totalDuration) {
-                lilypondCode += fullDuration(totalDuration, pitch, articulation);
+                lilypondCode += fd(totalDuration);
                 remaining -= totalDuration;
                 lilypondCode += "~ |\n";
             }
             if (totalDuration == remaining) { // exactly one bar left
-                lilypondCode += fullDuration(remaining, pitch, articulation);
+                lilypondCode += fd(remaining);
                 lilypondCode += " |\n";
                 leftoverDuration = totalDuration;
             } else { // less than 1 bar left. 
-                lilypondCode += fullDuration(remaining, pitch, articulation);
+                lilypondCode += fd(remaining);
                 lilypondCode += " ";
                 leftoverDuration = totalDuration - remaining;
             }
-        }
+        } 
 
         // Add Dynamic if necessary
         if (note == 0 and dynamic >= 0){

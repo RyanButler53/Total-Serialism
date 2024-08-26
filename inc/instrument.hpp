@@ -44,6 +44,7 @@ private:
     // Instrument Specific, Passed up from derived classes
     Note low_;
     Note high_;
+
 protected:
 
     // All Inherited Instruments can use the Analysis Matrices and dynamics rows
@@ -128,6 +129,14 @@ public:
      */
     std::string clamp(std::string n);
 
+    /**
+     * @brief Uses uses the BoulezDist_ distribution to increase or decrease
+     * the pitch of a note by 1 or 2 octaves. Named after Pierre Boulez
+     * for his original Total Serial experiment putting notes as far
+     * away as possible
+     * 
+     * @return std::string a suffix to put after a note string in the lilypond code
+     */
     std::string boulezJitter();
 };
 

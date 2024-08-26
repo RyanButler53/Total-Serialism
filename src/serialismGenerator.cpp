@@ -242,33 +242,6 @@ string SerialismGenerator::header() const {
     return header;
 }
 
-std::string SerialismGenerator::boulezJitter(){
-    if (boulezFactor_ == 0.0){
-        return "";
-    }
-    std::scoped_lock lock{boulezMutex_};
-    double value = boulezDist_(rng_);
-    int octave = std::round(value);
-    std::clamp(octave, -2, 2);
-    switch (octave)
-    {
-    case -2:
-        return ",,";
-    case -1:
-        return ",";
-    case 0:
-        return "";
-    case 1:
-        return "'";
-    case 2:
-        return "''";
-    default:
-        // Clamp and round gaurantee an integer val between -2 and 2. 
-        break;
-    }
-    return "";
-}
-
 std::string SerialismGenerator::scoreBox() {
     std::string scoreBox = "\\score {\n\t<<\n";
     for (Instrument*& instrument : instruments_){
