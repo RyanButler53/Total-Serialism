@@ -33,6 +33,10 @@ private:
     std::vector<short> P0_;
     std::vector<short> I0_;
 
+    // Helper functions to get prime and inverted rows
+    void getPrimeRow(short num, std::vector<short> &rowVec) const;
+    void getInvertedRow(short num, std::vector<short> &rowVec) const;
+
     public :
         // Constructors
     AnalysisMatrix() = delete;
@@ -40,16 +44,22 @@ private:
     AnalysisMatrix(const AnalysisMatrix &other) = delete;
     ~AnalysisMatrix() = default;
 
-    // Get Data members
-    void getPrimeRow(short num, std::vector<short> &rowVec) const;
-    void getInvertedRow(short num, std::vector<short> &rowVec) const;
-
+    /**
+     * @brief Get the Row object associated with the Row type and number
+     * 
+     * @param row Row number and type to get
+     * @return std::vector<short>. Vector with all the numbers 1-12 arranged correctly
+     */
     std::vector<short> getRow(Row row) const;
+
+    // Row and column maps to find rows of the matrix fast. Used in testing
     std::vector<size_t> getRowMap() const;
     std::vector<size_t> getColMap() const;
+
     void printMatrix(std::ostream& os) const;
 };
 
+// Helper Printing functions
 std::ostream &operator<<(std::ostream &os, const AnalysisMatrix &a);
 
 std::ostream &operator<<(std::ostream &os, const Row &r);

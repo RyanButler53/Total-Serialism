@@ -2,10 +2,24 @@
 #define NOTE_HPP_INCLUDED
 #include <string>
 
+/**
+ * @brief Class to represent a note. 
+ * Notes are represented with a Pitch and an Octave. 
+ * The octaves are NOT represented with typical numbers, they are represented
+ *  with the number of commas and apostrophes required in lilypond
+ * 
+ * Class allows for raising and lowering an octave and converting to strings
+ * 
+ */
 class Note
 {
 private:
-    /* data */
+    
+    /**
+     * @brief enum with all possible pitch types plus an invalid pitch
+     * to default to or cause errors. 
+     * 
+     */
     enum class Pitch
     {
         C = 0,
@@ -27,7 +41,13 @@ private:
     int octave_;
     std::string str_;
 
-    // Conversion Function
+    /**
+     * @brief Converts a string to a pitch name
+     * 
+     * @param s string to convert
+     * @return Pitch the pitch that is represented by the pitch. Invalid ones 
+     * return Pitch::INVALID
+     */
     Pitch strToPitch(std::string s);
 
 public:
@@ -38,11 +58,30 @@ public:
     ~Note() = default;
 
     // Utility functions
+    /**
+     * @brief Gets the lilypond string equivalent of the note
+     * 
+     * @return std::string string equivalet
+     */
     std::string str();
+
+    /**
+     * @brief Raises the note by an octave
+     * 
+     * @return Note Raised note. Can be updated to use the ++ operator
+     */
     Note raise();
+
+    /**
+     * @brief Lowers the note by 1 octave
+     * 
+     * @return Note, lowered note. Can become the -- operator. 
+     */
     Note lower();
 
-    // Operators
+    // Comparison Operators
+    // Defining the higher note to be the higher sounding pitched note. 
+    // All operators are defined for testing and completeness
     bool operator<(const Note &other) const;
     bool operator==(const Note &other)const ;
     bool operator!=(const Note &other) const;
