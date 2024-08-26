@@ -27,18 +27,20 @@ set(INSTRUMENT_SRC
     src/instrumentDefinitions.cpp
     src/pianoharp.cpp)
 
-
+set (SERIALISM_SRC
+    src/serialismGenerator.cpp
+    src/analysisMatrix.cpp
+    src/timeSignature.cpp
+    src/note.cpp
+    ${INSTRUMENT_SRC}
+    )
 include_directories(inc)
 
 # Production
 add_executable(
     TotalSerialism 
     src/totalSerialism.cpp
-    src/serialismGenerator.cpp
-    src/analysisMatrix.cpp
-    src/timeSignature.cpp
-    src/note.cpp
-    ${INSTRUMENT_SRC}
+    ${SERIALISM_SRC}
     )
 
 # Tests
@@ -84,6 +86,7 @@ gtest_discover_tests(note-test)
 
 # Fuzz Test:
 add_executable(
-    fuzzEval
-    src/fuzzEval.cpp
+    fuzz
+    src/fuzzTest.cpp
+    ${SERIALISM_SRC}
     )
