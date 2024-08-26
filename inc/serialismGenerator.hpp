@@ -21,7 +21,9 @@
 
 class SerialismGenerator
 {
-private:
+  private:
+
+    // Data
     std::mt19937 rng_;
     std::normal_distribution<double> boulezDist_;
     std::mutex boulezMutex_;
@@ -45,6 +47,8 @@ private:
     TimeSignature ts_;
     std::string title_;
     std::string composer_;
+    std::string outputFilename_;
+
 
     // Matrices
     AnalysisMatrix* pitches_;
@@ -63,13 +67,7 @@ private:
     short tempo_;
     float boulezFactor_;
 
-public:
-
-    // Constructors
-    SerialismGenerator();
-    SerialismGenerator(long seed);
-    SerialismGenerator(std::string inputfile);
-    ~SerialismGenerator();
+    // Private Functions
 
     void initializeRandom();
 
@@ -86,6 +84,17 @@ public:
     std::vector<short> getRowNums(std::fstream& input) const;
 
     std::vector<Row> getRowTypes(std::fstream &input, std::vector<short> rowNums) const;
+
+  public:
+
+    // Constructors
+    SerialismGenerator(std::string outputFile);
+    SerialismGenerator(long seed, std::string outputFilename);
+    SerialismGenerator(std::string inputfile, std::string outputFilename);
+    ~SerialismGenerator();
+    
+    // Function
+    void run();
 };
 
 #endif

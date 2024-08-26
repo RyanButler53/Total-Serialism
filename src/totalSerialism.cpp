@@ -3,10 +3,6 @@
 #include <string>
 #include <thread>
 #include <regex>
-#include "analysisMatrix.hpp"
-#include "timeSignature.hpp"
-#include "instrument.hpp"
-#include "pianoharp.hpp"
 #include "serialismGenerator.hpp"
 
 using namespace std;
@@ -17,46 +13,23 @@ int main(int argc, char** argv){
     string inputFilename = "";
     size_t seed = 0;
 
-    if (argc == 1)
-    { // no args given
-        generator = new SerialismGenerator();
+    if (argc == 1) { // no args given
         outputFilename = "random_score.ly";
-    }
-    else if (argc == 2)
-    { // gave seed
+        generator = new SerialismGenerator(outputFilename);
+
+    } else if (argc == 2) { // gave seed
         seed = stoull(argv[1]);
-        generator = new SerialismGenerator(seed);
         outputFilename = "random_score_seed_" + to_string(seed) + ".ly";
-    }
-    else if (argc == 3)
-    { // gave input and output file
+        generator = new SerialismGenerator(seed, outputFilename);
+
+    } else if (argc == 3) { // gave input and output file
         outputFilename = argv[1];
         inputFilename = argv[2];        
-        generator = new SerialismGenerator(inputFilename);
+        generator = new SerialismGenerator(inputFilename, outputFilename);
     }
 
-    ofstream outputFile(outputFilename);
-    string header = generator->header();
-
-    vector<string> lilypondCode;
-    // Parallelize!
-
-    // auto gen = [&generator](bool rh, vector<string>& lilypondCode)
-    // {
-    //     generator->generatePiece(rh, lilypondCode);
-    // };
-
-    // Do right and left in parallel
-    // std::thread right(gen, true, std::ref(rightCode));
-    // gen(true, rightCode);
-    // gen(false, leftCode);
-    generator->generatePiece(lilypondCode);
-
-    // Write to file
-    for (auto &line : lilypondCode) {
-        outputFile << line;
-    }
-    
+    generator->run();
     delete generator;
+
     return 0;
 }

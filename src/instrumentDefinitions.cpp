@@ -42,7 +42,7 @@ Trombone::Trombone(InstrumentData data, std::vector<Row> rows, vector<short> dyn
 SingleClefInstrument(data, boulez, {rows, "Trombone", "trombone", dynamics, "bass", "c",num}, {Note("e", -1), Note("f", 2)}){};
 
 Trumpet::Trumpet(InstrumentData data, std::vector<Row> rows, vector<short> dynamics, int num, BoulezData boulez) :
-SingleClefInstrument(data, boulez, {rows, "Trumpet", "trombone", dynamics, "treble", "c''",num}, {Note("e", 0), Note("d", 3)}){};
+SingleClefInstrument(data, boulez, {rows, "Trumpet", "trumpet", dynamics, "treble", "c''",num}, {Note("e", 0), Note("d", 3)}){};
 
 FrenchHorn::FrenchHorn(InstrumentData data, std::vector<Row> rows, vector<short> dynamics, int num, BoulezData boulez) :
 SingleClefInstrument(data, boulez, {rows, "French Horn", "frenchhorn", dynamics, "bass", "c",num}, {Note("a", -2), Note("f", 2)}){};

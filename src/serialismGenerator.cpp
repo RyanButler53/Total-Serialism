@@ -9,21 +9,25 @@
 
 using namespace std;
 
-SerialismGenerator::SerialismGenerator(): 
+SerialismGenerator::SerialismGenerator(string outputFilename): 
+    outputFilename_{outputFilename},
     seed_{time(0)},
     boulezFactor_{0.5}
     {
     initializeRandom();
 }
 
-SerialismGenerator::SerialismGenerator(long seed):
-    numRows_{12}, seed_{seed},boulezFactor_{0.5}
+SerialismGenerator::SerialismGenerator(long seed, string outputFilename):
+    outputFilename_{outputFilename},
+    numRows_{12}, 
+    seed_{seed},
+    boulezFactor_{0.5}
     {
     initializeRandom();
 }
 
-SerialismGenerator::SerialismGenerator(string inputfile):
-    seed_{time(0)}, boulezFactor_(0.5)
+SerialismGenerator::SerialismGenerator(string inputfile, string outputFilename):
+    outputFilename_{outputFilename},seed_{time(0)}, boulezFactor_(0.5)
     {
     // Set up rng, fileinput and row mapping
     rng_ = mt19937(seed_);
@@ -230,7 +234,7 @@ string SerialismGenerator::header() const {
     header += "  tagline = ##f}\n\n";
     header += "global = { \\time " + ts_.str() + " \\tempo 4 = ";
     header += to_string(tempo_) + "}\n\n";
-    if (instrumentNames_.size() > 10){
+    if (instrumentNames_.size() > 9){
         header += "\\paper{\n\t#(set-paper-size \"11x17\")\n}\n\n";
     } else{
         header += "\\paper{\n\t#(set-paper-size \"letter\")\n}\n\n";
@@ -298,4 +302,14 @@ std::vector<Row> SerialismGenerator::getRowTypes(std::fstream& input, std::vecto
         rows.push_back(Row(rowTypes_.at(type), rowNums[num]));
     }
     return rows;
+}
+
+void SerialismGenerator::run(){
+    vector<string> lilypondCode;
+    generatePiece(lilypondCode);
+
+    ofstream outputFile{outputFilename_};
+    for (auto& line : lilypondCode){
+        outputFile << line;
+    }
 }
