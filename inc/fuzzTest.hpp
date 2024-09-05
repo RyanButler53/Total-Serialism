@@ -2,6 +2,7 @@
 #define FUZZ_TEST_HPP_INCLUDED
 
 #include "serialismGenerator.hpp"
+#include "threadPool.hpp"
 
 /**
  * @brief Launches threads to execute numTests fuzz tests
@@ -18,5 +19,12 @@ void launch(size_t numTests, size_t maxConcurrent);
  * @param numTests Number of tests to check. 
  */
 void evaluate(size_t numTests);
+
+/**
+ * @brief Function executed by each thread
+ * 
+ * @param seed 
+ */
+void threadFunc(int seed);
 
 #endif

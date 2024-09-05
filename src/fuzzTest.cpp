@@ -39,41 +39,15 @@ int main(int argc, char** argv){
     evaluate(numTests);
 }
 void launch(size_t numTests, size_t maxConcurrent){
-    // Simply executing in batches not with a queue, could be a LOT faster...
-    size_t numRounds = numTests / maxConcurrent;
-    size_t lastRound = numTests % maxConcurrent;
+
     long seed = 1;
-    std::vector<thread> threads;
-    auto threadFunc = [](long s)
-    {
-        std::string seed_str = to_string(s);
-        std::string filename = "fuzz/" + seed_str + ".ly";
-        std::string lpCommand = "lilypond -f pdf -o fuzz -l WARN fuzz/" + seed_str + ".ly 2>fuzz/err" + seed_str + ".txt";
-        SerialismGenerator gen = SerialismGenerator(s, filename);
-        gen.run();
-        // SECURITY NOTE: NO USER ACCESS TO THIS COMMAND
-        system(lpCommand.data());
-    };
-
-    for (size_t r = 0; r < numRounds; ++r) {
-        for (size_t p = 0; p < maxConcurrent; ++p)
-        {
-            threads.emplace_back(threadFunc, seed);
-            ++seed;
-        }
-        for (auto& t : threads){
-            t.join();
-        }
-        threads.clear();
+    ThreadPool t(maxConcurrent);
+    for (size_t seed = 1; seed < numTests+1; seed++) {
+        t.submit([seed] { threadFunc(seed); });
     }
-
-    // Last Round
-    for (size_t p = 0; p < lastRound; ++p) {
-        threads.emplace_back(threadFunc, seed);
-    }
-    for (auto& t : threads) {
-        t.join();
-    }
+    t.run();
+    // Wait for all tests to run in parallel
+    while(!t.isDone()){}
 }
 
 void evaluate(size_t numTests)
@@ -114,3 +88,12 @@ void evaluate(size_t numTests)
     }
 }
 
+void threadFunc(int s){
+    std::string seed_str = to_string(s);
+    std::string filename = "fuzz/" + seed_str + ".ly";
+    std::string lpCommand = "lilypond -f pdf -o fuzz -l WARN fuzz/" + seed_str + ".ly 2>fuzz/err" + seed_str + ".txt";
+    SerialismGenerator gen = SerialismGenerator(s, filename, 1);
+    gen.run();
+    // SECURITY NOTE: NO USER ACCESS TO THIS COMMAND
+    system(lpCommand.data());
+}

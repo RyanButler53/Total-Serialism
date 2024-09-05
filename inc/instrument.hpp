@@ -5,6 +5,8 @@
 #include "timeSignature.hpp"
 #include "note.hpp"
 
+#include <cassert>
+#include <algorithm>
 #include <string>
 #include <mutex>
 #include <random>
