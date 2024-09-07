@@ -86,7 +86,13 @@ class SerialismGenerator
     long seed_; // Randomness Seed. Refaults to (time(0))
     short tempo_; // Piece Tempo
     float boulezFactor_; // Std deviation of the boulez dist. 0 for gui designed pieces
+    
+    // Parallelism
     unsigned int maxThreads_ = 8; // max threads for concurrent generation
+
+    std::vector<std::string> Gen(Instrument* ins){
+        return ins->generateCode();
+    }
 
     // Private Functions
 

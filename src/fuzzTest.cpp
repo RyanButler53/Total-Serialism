@@ -35,43 +35,32 @@ int main(int argc, char** argv){
     }
     fs::create_directory("fuzz");
 
-    launch(numTests, maxConcurrent);
-    evaluate(numTests);
+    fuzzTest(numTests, maxConcurrent);
 }
-void launch(size_t numTests, size_t maxConcurrent){
+void fuzzTest(size_t numTests, size_t maxConcurrent){
 
     long seed = 1;
     ThreadPool t(maxConcurrent);
-    for (size_t seed = 1; seed < numTests+1; seed++) {
-        t.submit([seed] { threadFunc(seed); });
-    }
-    t.run();
-    // Wait for all tests to run in parallel
-    while(!t.isDone()){}
-}
 
-void evaluate(size_t numTests)
-{
-    vector<int> failedTests;
-    vector<string> passedTests;
-    for (size_t test = 1; test < numTests + 1; ++test) {
-        string filename = "fuzz/err" + to_string(test) + ".txt";
-        fstream file{filename};
-        if (file.peek() != std::ifstream::traits_type::eof()){
-            failedTests.push_back(test);
-        } else {
-            passedTests.push_back(filename);
-            // Clear out the ly, error log, pdf of passed tests
-            string s = to_string(test);
-            fs::remove("fuzz/" + s + ".ly");
-            fs::remove("fuzz/" + s + ".pdf");
-            fs::remove("fuzz/err" + s + ".txt");
+    // Submit to Queue
+    std::vector < std::future<bool>> futures(numTests);
+    std::vector<size_t> failures;
+    for (size_t seed = 1; seed < numTests + 1; seed++)
+    {
+        futures[seed-1] = t.submit([seed] {return threadFunc(seed); });
+    }
+
+    // Get the failed tests
+    for (size_t i = 0; i < numTests; ++i)
+    {
+        bool result = futures[i].get();
+        if (!result){
+            failures.push_back(i + 1);
         }
     }
-    for (const auto& pass : passedTests){
-        std::filesystem::remove(pass);
-    }
-    if (failedTests.empty()){
+
+    // Evaluate
+    if (failures.empty()){
         std::string message = "All " + to_string(numTests - 1) + " Tests Pass!";
         std::cout << "\033[;32mAll " << numTests << " Tests Pass!\033[0m" << endl;
         // Clear out entire fuzz test directory
@@ -79,7 +68,7 @@ void evaluate(size_t numTests)
     }
     else
     {
-        for (const auto& fail : failedTests){
+        for (const auto& fail : failures){
             std::cout << "\033[1;31mFailed random test with seed " << fail << "\033[0m" << endl;
             std::cout << "Lilypond Error log can be found in the file \"fuzz/err" 
                     << fail << ".txt\"\n" << endl;
@@ -88,7 +77,7 @@ void evaluate(size_t numTests)
     }
 }
 
-void threadFunc(int s){
+bool threadFunc(int s){
     std::string seed_str = to_string(s);
     std::string filename = "fuzz/" + seed_str + ".ly";
     std::string lpCommand = "lilypond -f pdf -o fuzz -l WARN fuzz/" + seed_str + ".ly 2>fuzz/err" + seed_str + ".txt";
@@ -96,4 +85,16 @@ void threadFunc(int s){
     gen.run();
     // SECURITY NOTE: NO USER ACCESS TO THIS COMMAND
     system(lpCommand.data());
+
+    // Evaluate Individual Test
+    filename = "fuzz/err" + seed_str+ ".txt";
+    fstream file{filename};
+    if (file.peek() != std::ifstream::traits_type::eof()){
+        return false;
+    }else {
+        fs::remove("fuzz/" + seed_str + ".ly");
+        fs::remove("fuzz/" + seed_str + ".pdf");
+        fs::remove("fuzz/err" + seed_str + ".txt");
+        return true;
+    }
 }

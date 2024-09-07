@@ -50,7 +50,7 @@ class SingleClefInstrument : public Instrument
      * 
      * @param lilypondCode Vector reference to add the lines of lilypond code. 
      */
-    void generateCode(std::vector<std::string> &lilypondCode);
+    std::vector<std::string>  generateCode();
 
     /**
      * @brief Creates the appropriate staff header

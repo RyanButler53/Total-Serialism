@@ -169,7 +169,6 @@ std::string Instrument::boulezJitter(){
 
     std::unique_lock lock{boulezMutex_};
     double value = boulezDist_(rng_);
-    cout << "Locked" << endl;
     lock.unlock(); // unlocking here is faster than scoped_lock
     int octave = std::round(value);
     octave = std::clamp(octave, -2, 2);
