@@ -60,6 +60,13 @@ class SerialismGenerator
         {"I", RowType(I)},
         {"RI", RowType(RI)}};
 
+    // Instrument Sorting Map
+    const std::unordered_map<std::string, int> scoreOrdering_{
+        {"Flute", 0}, {"Piccolo", 1}, {"Oboe", 2}, {"Clarinet",3},{"Bassoon", 4}, {"Alto Saxophone", 5}, 
+        {"Tenor Saxophone", 6}, {"Bari Saxophone", 7}, {"French Horn", 8}, {"Trumpet", 9}, 
+        {"Trombone", 10}, {"tuba", 11}, {"Piano", 12}, {"Harp", 13}, 
+        {"Violin", 14}, {"Viola", 15}, {"Cello", 16}, {"String Bass", 17}};
+
     // Global piece data: Time Signature, Title, Composer and Output Filename
     TimeSignature ts_;
     std::string title_;
@@ -89,10 +96,6 @@ class SerialismGenerator
     
     // Parallelism
     unsigned int maxThreads_ = 8; // max threads for concurrent generation
-
-    std::vector<std::string> Gen(Instrument* ins){
-        return ins->generateCode();
-    }
 
     // Private Functions
 

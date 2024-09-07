@@ -104,7 +104,20 @@ SerialismGenerator::SerialismGenerator(string inputfile, string outputFilename):
             instruments_.push_back(factory_->createInstrument(name, rows,dynamics, num));
         }
     }
-}
+    auto compareFunc = [this](Instrument *i1, Instrument *i2) {
+        std::string i1name = i1->getName();
+        std::string i2name = i2->getName();
+        if (i1name == i2name)
+        {
+            return i1->getNum() < i2->getNum();
+        }
+        else
+        {
+            return scoreOrdering_.at(i1name) < scoreOrdering_.at(i2name);
+        }
+    };
+    std::sort(instruments_.begin(), instruments_.end(), compareFunc);
+    }
 
 void SerialismGenerator::initializeRandom(){
     rng_ = mt19937(seed_);

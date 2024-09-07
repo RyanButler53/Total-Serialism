@@ -140,6 +140,18 @@ public:
      * @return std::string a suffix to put after a note string in the lilypond code
      */
     std::string boulezJitter();
+
+    /**
+     * @brief Gets the instrument's name
+     * 
+     */
+    virtual std::string getName() = 0;
+
+    /**
+     * @brief Gets the intruments number
+     * 
+     */
+    virtual int getNum() = 0;
 };
 
 #endif // INSTRUMENT_HPP_INCLUDED

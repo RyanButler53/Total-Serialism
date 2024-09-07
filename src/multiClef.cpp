@@ -85,3 +85,10 @@ string MultiClefInstrument::scoreBox() {
     scoreBox += " \n\t\t>>\n\t}\n";
     return scoreBox;
 }
+std::string MultiClefInstrument::getName(){
+    return displayName_;
+}
+
+int MultiClefInstrument::getNum(){
+    return num_;
+}

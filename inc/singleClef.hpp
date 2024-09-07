@@ -66,6 +66,18 @@ class SingleClefInstrument : public Instrument
      */
     std::string scoreBox();
     
+    /**
+     * @brief Get the Name object
+     *
+     * @return Get the name of the instrument;
+     */
+    std::string getName();
+
+    /**
+     * @brief  Gets the number of the instrument
+     * 
+     */
+    int getNum();
 };
 
 #endif

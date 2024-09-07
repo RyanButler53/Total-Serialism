@@ -53,4 +53,12 @@ std::string SingleClefInstrument::scoreBox() {
     string scoreBox = "\n\t\\new Staff \\with {instrumentName = \"";
     scoreBox += displayName_ +" " +  to_string(num_) + "\" } { \\" + variableName_+ " }";
     return scoreBox;
-}                                                                      
+}
+
+std::string SingleClefInstrument::getName(){
+    return displayName_;
+}
+
+int SingleClefInstrument::getNum(){
+    return num_;
+}
