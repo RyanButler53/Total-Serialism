@@ -17,11 +17,12 @@ SerialismGenerator::SerialismGenerator(string outputFilename):
     initializeRandom();
 }
 
-SerialismGenerator::SerialismGenerator(long seed, string outputFilename):
+SerialismGenerator::SerialismGenerator(long seed, string outputFilename, unsigned int numThreads):
     outputFilename_{outputFilename},
     numRows_{12}, 
     seed_{seed},
-    boulezFactor_{0.5}
+    boulezFactor_{0.5},
+    maxThreads_{numThreads}
     {
     initializeRandom();
 }
@@ -217,9 +218,39 @@ SerialismGenerator::~SerialismGenerator()
 void SerialismGenerator::generatePiece(vector<string>& lilypondCode){
     lilypondCode.push_back(header());
     // Parallelize Here
-    for (Instrument*& instrument : instruments_){
-        instrument->generateCode(lilypondCode);
+    if (maxThreads_ > 1)
+    {
+        ThreadPool tp(maxThreads_);
+        vector<future<vector<string>>> futures(instruments_.size());
+        // vector<future<int>> futures;
+
+        for (size_t i = 0; i < instruments_.size(); ++i)
+        {
+            Instrument*& insPtr = instruments_[i];
+            auto gen = [&insPtr]() { return insPtr->generateCode(); };
+            futures[i] = tp.submit(gen);
+        }
+
+        // Combine into one big vector
+        for (future<std::vector<string>>& future : futures){
+            vector<string> code = future.get();
+            for (string &line : code)
+            {
+                lilypondCode.push_back(line);
+            }
+        }
     }
+    else
+    {
+        for (Instrument *&instrument : instruments_)
+        {
+            vector<string> code = instrument->generateCode();
+            for (string &line : code){
+                lilypondCode.push_back(line);
+            }
+        }
+    }
+
     lilypondCode.push_back(scoreBox());
 }
 

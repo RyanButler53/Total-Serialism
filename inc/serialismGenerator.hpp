@@ -12,6 +12,7 @@
 #include "instrument.hpp"
 #include "pianoharp.hpp"
 #include "instrumentDefinitions.hpp"
+#include "threadPool.hpp"
 
 #ifndef SERIALISM_GENERATOR_HPP_INCLUDED
 #define SERIALISM_GENERATOR_HPP_INCLUDED
@@ -85,6 +86,13 @@ class SerialismGenerator
     long seed_; // Randomness Seed. Refaults to (time(0))
     short tempo_; // Piece Tempo
     float boulezFactor_; // Std deviation of the boulez dist. 0 for gui designed pieces
+    
+    // Parallelism
+    unsigned int maxThreads_ = 8; // max threads for concurrent generation
+
+    std::vector<std::string> Gen(Instrument* ins){
+        return ins->generateCode();
+    }
 
     // Private Functions
 
@@ -142,10 +150,10 @@ class SerialismGenerator
     // Constructors
 
     // Only given an output file, use time for seed and generate randomly
-    SerialismGenerator(std::string outputFile);
+    SerialismGenerator(std::string outputFileThat);
     
     // Given a seed and output filename, generate the fields randomly. 
-    SerialismGenerator(long seed, std::string outputFilename);
+    SerialismGenerator(long seed, std::string outputFilename, unsigned int numThreads = 8);
 
     // Given an input and output filenae, use the inputfile to read in fields. 
     SerialismGenerator(std::string inputfile, std::string outputFilename);

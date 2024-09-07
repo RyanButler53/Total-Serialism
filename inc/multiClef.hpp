@@ -47,7 +47,7 @@ class MultiClefInstrument : public Instrument
      * 
      * @param lilypondCode Vector reference to fill up with lines of lilypond
      */
-    void generateCode(std::vector<std::string> &lilypondCode);
+    std::vector<std::string>  generateCode();
 
     /**
      * @brief Generates the appropriate staff header for both hands. 

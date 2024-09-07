@@ -5,6 +5,8 @@
 #include "timeSignature.hpp"
 #include "note.hpp"
 
+#include <cassert>
+#include <algorithm>
 #include <string>
 #include <mutex>
 #include <random>
@@ -84,7 +86,7 @@ public:
      *
      * @param lilypondCode Reference to vector of strings with each line
      */
-    virtual void generateCode(std::vector<std::string> &lilypondCode) = 0; // Pure Virtual?
+    virtual std::vector<std::string> generateCode() = 0;
 
     /**
      * @brief Unique Staff Header for each staff in the piece

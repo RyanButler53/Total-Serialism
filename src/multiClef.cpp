@@ -17,7 +17,8 @@ MultiClefInstrument::MultiClefInstrument(InstrumentData data, BoulezData boulez,
 
 MultiClefInstrument::~MultiClefInstrument(){}
 
-void MultiClefInstrument::generateCode(vector<string>& lilypondCode){
+vector<string> MultiClefInstrument::generateCode(){
+    vector<string> lilypondCode;
     std::vector<string> rightCode;
     std::vector<string> leftCode;
     short leftover16ths = ts_.num16ths();
@@ -64,6 +65,7 @@ void MultiClefInstrument::generateCode(vector<string>& lilypondCode){
     for (auto& l : leftCode){
         lilypondCode.push_back(l);
     }
+    return lilypondCode;
 }
 
 string MultiClefInstrument::staffHeader(){
