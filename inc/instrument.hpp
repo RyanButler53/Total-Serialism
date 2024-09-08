@@ -5,6 +5,8 @@
 #include "timeSignature.hpp"
 #include "note.hpp"
 
+#include <cassert>
+#include <algorithm>
 #include <string>
 #include <mutex>
 #include <random>
@@ -44,6 +46,7 @@ private:
     // Instrument Specific, Passed up from derived classes
     Note low_;
     Note high_;
+
 protected:
 
     // All Inherited Instruments can use the Analysis Matrices and dynamics rows
@@ -83,7 +86,7 @@ public:
      *
      * @param lilypondCode Reference to vector of strings with each line
      */
-    virtual void generateCode(std::vector<std::string> &lilypondCode) = 0; // Pure Virtual?
+    virtual std::vector<std::string> generateCode() = 0;
 
     /**
      * @brief Unique Staff Header for each staff in the piece
@@ -128,7 +131,27 @@ public:
      */
     std::string clamp(std::string n);
 
+    /**
+     * @brief Uses uses the BoulezDist_ distribution to increase or decrease
+     * the pitch of a note by 1 or 2 octaves. Named after Pierre Boulez
+     * for his original Total Serial experiment putting notes as far
+     * away as possible
+     * 
+     * @return std::string a suffix to put after a note string in the lilypond code
+     */
     std::string boulezJitter();
+
+    /**
+     * @brief Gets the instrument's name
+     * 
+     */
+    virtual std::string getName() = 0;
+
+    /**
+     * @brief Gets the intruments number
+     * 
+     */
+    virtual int getNum() = 0;
 };
 
 #endif // INSTRUMENT_HPP_INCLUDED

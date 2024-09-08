@@ -17,10 +17,12 @@ class Matrix {
     Matrix(const Matrix &other) = default;
     ~Matrix();
 
+    // Used to access a row and column of the matrix
     T &operator()(size_t row, size_t col) const;
     void print(std::ostream &os) const;
 };
 
+// Printing utility function
 template <typename T>
 std::ostream &operator<<(std::ostream &os, const Matrix<T> &m);
 

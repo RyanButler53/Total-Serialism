@@ -9,21 +9,26 @@
 
 using namespace std;
 
-SerialismGenerator::SerialismGenerator(): 
+SerialismGenerator::SerialismGenerator(string outputFilename): 
+    outputFilename_{outputFilename},
     seed_{time(0)},
     boulezFactor_{0.5}
     {
     initializeRandom();
 }
 
-SerialismGenerator::SerialismGenerator(long seed):
-    numRows_{12}, seed_{seed},boulezFactor_{0.5}
+SerialismGenerator::SerialismGenerator(long seed, string outputFilename, unsigned int numThreads):
+    outputFilename_{outputFilename},
+    numRows_{12}, 
+    seed_{seed},
+    boulezFactor_{0.5},
+    maxThreads_{numThreads}
     {
     initializeRandom();
 }
 
-SerialismGenerator::SerialismGenerator(string inputfile):
-    seed_{time(0)}, boulezFactor_(0.5)
+SerialismGenerator::SerialismGenerator(string inputfile, string outputFilename):
+    outputFilename_{outputFilename},seed_{time(0)}, boulezFactor_(0.5)
     {
     // Set up rng, fileinput and row mapping
     rng_ = mt19937(seed_);
@@ -99,7 +104,20 @@ SerialismGenerator::SerialismGenerator(string inputfile):
             instruments_.push_back(factory_->createInstrument(name, rows,dynamics, num));
         }
     }
-}
+    auto compareFunc = [this](Instrument *i1, Instrument *i2) {
+        std::string i1name = i1->getName();
+        std::string i2name = i2->getName();
+        if (i1name == i2name)
+        {
+            return i1->getNum() < i2->getNum();
+        }
+        else
+        {
+            return scoreOrdering_.at(i1name) < scoreOrdering_.at(i2name);
+        }
+    };
+    std::sort(instruments_.begin(), instruments_.end(), compareFunc);
+    }
 
 void SerialismGenerator::initializeRandom(){
     rng_ = mt19937(seed_);
@@ -213,9 +231,39 @@ SerialismGenerator::~SerialismGenerator()
 void SerialismGenerator::generatePiece(vector<string>& lilypondCode){
     lilypondCode.push_back(header());
     // Parallelize Here
-    for (Instrument*& instrument : instruments_){
-        instrument->generateCode(lilypondCode);
+    if (maxThreads_ > 1)
+    {
+        ThreadPool tp(maxThreads_);
+        vector<future<vector<string>>> futures(instruments_.size());
+        // vector<future<int>> futures;
+
+        for (size_t i = 0; i < instruments_.size(); ++i)
+        {
+            Instrument*& insPtr = instruments_[i];
+            auto gen = [&insPtr]() { return insPtr->generateCode(); };
+            futures[i] = tp.submit(gen);
+        }
+
+        // Combine into one big vector
+        for (future<std::vector<string>>& future : futures){
+            vector<string> code = future.get();
+            for (string &line : code)
+            {
+                lilypondCode.push_back(line);
+            }
+        }
     }
+    else
+    {
+        for (Instrument *&instrument : instruments_)
+        {
+            vector<string> code = instrument->generateCode();
+            for (string &line : code){
+                lilypondCode.push_back(line);
+            }
+        }
+    }
+
     lilypondCode.push_back(scoreBox());
 }
 
@@ -230,39 +278,12 @@ string SerialismGenerator::header() const {
     header += "  tagline = ##f}\n\n";
     header += "global = { \\time " + ts_.str() + " \\tempo 4 = ";
     header += to_string(tempo_) + "}\n\n";
-    if (instrumentNames_.size() > 10){
+    if (instrumentNames_.size() > 9){
         header += "\\paper{\n\t#(set-paper-size \"11x17\")\n}\n\n";
     } else{
         header += "\\paper{\n\t#(set-paper-size \"letter\")\n}\n\n";
     }
     return header;
-}
-
-std::string SerialismGenerator::boulezJitter(){
-    if (boulezFactor_ == 0.0){
-        return "";
-    }
-    std::scoped_lock lock{boulezMutex_};
-    double value = boulezDist_(rng_);
-    int octave = std::round(value);
-    std::clamp(octave, -2, 2);
-    switch (octave)
-    {
-    case -2:
-        return ",,";
-    case -1:
-        return ",";
-    case 0:
-        return "";
-    case 1:
-        return "'";
-    case 2:
-        return "''";
-    default:
-        // Clamp and round gaurantee an integer val between -2 and 2. 
-        break;
-    }
-    return "";
 }
 
 std::string SerialismGenerator::scoreBox() {
@@ -298,4 +319,14 @@ std::vector<Row> SerialismGenerator::getRowTypes(std::fstream& input, std::vecto
         rows.push_back(Row(rowTypes_.at(type), rowNums[num]));
     }
     return rows;
+}
+
+void SerialismGenerator::run(){
+    vector<string> lilypondCode;
+    generatePiece(lilypondCode);
+
+    ofstream outputFile{outputFilename_};
+    for (auto& line : lilypondCode){
+        outputFile << line;
+    }
 }

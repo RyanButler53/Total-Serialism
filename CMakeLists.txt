@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.24.0)
 project(Total-Serialism)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(FetchContent)
@@ -27,6 +27,16 @@ set(INSTRUMENT_SRC
     src/instrumentDefinitions.cpp
     src/pianoharp.cpp)
 
+set (SERIALISM_SRC
+    src/serialismGenerator.cpp
+    src/analysisMatrix.cpp
+    src/timeSignature.cpp
+    src/note.cpp
+    )
+
+set (PARALLELISM_SRC
+    src/joinThreads.cpp
+    src/threadPool.cpp)
 
 include_directories(inc)
 
@@ -34,11 +44,9 @@ include_directories(inc)
 add_executable(
     TotalSerialism 
     src/totalSerialism.cpp
-    src/serialismGenerator.cpp
-    src/analysisMatrix.cpp
-    src/timeSignature.cpp
-    src/note.cpp
+    ${SERIALISM_SRC}
     ${INSTRUMENT_SRC}
+    ${PARALLELISM_SRC}
     )
 
 # Tests
@@ -84,6 +92,9 @@ gtest_discover_tests(note-test)
 
 # Fuzz Test:
 add_executable(
-    fuzzEval
-    src/fuzzEval.cpp
+    fuzz
+    src/fuzzTest.cpp
+    ${SERIALISM_SRC}
+    ${PARALLELISM_SRC}
+    ${INSTRUMENT_SRC}
     )

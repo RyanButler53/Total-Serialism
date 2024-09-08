@@ -1,5 +1,5 @@
 mkdir build;
 cd build;
 cmake ..;
-cmake --build . -j5
+cmake --build . -j15
 cd ..

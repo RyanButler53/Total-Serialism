@@ -18,7 +18,8 @@ SingleClefInstrument::SingleClefInstrument(InstrumentData data, BoulezData boule
 
 SingleClefInstrument::~SingleClefInstrument(){}
 
-void SingleClefInstrument::generateCode(vector<string>& lilypondCode) {
+std::vector<std::string> SingleClefInstrument::generateCode(){
+    std::vector<std::string> lilypondCode;
     short leftover16ths = ts_.num16ths();
     string lilypondRow = staffHeader();
     lilypondCode.push_back(lilypondRow);
@@ -37,6 +38,7 @@ void SingleClefInstrument::generateCode(vector<string>& lilypondCode) {
         string remainingPiece = fullDuration(leftover16ths, "r", "");
         lilypondCode.back().append(remainingPiece + "|\n \\fine}\n");
     }
+    return lilypondCode;
 }
 
 std::string SingleClefInstrument::staffHeader() {
@@ -51,4 +53,12 @@ std::string SingleClefInstrument::scoreBox() {
     string scoreBox = "\n\t\\new Staff \\with {instrumentName = \"";
     scoreBox += displayName_ +" " +  to_string(num_) + "\" } { \\" + variableName_+ " }";
     return scoreBox;
-}                                                                      
+}
+
+std::string SingleClefInstrument::getName(){
+    return displayName_;
+}
+
+int SingleClefInstrument::getNum(){
+    return num_;
+}
