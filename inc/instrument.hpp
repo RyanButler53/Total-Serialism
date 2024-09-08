@@ -10,14 +10,15 @@
 #include <string>
 #include <mutex>
 #include <random>
+#include <memory>
 
 // Structs to store Instrument Data (Passed from Instrument classes to Instrument Base)
 struct InstrumentData
 {
     // Musical Shared Data
-    AnalysisMatrix* pitches_;
-    AnalysisMatrix* rhythms_;
-    AnalysisMatrix* articulations_;
+    std::shared_ptr<AnalysisMatrix> pitches_;
+    std::shared_ptr<AnalysisMatrix> rhythms_;
+    std::shared_ptr<AnalysisMatrix>  articulations_;
     TimeSignature ts_;
 };
 
@@ -50,9 +51,9 @@ private:
 protected:
 
     // All Inherited Instruments can use the Analysis Matrices and dynamics rows
-    AnalysisMatrix *pitches_;
-    AnalysisMatrix *rhythms_;
-    AnalysisMatrix *articulations_;
+    std::shared_ptr<AnalysisMatrix> pitches_;
+    std::shared_ptr<AnalysisMatrix> rhythms_;
+    std::shared_ptr<AnalysisMatrix> articulations_;
     TimeSignature ts_;
 
     // Everything can access the pitch, articulation and dynamic mappings
