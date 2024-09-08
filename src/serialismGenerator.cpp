@@ -49,9 +49,9 @@ SerialismGenerator::SerialismGenerator(string inputfile, string outputFilename):
         }
     }
     
-    pitches_ = new AnalysisMatrix(sequences[0]);
-    rhythms_ = new AnalysisMatrix(sequences[1]);
-    articulations_ = new AnalysisMatrix(sequences[2]);
+    pitches_ = make_shared<AnalysisMatrix>(sequences[0]);
+    rhythms_ = make_shared<AnalysisMatrix>(sequences[1]);
+    articulations_ = make_shared<AnalysisMatrix>(sequences[2]);
 
     // Read in tempo, time sig, title, composer
     string tempo_str;
@@ -69,7 +69,7 @@ SerialismGenerator::SerialismGenerator(string inputfile, string outputFilename):
     // Initialize Factory
     boulezDist_= std::normal_distribution<double>(0, 0);
     BoulezData boulezData{rng_, boulezDist_, boulezMutex_};
-    factory_ = new InstrumentFactory(pitches_, rhythms_, articulations_, ts_, boulezData);
+    factory_ = make_shared<InstrumentFactory>(pitches_, rhythms_, articulations_, ts_, boulezData);
 
     // Read in instruments
     std::unordered_map<std::string, int> instrumentMap;
@@ -104,7 +104,7 @@ SerialismGenerator::SerialismGenerator(string inputfile, string outputFilename):
             instruments_.push_back(factory_->createInstrument(name, rows,dynamics, num));
         }
     }
-    auto compareFunc = [this](Instrument *i1, Instrument *i2) {
+    auto compareFunc = [this](std::shared_ptr<Instrument>i1, std::shared_ptr<Instrument> i2) {
         std::string i1name = i1->getName();
         std::string i2name = i2->getName();
         if (i1name == i2name)
@@ -137,10 +137,10 @@ void SerialismGenerator::initializeRandom(){
     tempo_ = tempoDist(rng_);
 
     // Initialize analysis matrices
-    pitches_ = new AnalysisMatrix(pitchRow);
-    rhythms_ = new AnalysisMatrix(rhythmRow);
-    articulations_ = new AnalysisMatrix(articulationRow);
-    const std::vector < std::string > validTimes{
+    pitches_ = make_shared<AnalysisMatrix>(pitchRow);
+    rhythms_ = make_shared<AnalysisMatrix>(rhythmRow);
+    articulations_ = make_shared<AnalysisMatrix>(articulationRow);
+    const std::vector<std::string> validTimes{
                                      "1/4","3/8", "2/4", "5/8",
                                      "3/4", "7/4", "15/8","13/8",
                                      "6/8", "12/8", "6/4", "3/2",
@@ -191,7 +191,7 @@ void SerialismGenerator::initializeRandom(){
         dynamicRows.push_back(row);
     }
     BoulezData boulez{rng_, boulezDist_, boulezMutex_};
-    factory_ = new InstrumentFactory(pitches_, rhythms_, articulations_, ts_, boulez);
+    factory_ = make_shared<InstrumentFactory>(pitches_, rhythms_, articulations_, ts_, boulez);
     size_t row_i = 0;
     size_t dynamic_i = 0;
     for (auto &[name, num] : instrumentNames_)
@@ -212,22 +212,6 @@ void SerialismGenerator::initializeRandom(){
     }
 }
 
-SerialismGenerator::~SerialismGenerator()
-{
-    // clean up matrices
-    delete pitches_;
-    delete rhythms_;
-    delete articulations_;
-
-    // Clean up instruments
-    for (Instrument*& i : instruments_){
-        delete i;
-    }
-
-    // Clean up factory
-    delete factory_;
-}
-
 void SerialismGenerator::generatePiece(vector<string>& lilypondCode){
     lilypondCode.push_back(header());
     // Parallelize Here
@@ -235,11 +219,9 @@ void SerialismGenerator::generatePiece(vector<string>& lilypondCode){
     {
         ThreadPool tp(maxThreads_);
         vector<future<vector<string>>> futures(instruments_.size());
-        // vector<future<int>> futures;
-
         for (size_t i = 0; i < instruments_.size(); ++i)
         {
-            Instrument*& insPtr = instruments_[i];
+            shared_ptr<Instrument>& insPtr = instruments_[i];
             auto gen = [&insPtr]() { return insPtr->generateCode(); };
             futures[i] = tp.submit(gen);
         }
@@ -255,7 +237,7 @@ void SerialismGenerator::generatePiece(vector<string>& lilypondCode){
     }
     else
     {
-        for (Instrument *&instrument : instruments_)
+        for (shared_ptr<Instrument>&instrument : instruments_)
         {
             vector<string> code = instrument->generateCode();
             for (string &line : code){
@@ -288,7 +270,7 @@ string SerialismGenerator::header() const {
 
 std::string SerialismGenerator::scoreBox() {
     std::string scoreBox = "\\score {\n\t<<\n";
-    for (Instrument*& instrument : instruments_){
+    for (shared_ptr<Instrument>& instrument : instruments_){
         scoreBox += instrument->scoreBox();
     }
     scoreBox += "\n\t>>\n}";

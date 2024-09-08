@@ -5,6 +5,7 @@
 #include <mutex>
 #include <unordered_map>
 #include <tuple>
+#include <memory>
 
 #include "instrumentFactory.hpp"
 #include "timeSignature.hpp"
@@ -74,13 +75,13 @@ class SerialismGenerator
     std::string outputFilename_;
 
     // Matrices (dynamically managed)
-    AnalysisMatrix* pitches_;
-    AnalysisMatrix* rhythms_;
-    AnalysisMatrix* articulations_;
+    std::shared_ptr<AnalysisMatrix> pitches_;
+    std::shared_ptr<AnalysisMatrix> rhythms_;
+    std::shared_ptr<AnalysisMatrix> articulations_;
 
     // Factory and Instrument vector
-    InstrumentFactory* factory_;
-    std::vector<Instrument*> instruments_;
+    std::shared_ptr<InstrumentFactory> factory_;
+    std::vector<std::shared_ptr<Instrument>> instruments_;
     
     // Instrument names holds the name of each instrument and the number of them
     // Used to calculate Display Name in instrument objects
@@ -162,8 +163,8 @@ class SerialismGenerator
     SerialismGenerator(std::string inputfile, std::string outputFilename);
     
     // Clean up Analysis Matrices, Instruments and Factory
-    ~SerialismGenerator();
-    
+    ~SerialismGenerator() = default;
+
     /**
      * @brief Runs the Total Serial Generator process from end to end. 
      * 
