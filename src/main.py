@@ -12,7 +12,8 @@ from PyQt6.QtWidgets import (
     QComboBox,
     QWidget,
     QScrollArea,
-    QFrame
+    QDialogButtonBox,
+    QDialog
 )
 from PyQt6 import QtGui
 
@@ -58,7 +59,8 @@ def clean12Nums(num_string:str, field_name:str):
         elif split == []:
             pass
         else:
-            print(f"Need exactly 12 unique numbers 0-11 in {field_name}")
+            msg = f"Need exactly 12 unique numbers 0-11 in {field_name}"
+            print(msg)
 
     except ValueError as error:
         print(f"Error converting numbers to string in {field_name}")
@@ -395,6 +397,26 @@ class MainWindow(QMainWindow):
             title.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
             return title
 
+class IncorrectInputDlg(QDialog):
+    def __init__(self, msg):
+        super().__init__()
+        self.setWindowTitle("Invalid Input")
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+
+        QBtn = (
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
+        )
+
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
+        self.msg = QLabel(msg)
+
+        self.layout = QVBoxLayout()
+        self.layout.addWidget(self.msg)
+        self.layout.addButtonBox()
+        self.setLayout(self.layout)
 
 
 app = QApplication([])
