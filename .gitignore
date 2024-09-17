@@ -39,7 +39,8 @@ totalSerialism
 build/
 fuzz/
 
-# Lilypond output files and pdfs
+# Lilypond output files, lilypond include files and pdfs
 *.ly
+*.ily
 *.pdf
 params.txt

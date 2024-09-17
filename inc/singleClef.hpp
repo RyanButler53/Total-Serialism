@@ -2,8 +2,10 @@
 #define SINGLE_CLEF_HPP_INCLUDED
 
 #include "instrument.hpp"
-#include <string>
 #include "note.hpp"
+#include <string>
+#include <fstream>
+#include <ostream>
 
 /**
  * @brief Struct to hold all the data required for generating code for a single
@@ -78,6 +80,13 @@ class SingleClefInstrument : public Instrument
      * 
      */
     int getNum();
+
+    /**
+     * @brief Makes the individual part score box file
+     * 
+     * @param filename Filename to write to
+     */
+    void makePart(std::string filename);
 };
 
 #endif
