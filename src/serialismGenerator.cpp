@@ -338,8 +338,9 @@ void SerialismGenerator::run(){
         // Make parts for all instruments
         for (std::shared_ptr<Instrument>& ins : instruments_){
             std::string filename = ins->getName();
+            std::string num = to_string(ins->getNum());
             std::replace(filename.begin(), filename.end(), ' ', '_');
-            filename += ".ly";
+            filename += "_" + num + ".ly";
             ins->makePart(folder / fs::path(filename));
         }
     }

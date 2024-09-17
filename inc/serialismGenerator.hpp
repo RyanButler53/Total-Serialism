@@ -48,10 +48,10 @@ class SerialismGenerator
     
     // List of instruments that the random serialism generator can pick from. 
     std::vector<std::string> instrumentList_{
+        "flute",  "piccolo",  "oboe", "clarinet", "bassoon", 
+        "frenchhorn", "trumpet", "trombone", "tuba",
         "piano", "harp",
-        "violin", "viola", "cello", "bass", 
-        "oboe", "bassoon", "clarinet", "piccolo", "flute", 
-        "trombone", "trumpet", "frenchhorn", "tuba"
+        "violin", "viola", "cello", "bass"
     };
 
     // Mapping Row Types in strings to RowType Enums. 

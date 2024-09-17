@@ -18,10 +18,10 @@ else
             in_filename=$2;
             build/TotalSerialism -o $out_filename.ly -i $in_filename -p;
             cd score-$out_filename
-            lilypond -f pdf -l NONE \*.ly
+            lilypond -f pdf -l NONE *.ly
             cd ..
             finalFile=score-$out_filename/$out_filename.pdf
-            rm params.txt 2> /dev/null
+            # rm params.txt 2> /dev/null
         elif [ $numArgs == 1 ];
         then
             seed=$1
