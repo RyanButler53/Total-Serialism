@@ -2,33 +2,34 @@
 #include <chrono>
 #include <iostream>
 #include <fstream>
-#include <regex>
 #include <sstream>
 #include <algorithm>
 #include <cmath>
 
 using namespace std;
+namespace fs = std::filesystem;
 
 SerialismGenerator::SerialismGenerator(string outputFilename): 
     outputFilename_{outputFilename},
     seed_{time(0)},
-    boulezFactor_{0.5}
+    boulezFactor_{0.5},
+    parts_{false}
     {
     initializeRandom();
 }
 
-SerialismGenerator::SerialismGenerator(long seed, string outputFilename, unsigned int numThreads):
+SerialismGenerator::SerialismGenerator(long seed, string outputFilename, unsigned int numThreads, bool parts):
     outputFilename_{outputFilename},
     numRows_{12}, 
     seed_{seed},
     boulezFactor_{0.5},
-    maxThreads_{numThreads}
-    {
+    maxThreads_{numThreads},
+    parts_{parts} {
     initializeRandom();
 }
 
-SerialismGenerator::SerialismGenerator(string inputfile, string outputFilename):
-    outputFilename_{outputFilename},seed_{time(0)}, boulezFactor_(0.5)
+SerialismGenerator::SerialismGenerator(string inputfile, string outputFilename, bool parts):
+    outputFilename_{outputFilename},seed_{time(0)}, boulezFactor_(0.5), parts_{parts}
     {
     // Set up rng, fileinput and row mapping
     rng_ = mt19937(seed_);
@@ -234,9 +235,7 @@ void SerialismGenerator::generatePiece(vector<string>& lilypondCode){
                 lilypondCode.push_back(line);
             }
         }
-    }
-    else
-    {
+    } else {
         for (shared_ptr<Instrument>&instrument : instruments_)
         {
             vector<string> code = instrument->generateCode();
@@ -246,7 +245,7 @@ void SerialismGenerator::generatePiece(vector<string>& lilypondCode){
         }
     }
 
-    lilypondCode.push_back(scoreBox());
+    // Delay adding the Score Box
 }
 
 string SerialismGenerator::header() const {
@@ -268,8 +267,13 @@ string SerialismGenerator::header() const {
     return header;
 }
 
-std::string SerialismGenerator::scoreBox() {
-    std::string scoreBox = "\\score {\n\t<<\n";
+std::string SerialismGenerator::scoreBox(bool parts) {
+    std::string scoreBox = "\\version \"2.24.3\"\n";
+    if (parts){
+        scoreBox += "\\include \"definitions.ily\"\n\n";
+    }
+    scoreBox += "\\score {\n\t<<";
+
     for (shared_ptr<Instrument>& instrument : instruments_){
         scoreBox += instrument->scoreBox();
     }
@@ -307,8 +311,36 @@ void SerialismGenerator::run(){
     vector<string> lilypondCode;
     generatePiece(lilypondCode);
 
-    ofstream outputFile{outputFilename_};
-    for (auto& line : lilypondCode){
-        outputFile << line;
+    if (!parts_){
+        lilypondCode.push_back(scoreBox());
+        ofstream outputFile{outputFilename_};
+        for (auto& line : lilypondCode){
+            outputFile << line;
+        }
+    } else {
+        // Clear out if it exists
+        std::string outputFolder = "score-" + outputFilename_;
+        fs::path path(outputFolder);
+        fs::path folder = path.stem();
+        if (fs::exists(folder)) {
+            fs::remove_all(folder);
+        }
+        fs::create_directory(folder);
+        // First create instrument definitions files:
+        ofstream definitionsFile(folder / fs::path("definitions.ily"));
+        for (auto& line : lilypondCode){
+            definitionsFile << line;
+        }
+
+        ofstream mainScore(folder / fs::path(outputFilename_));
+        mainScore << scoreBox(true);
+
+        // Make parts for all instruments
+        for (std::shared_ptr<Instrument>& ins : instruments_){
+            std::string filename = ins->getName();
+            std::replace(filename.begin(), filename.end(), ' ', '_');
+            filename += ".ly";
+            ins->makePart(folder / fs::path(filename));
+        }
     }
 }

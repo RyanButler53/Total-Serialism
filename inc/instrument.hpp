@@ -153,6 +153,13 @@ public:
      * 
      */
     virtual int getNum() = 0;
+
+    /**
+     * @brief Makesthe individual part
+     * 
+     * @param filename Filename ot write to. 
+     */
+    virtual void makePart(std::string filename) = 0;
 };
 
 #endif // INSTRUMENT_HPP_INCLUDED

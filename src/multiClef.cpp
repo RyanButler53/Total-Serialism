@@ -92,3 +92,13 @@ std::string MultiClefInstrument::getName(){
 int MultiClefInstrument::getNum(){
     return num_;
 }
+
+void MultiClefInstrument::makePart(std::string filename){
+    string fileContents = "\\version \"2.24.1\"\n\\language \"english\"\n\n";
+    fileContents += "\\include \"definitions.ily\"\n\n";
+    fileContents += "\\score {\n";
+    fileContents += scoreBox();
+    fileContents += "}\n";
+    std::ofstream out(filename);
+    out << fileContents << endl;
+}

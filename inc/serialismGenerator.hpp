@@ -1,10 +1,10 @@
 #include <string>
 #include <vector>
 #include <random>
-#include <array>
 #include <mutex>
 #include <unordered_map>
 #include <tuple>
+#include <filesystem>
 #include <memory>
 
 #include "instrumentFactory.hpp"
@@ -94,6 +94,7 @@ class SerialismGenerator
     long seed_; // Randomness Seed. Refaults to (time(0))
     short tempo_; // Piece Tempo
     float boulezFactor_; // Std deviation of the boulez dist. 0 for gui designed pieces
+    bool parts_;
     
     // Parallelism
     unsigned int maxThreads_ = 8; // max threads for concurrent generation
@@ -127,7 +128,7 @@ class SerialismGenerator
      * 
      * @return std::string 
      */
-    std::string scoreBox();
+    std::string scoreBox(bool parts=false);
 
     // Utility Functions
 
@@ -157,10 +158,10 @@ class SerialismGenerator
     SerialismGenerator(std::string outputFileThat);
     
     // Given a seed and output filename, generate the fields randomly. 
-    SerialismGenerator(long seed, std::string outputFilename, unsigned int numThreads = 8);
+    SerialismGenerator(long seed, std::string outputFilename, unsigned int numThreads = 8, bool parts=false);
 
     // Given an input and output filenae, use the inputfile to read in fields. 
-    SerialismGenerator(std::string inputfile, std::string outputFilename);
+    SerialismGenerator(std::string inputfile, std::string outputFilename, bool parts=false);
     
     // Clean up Analysis Matrices, Instruments and Factory
     ~SerialismGenerator() = default;

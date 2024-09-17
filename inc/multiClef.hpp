@@ -2,6 +2,8 @@
 #define MULTI_CLEF_HPP_INCLUDED
 
 #include "instrument.hpp"
+#include <fstream>
+#include <ostream>
 
 /**
  * @brief Struct to hold all data required for multi clef instruments
@@ -76,6 +78,13 @@ class MultiClefInstrument : public Instrument
      * 
      */
     int getNum();
+
+    /**
+     * @brief Makes the individual part
+     *
+     * @param filename Filename to write to;
+     */
+    void makePart(std::string filename);
 };
 
 #endif // MULTI_CLEF_HPP_INCLUDED
