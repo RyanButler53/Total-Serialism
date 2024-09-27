@@ -191,4 +191,26 @@ std::string Instrument::boulezJitter(){
     return "";
 }
 
+std::string Instrument::header(std::string title, std::string composer){
+    std::string header = "\\header {\n\t title = \"";
+    header += title;
+    header += "\"\n\tsubtitile = \"Algorithmic Composition\"";
+    // header += subtitile;
+    header += "\n\tinstrument = \"";
+    header += getName() + " " + to_string(getNum()) + "\"";
+    header += "\n\tcomposer = \"";
+    header += composer;
+    header += "\"\n\ttagline = ##f}\n\n";
+    return header;
+}
 
+void Instrument::makePart(std::string filename, std::string title, std::string composer){
+    string fileContents = "\\version \"2.24.1\"\n\\language \"english\"\n\n";
+    fileContents += "\\include \"definitions.ily\"\n\n";
+    fileContents += header(title, composer);
+    fileContents += "\\score {\n";
+    fileContents += instrumentScoreBox();
+    fileContents += "}\n";
+    std::ofstream out(filename);
+    out << fileContents << endl;
+}

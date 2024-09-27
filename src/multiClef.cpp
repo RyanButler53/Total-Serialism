@@ -77,7 +77,7 @@ string MultiClefInstrument::staffHeader(){
 }
 
 // Variable names will look like rightXX_hand 
-string MultiClefInstrument::scoreBox() {
+string MultiClefInstrument::instrumentScoreBox() {
     string scoreBox = "\t\\new PianoStaff \\with {instrumentName = \"";
     scoreBox += displayName_ +" "+ to_string(num_) + "\"} {\n\t\t<<";
     scoreBox += "\n\t\t\\new Staff {\\" + variableName_ + "_right"+ " }";
@@ -93,12 +93,12 @@ int MultiClefInstrument::getNum(){
     return num_;
 }
 
-void MultiClefInstrument::makePart(std::string filename){
-    string fileContents = "\\version \"2.24.1\"\n\\language \"english\"\n\n";
-    fileContents += "\\include \"definitions.ily\"\n\n";
-    fileContents += "\\score {\n";
-    fileContents += scoreBox();
-    fileContents += "}\n";
-    std::ofstream out(filename);
-    out << fileContents << endl;
-}
+// void MultiClefInstrument::makePart(std::string filename){
+//     string fileContents = "\\version \"2.24.1\"\n\\language \"english\"\n\n";
+//     fileContents += "\\include \"definitions.ily\"\n\n";
+//     fileContents += "\\score {\n";
+//     fileContents += scoreBox();
+//     fileContents += "}\n";
+//     std::ofstream out(filename);
+//     out << fileContents << endl;
+// }

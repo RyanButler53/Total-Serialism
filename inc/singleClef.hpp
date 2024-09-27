@@ -66,7 +66,7 @@ class SingleClefInstrument : public Instrument
      * 
      * @return std::string The score box for the instrument. 
      */
-    std::string scoreBox();
+    std::string instrumentScoreBox();
     
     /**
      * @brief Get the Name object
@@ -81,12 +81,12 @@ class SingleClefInstrument : public Instrument
      */
     int getNum();
 
-    /**
-     * @brief Makes the individual part score box file
-     * 
-     * @param filename Filename to write to
-     */
-    void makePart(std::string filename);
+    // /**
+    //  * @brief Makes the individual part score box file
+    //  * 
+    //  * @param filename Filename to write to
+    //  */
+    // void makePart(std::string filename);
 };
 
 #endif

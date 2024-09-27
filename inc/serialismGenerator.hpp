@@ -122,6 +122,13 @@ class SerialismGenerator
     std::string header() const;
 
     /**
+     * @brief Creates the code for the global and paper blocks
+     * This is needd to get the tempo on the correct line and adjust the paper size accordingly. 
+     * @return std::string global and paper box settings string. 
+     */
+    std::string globalPaperBox() const;
+
+    /**
      * @brief Returns the "Score box" for the piece. 
      * The score box in lilypond is analogous to the main function in C++
      * This is the driver code that lets the staves get called and added correcly. 

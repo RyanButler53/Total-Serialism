@@ -214,7 +214,6 @@ void SerialismGenerator::initializeRandom(){
 }
 
 void SerialismGenerator::generatePiece(vector<string>& lilypondCode){
-    lilypondCode.push_back(header());
     // Parallelize Here
     if (maxThreads_ > 1)
     {
@@ -248,6 +247,7 @@ void SerialismGenerator::generatePiece(vector<string>& lilypondCode){
     // Delay adding the Score Box
 }
 
+// This is the sccore
 string SerialismGenerator::header() const {
     string header = "\\version \"2.24.1\"\n\\language \"english\"\n\n";
     header += "\\header {\n   title = \"";
@@ -257,8 +257,6 @@ string SerialismGenerator::header() const {
     header += composer_;
     header += "\"\n";
     header += "  tagline = ##f}\n\n";
-    header += "global = { \\time " + ts_.str() + " \\tempo 4 = ";
-    header += to_string(tempo_) + "}\n\n";
     if (instrumentNames_.size() > 9){
         header += "\\paper{\n\t#(set-paper-size \"11x17\")\n}\n\n";
     } else{
@@ -267,15 +265,28 @@ string SerialismGenerator::header() const {
     return header;
 }
 
+std::string SerialismGenerator::globalPaperBox() const{
+    std::string global = "global = { \\time " + ts_.str() + " \\tempo 4 = ";
+    global += to_string(tempo_) + "}\n\n";
+    std::string paper;
+    if (instrumentNames_.size() > 9){
+        paper += "\\paper{\n\t#(set-paper-size \"11x17\")\n}\n\n";
+    } else{
+        paper += "\\paper{\n\t#(set-paper-size \"letter\")\n}\n\n";
+    }
+    return global + paper;
+}
+
 std::string SerialismGenerator::scoreBox(bool parts) {
     std::string scoreBox = "\\version \"2.24.3\"\n";
     if (parts){
         scoreBox += "\\include \"definitions.ily\"\n\n";
+        scoreBox += header();
     }
     scoreBox += "\\score {\n\t<<";
 
     for (shared_ptr<Instrument>& instrument : instruments_){
-        scoreBox += instrument->scoreBox();
+        scoreBox += instrument->instrumentScoreBox();
     }
     scoreBox += "\n\t>>\n}";
     return scoreBox;
@@ -309,6 +320,9 @@ std::vector<Row> SerialismGenerator::getRowTypes(std::fstream& input, std::vecto
 
 void SerialismGenerator::run(){
     vector<string> lilypondCode;
+    if (!parts_){
+        lilypondCode.push_back(header());
+    }
     generatePiece(lilypondCode);
 
     if (!parts_){
@@ -341,7 +355,7 @@ void SerialismGenerator::run(){
             std::string num = to_string(ins->getNum());
             std::replace(filename.begin(), filename.end(), ' ', '_');
             filename += "_" + num + ".ly";
-            ins->makePart(folder / fs::path(filename));
+            ins->makePart(folder / fs::path(filename), title_, composer_);
         }
     }
 }

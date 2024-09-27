@@ -48,7 +48,7 @@ std::string SingleClefInstrument::staffHeader() {
     return header;
 }
 
-std::string SingleClefInstrument::scoreBox() {
+std::string SingleClefInstrument::instrumentScoreBox() {
     string num = to_string(num_);
     string scoreBox = "\n\t\\new Staff \\with {instrumentName = \"";
     scoreBox += displayName_ +" " +  to_string(num_) + "\" } { \\" + variableName_+ " }";
@@ -63,12 +63,12 @@ int SingleClefInstrument::getNum(){
     return num_;
 }
 
-void SingleClefInstrument::makePart(std::string filename){
-    string fileContents = "\\version \"2.24.1\"\n\\language \"english\"\n\n";
-    fileContents += "\\include \"definitions.ily\"\n\n";
-    fileContents += "\\score {\n";
-    fileContents += scoreBox();
-    fileContents += "}\n";
-    std::ofstream out(filename);
-    out << fileContents << endl;
-}
+// void SingleClefInstrument::makePart(std::string filename){
+//     string fileContents = "\\version \"2.24.1\"\n\\language \"english\"\n\n";
+//     fileContents += "\\include \"definitions.ily\"\n\n";
+//     fileContents += "\\score {\n";
+//     fileContents += scoreBox();
+//     fileContents += "}\n";
+//     std::ofstream out(filename);
+//     out << fileContents << endl;
+// }

@@ -64,7 +64,7 @@ class MultiClefInstrument : public Instrument
      * 
      * @return std::string Score box code. 
      */
-    std::string scoreBox();
+    std::string instrumentScoreBox();
 
         /**
      * @brief Get the Name object
@@ -79,12 +79,12 @@ class MultiClefInstrument : public Instrument
      */
     int getNum();
 
-    /**
-     * @brief Makes the individual part
-     *
-     * @param filename Filename to write to;
-     */
-    void makePart(std::string filename);
+    // /**
+    //  * @brief Makes the individual part
+    //  *
+    //  * @param filename Filename to write to;
+    //  */
+    // void makePart(std::string filename);
 };
 
 #endif // MULTI_CLEF_HPP_INCLUDED
