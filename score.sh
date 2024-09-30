@@ -32,7 +32,7 @@ else
             pwd;
             finalFile=score-random_score_seed_$seed/random_score_seed_$seed.pdf;
         else #No Arguments
-            build/TotalSerialism;
+            build/TotalSerialism; # extract parts? 
             lilypond -f pdf -l NONE random_score.ly; 
             finalFile=random_score.pdf
         fi

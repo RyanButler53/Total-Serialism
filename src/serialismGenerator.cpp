@@ -213,6 +213,31 @@ void SerialismGenerator::initializeRandom(){
     }
 }
 
+std::vector<short> SerialismGenerator::getRowNums(std::fstream& input) const {
+    vector<short> rowNums;
+    string s;
+    getline(input, s);
+    stringstream ss{s};
+    for (size_t num = 0; num < numRows_; ++num) {
+        short value;
+        ss >> value;
+        rowNums.push_back(value);
+    }
+    return rowNums;
+}
+std::vector<Row> SerialismGenerator::getRowTypes(std::fstream& input, std::vector<short> rowNums) const {
+    std::vector<Row> rows;
+    string s;
+    getline(input, s);
+    stringstream ss{s};
+    for (size_t num = 0; num < numRows_; ++num)
+    {
+        string type;
+        ss >> type;
+        rows.push_back(Row(rowTypes_.at(type), rowNums[num]));
+    }
+    return rows;
+}
 void SerialismGenerator::generatePiece(vector<string>& lilypondCode){
     // Parallelize Here
     if (maxThreads_ > 1)
@@ -257,6 +282,11 @@ string SerialismGenerator::header() const {
     header += composer_;
     header += "\"\n";
     header += "  tagline = ##f}\n\n";
+    if (!parts_){
+        header += "global = { \\time " + ts_.str() + " \\tempo 4 = ";
+        header += to_string(tempo_) + "}\n\n";
+
+    }
     if (instrumentNames_.size() > 9){
         header += "\\paper{\n\t#(set-paper-size \"11x17\")\n}\n\n";
     } else{
@@ -265,21 +295,16 @@ string SerialismGenerator::header() const {
     return header;
 }
 
-std::string SerialismGenerator::globalPaperBox() const{
-    std::string global = "global = { \\time " + ts_.str() + " \\tempo 4 = ";
-    global += to_string(tempo_) + "}\n\n";
-    std::string paper;
-    if (instrumentNames_.size() > 9){
-        paper += "\\paper{\n\t#(set-paper-size \"11x17\")\n}\n\n";
-    } else{
-        paper += "\\paper{\n\t#(set-paper-size \"letter\")\n}\n\n";
-    }
-    return global + paper;
+std::string SerialismGenerator::definitionHeader() const{
+    string header = "\\version \"2.24.1\"\n\\language \"english\"\n\n";
+    header += "global = { \\time " + ts_.str() + " \\tempo 4 = ";
+    header += to_string(tempo_) + "}\n\n";
+    return header;
 }
 
-std::string SerialismGenerator::scoreBox(bool parts) {
+std::string SerialismGenerator::scoreBox() {
     std::string scoreBox = "\\version \"2.24.3\"\n";
-    if (parts){
+    if (parts_){
         scoreBox += "\\include \"definitions.ily\"\n\n";
         scoreBox += header();
     }
@@ -290,32 +315,6 @@ std::string SerialismGenerator::scoreBox(bool parts) {
     }
     scoreBox += "\n\t>>\n}";
     return scoreBox;
-}
-
-std::vector<short> SerialismGenerator::getRowNums(std::fstream& input) const {
-    vector<short> rowNums;
-    string s;
-    getline(input, s);
-    stringstream ss{s};
-    for (size_t num = 0; num < numRows_; ++num) {
-        short value;
-        ss >> value;
-        rowNums.push_back(value);
-    }
-    return rowNums;
-}
-std::vector<Row> SerialismGenerator::getRowTypes(std::fstream& input, std::vector<short> rowNums) const {
-    std::vector<Row> rows;
-    string s;
-    getline(input, s);
-    stringstream ss{s};
-    for (size_t num = 0; num < numRows_; ++num)
-    {
-        string type;
-        ss >> type;
-        rows.push_back(Row(rowTypes_.at(type), rowNums[num]));
-    }
-    return rows;
 }
 
 void SerialismGenerator::run(){
@@ -340,14 +339,19 @@ void SerialismGenerator::run(){
             fs::remove_all(folder);
         }
         fs::create_directory(folder);
-        // First create instrument definitions files:
+        // First create instrument definitions file:
         ofstream definitionsFile(folder / fs::path("definitions.ily"));
-        for (auto& line : lilypondCode){
+        // Needs to have the instrument definition header: 
+        // Needs version, language and global block.
+        std::string defHeader = definitionHeader();
+        definitionsFile << defHeader;
+        for (auto &line : lilypondCode)
+        {
             definitionsFile << line;
         }
 
         ofstream mainScore(folder / fs::path(outputFilename_));
-        mainScore << scoreBox(true);
+        mainScore << scoreBox();
 
         // Make parts for all instruments
         for (std::shared_ptr<Instrument>& ins : instruments_){
