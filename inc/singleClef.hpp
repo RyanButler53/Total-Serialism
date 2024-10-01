@@ -14,6 +14,7 @@
  * rows_: Rows for the instrument
  * displayName_: Name for the score
  * variableName_: Name for the variable in the score. Cannot have whitespace
+ * shortName_: Abbreviated name for the instrument
  * dynamicsRow_: Rows for the dynamics. 
  * clef_: Clef for staff header. Values should be 'treble', 'alto' or 'bass' 
  * octave_: Octave for lilypond to start in.  Often in the center of the instrument range
@@ -25,6 +26,7 @@ struct SingleClefData
     std::vector<Row> rows_;
     std::string displayName_;
     std::string variableName_;
+    std::string shortName_;
     std::vector<short> dynamicsRow_;
     std::string clef_;
     std::string octave_;
@@ -38,6 +40,7 @@ class SingleClefInstrument : public Instrument
     std::vector<Row> rows_;
     std::string displayName_;
     std::string variableName_;
+    std::string shortName_;
     std::vector<short> dynamicsRow_;
     std::string clef_;
     std::string octave_;
@@ -66,7 +69,7 @@ class SingleClefInstrument : public Instrument
      * 
      * @return std::string The score box for the instrument. 
      */
-    std::string scoreBox();
+    std::string instrumentScoreBox(bool specificPart);
     
     /**
      * @brief Get the Name object
@@ -81,12 +84,12 @@ class SingleClefInstrument : public Instrument
      */
     int getNum();
 
-    /**
-     * @brief Makes the individual part score box file
-     * 
-     * @param filename Filename to write to
-     */
-    void makePart(std::string filename);
+    // /**
+    //  * @brief Makes the individual part score box file
+    //  * 
+    //  * @param filename Filename to write to
+    //  */
+    // void makePart(std::string filename);
 };
 
 #endif

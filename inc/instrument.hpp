@@ -11,6 +11,8 @@
 #include <mutex>
 #include <random>
 #include <memory>
+#include <iostream>
+#include <fstream>
 
 // Structs to store Instrument Data (Passed from Instrument classes to Instrument Base)
 struct InstrumentData
@@ -101,7 +103,7 @@ public:
      *
      * @return std::string
      */
-    virtual std::string scoreBox() = 0;
+    virtual std::string instrumentScoreBox(bool specificPart) = 0;
 
     // Utility Functions
 
@@ -155,11 +157,21 @@ public:
     virtual int getNum() = 0;
 
     /**
-     * @brief Makesthe individual part
+     * @brief Gets the header information for each part
      * 
-     * @param filename Filename ot write to. 
+     * @return std::string String with the header information
      */
-    virtual void makePart(std::string filename) = 0;
+    std::string header(std::string title, std::string composer);
+    
+    /**
+     * @brief Makes the part for the instrument
+     * 
+     * @param filename filename to write to
+     */
+    void makePart(std::string filename, std::string title, std::string composer);
+
 };
+
+
 
 #endif // INSTRUMENT_HPP_INCLUDED

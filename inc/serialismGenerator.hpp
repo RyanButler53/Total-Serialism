@@ -25,11 +25,6 @@
  * instruments and complete the entire score. There is only one instance of a
  * SerialismGenerator created. 
  * 
- * Memory: The Serialism Generator class owns pointers to 
- * 3 analysis Matrices, all instruments and the instrument Factory. 
- * It also has the instances of the mutex and distributions shared between
- * all the instruments.  
- * 
  */
 class SerialismGenerator
 {
@@ -122,13 +117,20 @@ class SerialismGenerator
     std::string header() const;
 
     /**
+     * @brief Creates the code for the global and paper blocks
+     * This is needd to get the tempo on the correct line and adjust the paper size accordingly. 
+     * @return std::string global and paper box settings string. 
+     */
+    std::string definitionHeader() const;
+
+    /**
      * @brief Returns the "Score box" for the piece. 
      * The score box in lilypond is analogous to the main function in C++
      * This is the driver code that lets the staves get called and added correcly. 
      * 
      * @return std::string 
      */
-    std::string scoreBox(bool parts=false);
+    std::string scoreBox();
 
     // Utility Functions
 
