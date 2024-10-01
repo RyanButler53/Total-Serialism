@@ -1,4 +1,4 @@
-# gui
+# Main gui
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
@@ -12,10 +12,11 @@ from PyQt6.QtWidgets import (
     QComboBox,
     QWidget,
     QScrollArea,
+    QCheckBox,
     QDialogButtonBox,
     QDialog
 )
-from PyQt6 import QtGui
+from PyQt6 import QtGui # for getting application icon
 
 import subprocess
 import random
@@ -113,7 +114,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setFixedWidth(900)
+        self.setFixedWidth(800)
         self.setFixedHeight(400)
         self.piece_params()
         self.intialize_instruments()
@@ -131,7 +132,7 @@ class MainWindow(QMainWindow):
         """Function to call all the parts of the piece params side
         Initializes the QVbox that holds the entire piece params part"""
         self.param_layout = QVBoxLayout()
-        self.param_layout.setSpacing(20)
+        self.param_layout.setSpacing(15)
         self.param_title()
         self.param_labels()
         self.generate_button()
@@ -161,6 +162,11 @@ class MainWindow(QMainWindow):
 
         self.param_dict["Time Signature"].setPlaceholderText("4/4")
         self.param_dict["Number of Rows"].setPlaceholderText("12")
+
+        # Parts Checkbox
+        self.parts_box = QCheckBox(text="Export Parts")
+        labels.addWidget(self.parts_box)
+        data.addWidget(QLabel())
 
         # Add to full parameter layout
         self.param_label_pairs = QHBoxLayout()
@@ -349,6 +355,9 @@ class MainWindow(QMainWindow):
             count = 12
         text_strings.append(str(count))
 
+        parts = self.parts_box.isChecked() # boolean to add parts
+        
+
         # INSTRUMENTS
         if self.instrument_data == []:
             print("No Instruments")
@@ -384,7 +393,10 @@ class MainWindow(QMainWindow):
             title_filename += (word + "_")
         title_filename += title_split[-1]
 
-        subprocess.call(["sh", "score.sh", f"{title_filename}", "params.txt"])
+        args = ["sh", "score.sh", f"{title_filename}", "params.txt"]
+        if parts:
+            args += ["-p"]
+        subprocess.call(args)
 
     # Utility Functions
     def make_title(self,text) -> QLabel:

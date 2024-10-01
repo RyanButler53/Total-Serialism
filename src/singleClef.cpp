@@ -6,6 +6,7 @@ SingleClefInstrument::SingleClefInstrument(InstrumentData data, BoulezData boule
                     rows_{SCdata.rows_},
                     displayName_{SCdata.displayName_}, 
                     variableName_{SCdata.variableName_}, 
+                    shortName_{SCdata.shortName_},
                     dynamicsRow_{SCdata.dynamicsRow_},
                     clef_{SCdata.clef_}, 
                     octave_{SCdata.octave_},
@@ -48,10 +49,15 @@ std::string SingleClefInstrument::staffHeader() {
     return header;
 }
 
-std::string SingleClefInstrument::scoreBox() {
+std::string SingleClefInstrument::instrumentScoreBox(bool specificPart) {
     string num = to_string(num_);
     string scoreBox = "\n\t\\new Staff \\with {instrumentName = \"";
-    scoreBox += displayName_ +" " +  to_string(num_) + "\" } { \\" + variableName_+ " }";
+    scoreBox += displayName_ + " " + to_string(num_) + "\"";
+    if (!specificPart){ // If not in a specific part, add short instrument name
+        scoreBox += " shortInstrumentName = \"" + shortName_ + " " + to_string(num_) + "\"";
+    }
+    scoreBox += "} { \\" + variableName_ + " }";
+
     return scoreBox;
 }
 

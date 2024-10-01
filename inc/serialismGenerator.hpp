@@ -1,10 +1,10 @@
 #include <string>
 #include <vector>
 #include <random>
-#include <array>
 #include <mutex>
 #include <unordered_map>
 #include <tuple>
+#include <filesystem>
 #include <memory>
 
 #include "instrumentFactory.hpp"
@@ -25,11 +25,6 @@
  * instruments and complete the entire score. There is only one instance of a
  * SerialismGenerator created. 
  * 
- * Memory: The Serialism Generator class owns pointers to 
- * 3 analysis Matrices, all instruments and the instrument Factory. 
- * It also has the instances of the mutex and distributions shared between
- * all the instruments.  
- * 
  */
 class SerialismGenerator
 {
@@ -48,10 +43,10 @@ class SerialismGenerator
     
     // List of instruments that the random serialism generator can pick from. 
     std::vector<std::string> instrumentList_{
+        "flute",  "piccolo",  "oboe", "clarinet", "bassoon", 
+        "frenchhorn", "trumpet", "trombone", "tuba",
         "piano", "harp",
-        "violin", "viola", "cello", "bass", 
-        "oboe", "bassoon", "clarinet", "piccolo", "flute", 
-        "trombone", "trumpet", "frenchhorn", "tuba"
+        "violin", "viola", "cello", "bass"
     };
 
     // Mapping Row Types in strings to RowType Enums. 
@@ -94,6 +89,7 @@ class SerialismGenerator
     long seed_; // Randomness Seed. Refaults to (time(0))
     short tempo_; // Piece Tempo
     float boulezFactor_; // Std deviation of the boulez dist. 0 for gui designed pieces
+    bool parts_;
     
     // Parallelism
     unsigned int maxThreads_ = 8; // max threads for concurrent generation
@@ -119,6 +115,13 @@ class SerialismGenerator
      * @return std::string Piece header. 
      */
     std::string header() const;
+
+    /**
+     * @brief Creates the code for the global and paper blocks
+     * This is needd to get the tempo on the correct line and adjust the paper size accordingly. 
+     * @return std::string global and paper box settings string. 
+     */
+    std::string definitionHeader() const;
 
     /**
      * @brief Returns the "Score box" for the piece. 
@@ -157,10 +160,10 @@ class SerialismGenerator
     SerialismGenerator(std::string outputFileThat);
     
     // Given a seed and output filename, generate the fields randomly. 
-    SerialismGenerator(long seed, std::string outputFilename, unsigned int numThreads = 8);
+    SerialismGenerator(long seed, std::string outputFilename, unsigned int numThreads = 8, bool parts=false);
 
     // Given an input and output filenae, use the inputfile to read in fields. 
-    SerialismGenerator(std::string inputfile, std::string outputFilename);
+    SerialismGenerator(std::string inputfile, std::string outputFilename, bool parts=false);
     
     // Clean up Analysis Matrices, Instruments and Factory
     ~SerialismGenerator() = default;
