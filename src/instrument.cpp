@@ -209,7 +209,8 @@ void Instrument::makePart(std::string filename, std::string title, std::string c
     fileContents += "\\include \"definitions.ily\"\n\n";
     fileContents += header(title, composer);
     fileContents += "\\score {\n";
-    fileContents += instrumentScoreBox();
+    fileContents += instrumentScoreBox(true);
+    fileContents += "\t\\layout {\n\tindent = 2 \\cm\n\tshort-indent = 1\\cm\n\t}\n";
     fileContents += "}\n";
     std::ofstream out(filename);
     out << fileContents << endl;

@@ -303,17 +303,19 @@ std::string SerialismGenerator::definitionHeader() const{
 }
 
 std::string SerialismGenerator::scoreBox() {
-    std::string scoreBox = "\\version \"2.24.3\"\n";
+    std::string scoreBox;
     if (parts_){
-        scoreBox += "\\include \"definitions.ily\"\n\n";
         scoreBox += header();
+        scoreBox += "\\include \"definitions.ily\"\n\n";
     }
-    scoreBox += "\\score {\n\t<<";
+    scoreBox += "\\score {\n\t\\new StaffGroup\n\t<<";
 
     for (shared_ptr<Instrument>& instrument : instruments_){
-        scoreBox += instrument->instrumentScoreBox();
+        scoreBox += instrument->instrumentScoreBox(false);
     }
-    scoreBox += "\n\t>>\n}";
+    scoreBox += "\n\t>>\n";
+    scoreBox += "\t\\layout {\n\tindent = 2 \\cm\n\tshort-indent = 1\\cm\n\t}";
+    scoreBox += "\n}";
     return scoreBox;
 }
 

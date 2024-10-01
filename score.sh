@@ -29,10 +29,9 @@ else
             cd score-random_score_seed_$seed;
             lilypond -f pdf -l NONE *.ly
             cd ..
-            pwd;
             finalFile=score-random_score_seed_$seed/random_score_seed_$seed.pdf;
         else #No Arguments
-            build/TotalSerialism; # extract parts? 
+            build/TotalSerialism;
             lilypond -f pdf -l NONE random_score.ly; 
             finalFile=random_score.pdf
         fi

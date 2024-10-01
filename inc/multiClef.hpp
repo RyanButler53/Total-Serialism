@@ -21,7 +21,8 @@ struct MultiClefData{
     std::vector<Row> lhRows_;
     std::vector<short> dynamic_;
     std::string displayName_;
-    std::string variableName_; 
+    std::string variableName_;
+    std::string shortName_;
     int num_;
 };
 
@@ -37,9 +38,10 @@ class MultiClefInstrument : public Instrument
     std::vector<short> dynamics_;
     std::string variableName_;
     std::string displayName_;
+    std::string shortName_;
     int num_;
 
-  public:
+public:
     MultiClefInstrument(InstrumentData data, BoulezData boulez, MultiClefData MCdata, Range r);
     virtual ~MultiClefInstrument();
 
@@ -64,7 +66,7 @@ class MultiClefInstrument : public Instrument
      * 
      * @return std::string Score box code. 
      */
-    std::string instrumentScoreBox();
+    std::string instrumentScoreBox(bool specificPart);
 
         /**
      * @brief Get the Name object

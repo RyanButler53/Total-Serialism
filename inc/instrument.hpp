@@ -103,7 +103,7 @@ public:
      *
      * @return std::string
      */
-    virtual std::string instrumentScoreBox() = 0;
+    virtual std::string instrumentScoreBox(bool specificPart) = 0;
 
     // Utility Functions
 
@@ -156,13 +156,6 @@ public:
      */
     virtual int getNum() = 0;
 
-    // /**
-    //  * @brief Makesthe individual part
-    //  * 
-    //  * @param filename Filename ot write to. 
-    //  */
-    // virtual void makePart(std::string filename) = 0;
-    
     /**
      * @brief Gets the header information for each part
      * 
