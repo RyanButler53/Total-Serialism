@@ -1,4 +1,4 @@
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QThreadPool
 from PyQt6.QtWidgets import (
     QApplication,
     QLineEdit,
@@ -18,12 +18,14 @@ from PyQt6.QtWidgets import (
 import subprocess
 import random
 import utils
+from utils import Worker, GeneratedPiece
 import consts
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
+        self.threadpool = QThreadPool()
         self.setFixedWidth(800)
         self.setFixedHeight(400)
         self.piece_params()
@@ -323,8 +325,15 @@ class MainWindow(QMainWindow):
         args = ["sh", "score.sh", f"{title_filename}", "params.txt"]
         if parts:
             args += ["-p"]
+            msg = f"Score is in directory score-{title_filename} with filename {title_filename}"
+        else:
+            msg = f"Score is in current directory with filename {title_filename}"
+
         # Launch Thread from here
-        subprocess.call(args)
+        worker = Worker(args)
+        self.threadpool.start(worker)
+        dlg = GeneratedPiece(msg, self)
+        dlg.exec()
 
     # Utility Functions
     def make_title(self,text) -> QLabel:
