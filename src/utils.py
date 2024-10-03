@@ -1,5 +1,5 @@
 # Utility functions for gui
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QRunnable, pyqtSlot
 from PyQt6.QtWidgets import (
     QLabel,
     QVBoxLayout,
@@ -8,6 +8,7 @@ from PyQt6.QtWidgets import (
 )
 
 import random
+import subprocess
 
 class IncorrectInputDlg(QDialog):
     def __init__(self, msg, parent = None):
@@ -25,6 +26,34 @@ class IncorrectInputDlg(QDialog):
         self.layout.addWidget(self.msg)
         self.layout.addWidget(self.buttonBox, alignment=Qt.AlignmentFlag.AlignHCenter)
         self.setLayout(self.layout)
+
+class GeneratedPiece(QDialog):
+    def __init__(self, msg, parent = None):
+        super().__init__(parent)
+        self.setWindowTitle("Generated Piece")
+
+        QBtn = QDialogButtonBox.StandardButton.Ok 
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+
+        self.msg = QLabel(f"Generating Piece\n{msg}")
+
+        self.layout = QVBoxLayout()
+        self.layout.addWidget(self.msg)
+        self.layout.addWidget(self.buttonBox, alignment=Qt.AlignmentFlag.AlignHCenter)
+        self.setLayout(self.layout)
+
+
+class Worker(QRunnable):
+    
+    def __init__(self, args):
+        super(Worker, self).__init__()
+        self.args = args
+
+    @pyqtSlot()
+    def run(self):
+        subprocess.call(self.args)
+
 
 def toString(l):
     s = ""
