@@ -61,10 +61,15 @@ def clean12Nums(num_string:str, field_name:str):
             pass
         else:
             msg = f"Need exactly 12 unique numbers 0-11 in {field_name}"
-            print(msg)
-
+            msg += "\nClick OK to generate 12 random numbers"
+            result = launchDialog(msg)
+            if not result:
+                return []
     except ValueError as error:
-        print(f"Error converting numbers to string in {field_name}")
+        msg = f"Error converting numbers to string in {field_name}"
+        msg += "\nClick OK to generate 12 random numbers"
+        if not launchDialog(msg):
+            return
     nums = list(range(12))
     random.shuffle(nums)
     return nums
@@ -82,10 +87,16 @@ def cleanAnyNums(num_string:str, field_name:str, count:int):
         elif all(map(lambda x: 0 <= x < 12, nums)):
             return nums
         else:
-            print(f"Need exactly {count} numbers between 0 and 11 in {field_name}")
+            msg = f"Need exactly {count} numbers between 0 and 11 in {field_name}"
+            msg += f"\nClick ok to generate {count} random numbers\nbetween 0 and 11 in {field_name}"
+            if not launchDialog(msg):
+                return
 
     except ValueError as error:
-        print(f"Error converting numbers to string in {field_name}")
+        msg = f"Error converting numbers to string in {field_name}"
+        msg += f"\nClick ok to generate {count} random numbers\nbetween 0 and 11 in {field_name}"
+        if not launchDialog(msg):
+            return
 
     # If there are exactly 12 numbers then do the 0-11 perfect random
     if count == 12:
@@ -102,13 +113,23 @@ def cleanRows(row_str:str, field_name:str, count:int):
         if all([x in validStrings for x in split]):
             return split
         else:
-            print(f"At least one invalid character in {field_name}")
+            msg = f"At least one invalid character in {field_name}"
+            msg += f"\nClick ok to generate {count} row types for {field_name}"
+            if not launchDialog(msg):
+                return
     elif split == []:
         pass
     else:
-        print(f"Need exactly {count} row types in {field_name}")
+        msg = f"Need exactly {count} row types in {field_name}"
+        msg += f"\nClick ok to generate {count} row types for {field_name}"
+        if not launchDialog(msg):
+            return
 
     return [random.choice(validStrings) for _ in range(count)]
+
+def launchDialog(msg:str):
+    dlg = IncorrectInputDlg(msg)
+    return dlg.exec()
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -317,7 +338,10 @@ class MainWindow(QMainWindow):
         text_strings = []
         for field_name in PARAM_NAMES[:3]:
             text = self.param_dict[field_name].text()
-            text_strings.append(toString(clean12Nums(text, field_name)))
+            clean_nums = clean12Nums(text, field_name)
+            if clean_nums == []:
+                return
+            text_strings.append(toString(clean_nums))
 
         # handle tempo
         try:
@@ -329,7 +353,12 @@ class MainWindow(QMainWindow):
             else:
                 tempo = str(tempo)
         except ValueError as error:
-            tempo = '140'
+            if self.param_dict["Tempo"].text() == "": # left blank, set random
+                tempo = random.randrange(40, 240)
+            elif not launchDialog(f"{self.param_dict["Tempo"].text()} is not an invalid tempo. Press ok to set the tempo to 140"):
+                return 
+            else:
+                tempo = '140'
         text_strings.append(tempo)
 
         # time signature
@@ -357,10 +386,9 @@ class MainWindow(QMainWindow):
 
         parts = self.parts_box.isChecked() # boolean to add parts
         
-
         # INSTRUMENTS
         if self.instrument_data == []:
-            print("No Instruments")
+            launchDialog("No Instruments")
             return
         
         text_strings.append(len(self.instrument_data))
@@ -372,16 +400,27 @@ class MainWindow(QMainWindow):
                 for hand in ["Right", "Left"]:
                     row_nums = instrument_dict[f"{hand} Hand Row Numbers"].text()
                     row_types = instrument_dict[f"{hand} Hand Row Types"].text()
-                    text_strings.append(toString(cleanAnyNums(row_nums, name, count)))
-                    text_strings.append(toString(cleanRows(row_types,name, count)))
+                    row_nums_clean = cleanAnyNums(row_nums, name, count)
+                    row_types_clean = cleanRows(row_types,name, count)
+                    if row_nums_clean == [] or row_types_clean == []: # Handle error
+                        return 
+                    text_strings.append(toString(row_nums_clean))
+                    text_strings.append(toString(row_types_clean))
             else:
                 row_nums = instrument_dict["Row Numbers"].text()
                 row_types = instrument_dict["Row Types"].text()
-                text_strings.append(toString(cleanAnyNums(row_nums, name,count)))
-                text_strings.append(toString(cleanRows(row_types, name,count)))
+                row_nums_clean = cleanAnyNums(row_nums, f"{name}: Row Numbers", count)
+                row_types_clean = cleanRows(row_types,f"{name}: Row Types", count)
+                if row_nums_clean == [] or row_types_clean == []: # Handle error
+                    return 
+                text_strings.append(toString(row_nums_clean))
+                text_strings.append(toString(row_types_clean))
 
             dynamics_row = instrument_dict["Dynamics Row"].text()
-            text_strings.append(toString(cleanAnyNums(dynamics_row, "Dynamics Row", count)))
+            dynamics_row_clean = cleanAnyNums(dynamics_row, "Dynamics Row", count)
+            if dynamics_row_clean == []:
+                return 
+            text_strings.append(toString(dynamics_row_clean))
         
         with open("params.txt", 'w') as f:
             for line in text_strings:
@@ -396,6 +435,7 @@ class MainWindow(QMainWindow):
         args = ["sh", "score.sh", f"{title_filename}", "params.txt"]
         if parts:
             args += ["-p"]
+        # Launch Thread from here
         subprocess.call(args)
 
     # Utility Functions
@@ -410,15 +450,12 @@ class MainWindow(QMainWindow):
             return title
 
 class IncorrectInputDlg(QDialog):
-    def __init__(self, msg):
-        super().__init__()
+    def __init__(self, msg, parent = None):
+        super().__init__(parent)
         self.setWindowTitle("Invalid Input")
-        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
 
-        QBtn = (
-            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
-        )
-
+        QBtn = QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
+        # QBtn.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
         self.buttonBox = QDialogButtonBox(QBtn)
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
@@ -427,7 +464,7 @@ class IncorrectInputDlg(QDialog):
 
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.msg)
-        self.layout.addButtonBox()
+        self.layout.addWidget(self.buttonBox, alignment=Qt.AlignmentFlag.AlignHCenter)
         self.setLayout(self.layout)
 
 
