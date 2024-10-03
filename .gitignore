@@ -30,9 +30,7 @@
 *.exe
 *.out
 *.app
-analysisMatrix-test
-serialismGenerator-test
-totalSerialism
+__pycache__
 
 # Tests and Vscode:
 .vscode/
