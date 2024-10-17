@@ -60,7 +60,7 @@ protected:
 
     // Everything can access the pitch, articulation and dynamic mappings
     const std::vector<std::string> pitchMap_{"c", "cs", "d", "ef", "e", "f", "fs", "g", "af", "a", "bf", "b"};
-    const std::vector<std::string> articulationMap_{"->", "-^", "-_", "-!", "-.", "--", "->-.", "-^\\sfz", "", "->-!", "\\sfz", "-^-!"};
+    const std::vector<std::string> articulationMap_{"\\sfz", "-^\\sfz", "->", "-^", "-_", "-!", "-.", "--", "->-.",  "", "->-!" , "-^-!"};
     const std::vector<std::string> dynamicMap_{"\\ppppp", "\\pppp", "\\ppp", "\\pp", "\\p", "\\mp", "\\mf", "\\f", "\\ff", "\\fff", "\\ffff", "\\fffff"};
 
 public:
@@ -77,8 +77,7 @@ public:
      *
      * @param r The Row to convert
      * @param dynamic The dynamic index. -1 if no dynamic needed.
-     * @param ts Time signature.
-     * @param leftover The number of leftover 16ths. The leftover 16hs are used
+     * @param leftover The number of leftover 16ths. The leftover 16ths are used
      * in the next row
      * @return std::string Lilypond code representing a single row.
      */
@@ -108,11 +107,17 @@ public:
     // Utility Functions
 
     /**
-     * @brief Clears the Sfz off of the starting note
+     * @brief Function that formats a string in lilypond style for a given
+     * rhythm duration. Called only when no barline tie is needed and at the
+     * end of the piece to handle the remainder
      *
-     * @param str
+     * @param duration Note length required.
+     * @param pitch String of the pitch
+     * @param articulation Articulation (is "" if no articulation needed)
+     * @return std::string : Lilypond formatted string for the duration
      */
-    void clearSfz(std::string &str);
+    std::string fullDuration(short duration, std::string absPitch, std::string articulation);
+
 
     /**
      * @brief Function that formats a string in lilypond style for a given
@@ -124,7 +129,7 @@ public:
      * @param articulation Articulation (is "" if no articulation needed)
      * @return std::string : Lilypond formatted string for the duration
      */
-    std::string fullDuration(short duration, std::string absPitch, std::string articulation);
+    std::string fullDurationDynamic(short duration, std::string absPitch, size_t articulationInd, short dynamic);
 
     /**
      * @brief Clamps a note to be within the instruments range
@@ -171,7 +176,5 @@ public:
     void makePart(std::string filename, std::string title, std::string composer);
 
 };
-
-
 
 #endif // INSTRUMENT_HPP_INCLUDED

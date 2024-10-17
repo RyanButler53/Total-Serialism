@@ -50,9 +50,7 @@ void AnalysisMatrix::printMatrix(ostream& os) const {
     for (size_t s : I0_){
         cout  << s << " ";
     }
-    cout << endl;
-
-    
+    cout << endl; 
 }
 
 void AnalysisMatrix::getPrimeRow(short num, vector<short>& row) const{

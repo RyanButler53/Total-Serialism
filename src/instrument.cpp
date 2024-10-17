@@ -34,26 +34,48 @@ string Instrument::rowToLilypond(Row r, short dynamic, short& leftoverDuration){
         string articulation = articulationMap_[articulations[note]];
         pitch += boulezJitter();
         pitch = clamp(pitch);
-        // "Curried" form of full duration since pitch and articulation are the same
-        auto fd = [this, &pitch, &articulation](short duration)
+        bool addDynamicCond = (note == 0) and (dynamic >= 0);
+        // "Curried" form of full duration functions. 
+        auto fd = [this, &pitch](short duration, std::string articulation = "" )
         {
             return fullDuration(duration, pitch, articulation);
         };
-        
+
+        auto fdDynamic = [this, &pitch, &dynamic, &articulations, &note](short duration)
+        {
+            return fullDurationDynamic(duration, pitch, articulations[note], dynamic);
+        };
+
         if (noteDuration < leftoverDuration)
         { // fit entire note in measure
-            lilypondCode += fd(noteDuration);
+
+            if (addDynamicCond){
+                lilypondCode += fdDynamic(noteDuration);
+            } else {
+                lilypondCode += fd(noteDuration, articulation);
+            }
             lilypondCode += " ";
             leftoverDuration -= noteDuration;
         }
         else if (noteDuration == leftoverDuration)
         { // End of bar case.
-            lilypondCode += fd(noteDuration);
+            
+            if (addDynamicCond){
+                lilypondCode += fdDynamic(noteDuration);
+            } else {
+                lilypondCode += fd(noteDuration, articulation);
+            }
+
             lilypondCode += " |\n";
             leftoverDuration = totalDuration;
         } else { // Split note into n bars case
             // Use up the rest of the duration in the current bar. 
-            lilypondCode += fd(leftoverDuration);
+            if (addDynamicCond){
+                lilypondCode += fdDynamic(leftoverDuration);
+            } else {
+                lilypondCode += fd(leftoverDuration, articulation);
+            }
+
             short remaining = noteDuration - leftoverDuration; // total - used
             lilypondCode += "~ |\n";
             // There is still more than a full bar of duration left.
@@ -72,23 +94,6 @@ string Instrument::rowToLilypond(Row r, short dynamic, short& leftoverDuration){
                 leftoverDuration = totalDuration - remaining;
             }
         } 
-
-        // Add Dynamic if necessary
-        if (note == 0 and dynamic >= 0){
-            clearSfz(lilypondCode);
-            size_t codelen = lilypondCode.length();
-            if (lilypondCode.substr(codelen - 3) == " |\n")
-            {
-                lilypondCode.erase(codelen - 3);
-                lilypondCode += dynamicMap_[dynamic] + " |\n";
-            } else if (lilypondCode.substr(codelen - 1) == "\n"){
-                lilypondCode.erase(codelen- 2);
-                lilypondCode += dynamicMap_[dynamic] + " |\n";
-
-            } else {
-                lilypondCode += dynamicMap_[dynamic] + " ";
-            }
-        }
     }
 
     lilypondCode += "\n";
@@ -138,13 +143,31 @@ string Instrument::fullDuration(short duration, string absPitch, string articula
     return "";
 }
 
-void Instrument::clearSfz(std::string& str) {
-    const string from = "\\sfz";
-    const string to = "";
-    size_t start_pos = 0;
-    while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
-        str.replace(start_pos, from.length(), to);
-        start_pos += to.length(); // Move past the last replaced substring
+string Instrument::fullDurationDynamic(short duration, string absPitch, size_t articulationInd, short dynamic){
+    std::string dynamicStr = dynamicMap_[dynamic];
+    std::string articulation;
+    // If this is a SFZ dynamic, skip it. 
+    if (articulationInd < 2) {
+        articulation = "";
+    } else{
+        articulation = articulationMap_[articulationInd];
+    }
+
+    // 5, 9, 10, 11 and 13 are special cases where applying 
+    // to the end of first note doesn't correctly format dynamics 
+    switch(duration){
+        case 5:
+            return absPitch + "4" + dynamicStr + articulation + "~" + absPitch + "16";
+        case 9:
+            return absPitch + "2" + dynamicStr + articulation + "~" + absPitch + "16";
+        case 10:
+            return absPitch + "2" + dynamicStr + articulation + "~" + absPitch + "8";
+        case 11:
+            return absPitch + "2" + dynamicStr + articulation + "~" + absPitch + "8.";   
+        case 13:
+            return absPitch + "2." + dynamicStr + articulation + "~" + absPitch + "16";
+        default:
+            return fullDuration(duration, absPitch, articulation) + dynamicStr;
     }
 }
 
@@ -166,7 +189,9 @@ std::string Instrument::clamp(std::string n){
 }
 
 std::string Instrument::boulezJitter(){
-
+    if (boulezDist_.stddev() == 0){
+        return "";
+    }
     std::unique_lock lock{boulezMutex_};
     double value = boulezDist_(rng_);
     lock.unlock(); // unlocking here is faster than scoped_lock
