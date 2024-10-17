@@ -35,7 +35,7 @@ string Instrument::rowToLilypond(Row r, short dynamic, short& leftoverDuration){
         pitch += boulezJitter();
         pitch = clamp(pitch);
         bool addDynamicCond = (note == 0) and (dynamic >= 0);
-        // "Curried" form of full duration since pitch and articulation is the same. 
+        // "Curried" form of full duration functions. 
         auto fd = [this, &pitch](short duration, std::string articulation = "" )
         {
             return fullDuration(duration, pitch, articulation);
@@ -46,8 +46,6 @@ string Instrument::rowToLilypond(Row r, short dynamic, short& leftoverDuration){
             return fullDurationDynamic(duration, pitch, articulations[note], dynamic);
         };
 
-        // Curry dynamic adding function
-
         if (noteDuration < leftoverDuration)
         { // fit entire note in measure
 
@@ -56,13 +54,8 @@ string Instrument::rowToLilypond(Row r, short dynamic, short& leftoverDuration){
             } else {
                 lilypondCode += fd(noteDuration, articulation);
             }
-            // if (!dynamicAdded){
-            //     addDynamic(lilypondCode, dynamic, note);
-            //     dynamicAdded = true;
-            // }
             lilypondCode += " ";
             leftoverDuration -= noteDuration;
-
         }
         else if (noteDuration == leftoverDuration)
         { // End of bar case.
@@ -105,23 +98,6 @@ string Instrument::rowToLilypond(Row r, short dynamic, short& leftoverDuration){
 
     lilypondCode += "\n";
     return lilypondCode;
-}
-
-void Instrument::addDynamic(std::string& lilypondCode, short dynamic, size_t note){
-        // Add Dynamic if necessary
-        if (note == 0 and dynamic >= 0){
-            clearSfz(lilypondCode);
-            size_t codelen = lilypondCode.length();
-            if (codelen >= 3 and lilypondCode.substr(codelen - 3) == " |\n") {
-                lilypondCode.erase(codelen - 3);
-                lilypondCode += dynamicMap_[dynamic] + " |\n";
-            } else if (lilypondCode.substr(codelen - 1) == "\n"){
-                lilypondCode.erase(codelen- 2);
-                lilypondCode += dynamicMap_[dynamic] + " |\n";
-            } else {
-                lilypondCode += dynamicMap_[dynamic] + " ";
-            }
-        }
 }
 
 string Instrument::fullDuration(short duration, string absPitch, string articulation){
@@ -192,16 +168,6 @@ string Instrument::fullDurationDynamic(short duration, string absPitch, size_t a
             return absPitch + "2." + dynamicStr + articulation + "~" + absPitch + "16";
         default:
             return fullDuration(duration, absPitch, articulation) + dynamicStr;
-    }
-}
-
-void Instrument::clearSfz(std::string& str) {
-    const string from = "\\sfz";
-    const string to = "";
-    size_t start_pos = 0;
-    while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
-        str.replace(start_pos, from.length(), to);
-        start_pos += to.length(); // Move past the last replaced substring
     }
 }
 

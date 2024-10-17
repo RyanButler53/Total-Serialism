@@ -107,22 +107,6 @@ public:
     // Utility Functions
 
     /**
-     * @brief Clears the Sfz off of the starting note
-     *
-     * @param str
-     */
-    void clearSfz(std::string &str);
-
-    /**
-     * @brief Adds a dynamic if necessary
-     * 
-     * @param lilypondCode Lilypond code to modify. 
-     * @param dynamic Dynamic index to add
-     * @param note Index of the note. Only add if note == 0
-     */
-    void addDynamic(std::string &lilypondCode, short dynamic, size_t note);
-
-    /**
      * @brief Function that formats a string in lilypond style for a given
      * rhythm duration. Called only when no barline tie is needed and at the
      * end of the piece to handle the remainder
@@ -192,7 +176,5 @@ public:
     void makePart(std::string filename, std::string title, std::string composer);
 
 };
-
-
 
 #endif // INSTRUMENT_HPP_INCLUDED
