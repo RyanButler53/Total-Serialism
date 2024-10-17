@@ -34,10 +34,10 @@ std::vector<std::string> SingleClefInstrument::generateCode(){
 
     // Leftover 16ths in the piece
     if (leftover16ths == ts_.num16ths()){
-        lilypondCode.push_back("\n \\fine}\n");
+        lilypondCode.push_back("\\fine}\n");
     } else {
         string remainingPiece = fullDuration(leftover16ths, "r", "");
-        lilypondCode.back().append(remainingPiece + "|\n \\fine}\n");
+        lilypondCode.back().append(remainingPiece + "\\fine}\n");
     }
     return lilypondCode;
 }

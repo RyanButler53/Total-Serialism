@@ -69,7 +69,7 @@ class MainWindow(QMainWindow):
             self.param_dict[label_name] = entry_box
 
         # Set placehold text when appropriate
-        for param_name in consts.PARAM_NAMES[:4]:
+        for param_name in consts.PARAM_NAMES[:3]:
             self.param_dict[param_name].setPlaceholderText("0 1 2 3 4 5 6 7 8 9 10 11")
 
         self.param_dict["Time Signature"].setPlaceholderText("4/4")
@@ -252,8 +252,8 @@ class MainWindow(QMainWindow):
         text_strings.append(tempo)
 
         # time signature
-        if self.param_dict["Time Signature"] in consts.TIME_SIGNATURES:
-            text_strings.append(self.param_dict["Time Signature"] )
+        if self.param_dict["Time Signature"].text() in consts.TIME_SIGNATURES:
+            text_strings.append(self.param_dict["Time Signature"].text() )
         else:
             text_strings.append("4/4")
                     

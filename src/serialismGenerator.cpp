@@ -11,6 +11,7 @@ namespace fs = std::filesystem;
 
 SerialismGenerator::SerialismGenerator(string outputFilename): 
     outputFilename_{outputFilename},
+    numRows_{12},
     seed_{time(0)},
     boulezFactor_{0.5},
     parts_{false}
@@ -197,7 +198,7 @@ void SerialismGenerator::initializeRandom(){
     size_t dynamic_i = 0;
     for (auto &[name, num] : instrumentNames_)
     {
-        if (name == "piano" or name == "harp") { // Or Harp
+        if (name == "piano" or name == "harp") {
             std::vector<Row> rh = instrumentRows_[row_i];
             std::vector<Row> lh = instrumentRows_[row_i + 1];
             std::vector<short> dynamics = dynamicRows[dynamic_i];

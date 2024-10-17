@@ -24,7 +24,6 @@ vector<string> MultiClefInstrument::generateCode(){
     std::vector<string> leftCode;
     short leftover16ths = ts_.num16ths();
     string lilypondRow;
-    // Generate Right then left in series (later in parallel)
 
     string staffHeaders = staffHeader();
     size_t pos = staffHeaders.find("|");
@@ -40,7 +39,7 @@ vector<string> MultiClefInstrument::generateCode(){
     }
 
     if (leftover16ths == ts_.num16ths()){ // no leftover 16ths.
-        rightCode.push_back("\n \\fine}\n");
+        rightCode.push_back("\\fine}\n");
     } else {
         string remainingPiece = fullDuration(leftover16ths, "r", "");
         rightCode.back().append(remainingPiece + "|\n \\fine}\n");

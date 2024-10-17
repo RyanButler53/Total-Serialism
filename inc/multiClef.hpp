@@ -81,12 +81,6 @@ public:
      */
     int getNum();
 
-    // /**
-    //  * @brief Makes the individual part
-    //  *
-    //  * @param filename Filename to write to;
-    //  */
-    // void makePart(std::string filename);
 };
 
 #endif // MULTI_CLEF_HPP_INCLUDED
