@@ -7,7 +7,7 @@
 using namespace std;
 
 int main(int argc, char** argv){
-    // SerialismGenerator* generator;
+
     std::unique_ptr<SerialismGenerator> generator;
     string outputFilename = "";
     string inputFilename = "";

@@ -6,7 +6,7 @@
 #include "multiClef.hpp"
 #include "analysisMatrix.hpp"
 
-// Definitions for the two multiclf instruments: Piano and Harp. 
+// Definitions for the two multiclef instruments: Piano and Harp. 
 
 class Piano : public MultiClefInstrument  {
   public:

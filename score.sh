@@ -21,7 +21,7 @@ else
             lilypond -f pdf -l NONE *.ly
             cd ..
             finalFile=score-$out_filename/$out_filename.pdf
-            # rm params.txt 2> /dev/null
+            rm params.txt 2> /dev/null
         elif [ $numArgs == 1 ];
         then
             seed=$1

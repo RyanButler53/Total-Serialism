@@ -28,7 +28,6 @@ public:
 
     void push(T new_value);
     
-
 };
 
 #include "threadsafeQueue-private.hpp"
