@@ -6,6 +6,7 @@ SingleClefInstrument::SingleClefInstrument(InstrumentData data, BoulezData boule
                     rows_{SCdata.rows_},
                     displayName_{SCdata.displayName_}, 
                     variableName_{SCdata.variableName_}, 
+                    shortName_{SCdata.shortName_},
                     dynamicsRow_{SCdata.dynamicsRow_},
                     clef_{SCdata.clef_}, 
                     octave_{SCdata.octave_},
@@ -33,10 +34,10 @@ std::vector<std::string> SingleClefInstrument::generateCode(){
 
     // Leftover 16ths in the piece
     if (leftover16ths == ts_.num16ths()){
-        lilypondCode.push_back("\n \\fine}\n");
+        lilypondCode.push_back("\\fine}\n");
     } else {
         string remainingPiece = fullDuration(leftover16ths, "r", "");
-        lilypondCode.back().append(remainingPiece + "|\n \\fine}\n");
+        lilypondCode.back().append(remainingPiece + "\\fine}\n");
     }
     return lilypondCode;
 }
@@ -48,10 +49,15 @@ std::string SingleClefInstrument::staffHeader() {
     return header;
 }
 
-std::string SingleClefInstrument::scoreBox() {
+std::string SingleClefInstrument::instrumentScoreBox(bool specificPart) {
     string num = to_string(num_);
     string scoreBox = "\n\t\\new Staff \\with {instrumentName = \"";
-    scoreBox += displayName_ +" " +  to_string(num_) + "\" } { \\" + variableName_+ " }";
+    scoreBox += displayName_ + " " + to_string(num_) + "\"";
+    if (!specificPart){ // If not in a specific part, add short instrument name
+        scoreBox += " shortInstrumentName = \"" + shortName_ + " " + to_string(num_) + "\"";
+    }
+    scoreBox += "} { \\" + variableName_ + " }";
+
     return scoreBox;
 }
 

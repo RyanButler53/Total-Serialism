@@ -30,16 +30,15 @@
 *.exe
 *.out
 *.app
-analysisMatrix-test
-serialismGenerator-test
-totalSerialism
+__pycache__
 
 # Tests and Vscode:
 .vscode/
 build/
 fuzz/
 
-# Lilypond output files and pdfs
+# Lilypond output files, lilypond include files and pdfs
 *.ly
+*.ily
 *.pdf
 params.txt

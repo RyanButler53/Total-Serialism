@@ -1,35 +1,55 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <thread>
-#include <regex>
+#include <getopt.h>
 #include "serialismGenerator.hpp"
 
 using namespace std;
 
 int main(int argc, char** argv){
-    SerialismGenerator* generator;
+
+    std::unique_ptr<SerialismGenerator> generator;
     string outputFilename = "";
     string inputFilename = "";
     size_t seed = 0;
+    bool parts = false;
 
+    while (true){
+        switch (getopt(argc, argv,"i:o:s:p")){
+            case -1:
+                break;
+            case 'i':
+                inputFilename = optarg;
+                continue;
+            case 'o':
+                outputFilename = optarg;
+                continue;
+            case 's':
+                seed = atoi(optarg);
+                continue;
+            case 'p':
+                parts = true;
+            default:
+                break;
+        }
+        break;
+    }
+
+    // Deduce the constructor
     if (argc == 1) { // no args given
         outputFilename = "random_score.ly";
-        generator = new SerialismGenerator(outputFilename);
-
-    } else if (argc == 2) { // gave seed
-        seed = stoull(argv[1]);
+        generator = make_unique<SerialismGenerator>(outputFilename);
+    } else if (seed) {
         outputFilename = "random_score_seed_" + to_string(seed) + ".ly";
-        generator = new SerialismGenerator(seed, outputFilename);
-
-    } else if (argc == 3) { // gave input and output file
-        outputFilename = argv[1];
-        inputFilename = argv[2];        
-        generator = new SerialismGenerator(inputFilename, outputFilename);
+        generator = make_unique<SerialismGenerator>(seed, outputFilename, 8, parts);
+    } else if ((inputFilename!= "") or (outputFilename!= "")){
+        generator = make_unique<SerialismGenerator>(inputFilename, outputFilename, parts);
+    } else {
+        cerr << "Incorrect Arguments: Input filename and Output filename must be specified" << endl;
+        exit(1);
     }
 
     generator->run();
-    delete generator;
 
     return 0;
 }

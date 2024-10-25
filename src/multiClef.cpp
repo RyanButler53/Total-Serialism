@@ -8,6 +8,7 @@ MultiClefInstrument::MultiClefInstrument(InstrumentData data, BoulezData boulez,
                     dynamics_{MCdata.dynamic_},
                     displayName_{MCdata.displayName_},
                     variableName_{MCdata.variableName_},
+                    shortName_{MCdata.shortName_},
                     num_{MCdata.num_}{
                         for (size_t i = 0; i < num_ - 1; ++i){
                             variableName_ += "X";
@@ -23,7 +24,6 @@ vector<string> MultiClefInstrument::generateCode(){
     std::vector<string> leftCode;
     short leftover16ths = ts_.num16ths();
     string lilypondRow;
-    // Generate Right then left in series (later in parallel)
 
     string staffHeaders = staffHeader();
     size_t pos = staffHeaders.find("|");
@@ -39,7 +39,7 @@ vector<string> MultiClefInstrument::generateCode(){
     }
 
     if (leftover16ths == ts_.num16ths()){ // no leftover 16ths.
-        rightCode.push_back("\n \\fine}\n");
+        rightCode.push_back("\\fine}\n");
     } else {
         string remainingPiece = fullDuration(leftover16ths, "r", "");
         rightCode.back().append(remainingPiece + "|\n \\fine}\n");
@@ -77,9 +77,14 @@ string MultiClefInstrument::staffHeader(){
 }
 
 // Variable names will look like rightXX_hand 
-string MultiClefInstrument::scoreBox() {
+string MultiClefInstrument::instrumentScoreBox(bool specificPart) {
     string scoreBox = "\t\\new PianoStaff \\with {instrumentName = \"";
-    scoreBox += displayName_ +" "+ to_string(num_) + "\"} {\n\t\t<<";
+    scoreBox += displayName_ + " " + to_string(num_) + "\"";
+    if (!specificPart){
+        scoreBox += " shortInstrumentName = \"";
+        scoreBox += shortName_ + " " + to_string(num_) + "\"";     
+    }
+    scoreBox += "} {\n\t\t<<";
     scoreBox += "\n\t\t\\new Staff {\\" + variableName_ + "_right"+ " }";
     scoreBox += "\n\t\t\\new Staff {\\" + variableName_ + "_left" + " }";
     scoreBox += " \n\t\t>>\n\t}\n";
