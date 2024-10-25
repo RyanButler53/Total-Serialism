@@ -11,8 +11,6 @@ from PyQt6.QtWidgets import (
     QWidget,
     QScrollArea,
     QCheckBox,
-    QDialogButtonBox,
-    QDialog
 )
 
 import subprocess

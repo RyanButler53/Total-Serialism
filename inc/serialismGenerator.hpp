@@ -69,7 +69,7 @@ class SerialismGenerator
     std::string composer_;
     std::string outputFilename_;
 
-    // Matrices (dynamically managed)
+    // Matrices
     std::shared_ptr<AnalysisMatrix> pitches_;
     std::shared_ptr<AnalysisMatrix> rhythms_;
     std::shared_ptr<AnalysisMatrix> articulations_;
