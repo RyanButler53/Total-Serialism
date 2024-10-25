@@ -108,16 +108,26 @@ class MainWindow(QMainWindow):
 
     def ins_add_remove_button(self):
         """Adds buttons to add or remove instruments"""
-        button_layout = QHBoxLayout()
+        button_layout = QVBoxLayout()
+        add_buttons = QHBoxLayout()
+        remove_buttons = QHBoxLayout()
 
         # Add and link buttons
         self.single_clef_button = QPushButton("Add Single Clef Instrument")
         self.single_clef_button.clicked.connect(self.add_single_clef)
         self.multi_clef_button = QPushButton("Add Multi Clef Instrument")
         self.multi_clef_button.clicked.connect(self.add_multi_clef)
+        self.clear_instruments_button = QPushButton("Clear All Instruments")
+        self.clear_instruments_button.clicked.connect(self.clear_instruments)
+        self.remove_one_button = QPushButton("Remove Last Instrument")
+        self.remove_one_button.clicked.connect(self.remove_last)
 
-        button_layout.addWidget(self.single_clef_button)
-        button_layout.addWidget(self.multi_clef_button)
+        add_buttons.addWidget(self.single_clef_button)
+        add_buttons.addWidget(self.multi_clef_button)
+        remove_buttons.addWidget(self.clear_instruments_button)
+        remove_buttons.addWidget(self.remove_one_button)
+        button_layout.addLayout(add_buttons)
+        button_layout.addLayout(remove_buttons)
 
         self.instruments_layout.addLayout(button_layout)
         
@@ -125,13 +135,16 @@ class MainWindow(QMainWindow):
         """Creates a scroll area that has one instrument data box. """
         self.instrument_scroll = QScrollArea() # Actually do the scrolling
         self.instrument_widget = QWidget() # auxiliary widget to scroll on 
-        # QVbox laout with all instruments
+        # QVbox layout with all instruments
         self.instruments = QVBoxLayout() 
         self.instruments.setSpacing(30)
+
        
         # Instrument Data holds a list of dictionaries where each 
         # dict has the field mapping to a QLineEdit box with the data
         self.instrument_data = [] 
+        self.instrument_widgets = [] # save widgets for deletion
+
 
         # Adjust Scroll Settings
         self.instrument_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
@@ -180,8 +193,13 @@ class MainWindow(QMainWindow):
         instrument_layout.addLayout(labels)
         instrument_layout.addLayout(data)
 
+        # Make main instrument WIDGET
+        instrument_widget = QWidget()
+        instrument_widget.setLayout(instrument_layout)
+        self.instrument_widgets.append(instrument_widget)
+
         self.instrument_data.append(instrument_dict)
-        self.instruments.addLayout(instrument_layout)
+        self.instruments.addWidget(instrument_widget)
 
     def add_multi_clef(self):
         instrument_layout = QHBoxLayout()
@@ -218,8 +236,27 @@ class MainWindow(QMainWindow):
         instrument_layout.addLayout(labels)
         instrument_layout.addLayout(data)
 
+        # Make main instrument WIDGET and save it for deletion
+        instrument_widget = QWidget()
+        instrument_widget.setLayout(instrument_layout)
+        self.instrument_widgets.append(instrument_widget)
+
         self.instrument_data.append(instrument_dict)
-        self.instruments.addLayout(instrument_layout)
+        self.instruments.addWidget(instrument_widget)
+
+    def clear_instruments(self):
+        if len(self.instrument_widgets) == 0:
+            return 
+        else:
+            for ins in reversed(self.instrument_widgets):
+                ins.deleteLater()
+            self.instrument_data = []
+            self.instrument_widgets = []
+
+    def remove_last(self):
+        if len(self.instrument_widgets) != 0:
+            self.instrument_data.pop()
+            self.instrument_widgets.pop().deleteLater()
 
     def generate(self):
         """
