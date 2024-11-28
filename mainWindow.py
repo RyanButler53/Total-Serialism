@@ -15,9 +15,12 @@ from PyQt6.QtWidgets import (
 
 import subprocess
 import random
-import utils
+import utils as utils
 from utils import Worker, GeneratedPiece
-import consts
+import consts as consts
+import os
+
+basedir = os.path.dirname(__file__)
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -310,7 +313,13 @@ class MainWindow(QMainWindow):
         text_strings.append(str(count))
 
         parts = self.parts_box.isChecked() # boolean to add parts
-        
+        # Check here
+        output_path = utils.fileDialog()
+        if not output_path: # if no path selected then don't generate. 
+            return
+
+        text_strings.append(output_path)
+
         # INSTRUMENTS
         if self.instrument_data == []:
             utils.launchDialog("No Instruments")
@@ -346,24 +355,25 @@ class MainWindow(QMainWindow):
             if dynamics_row_clean == []:
                 return 
             text_strings.append(utils.toString(dynamics_row_clean))
-        
-        with open("params.txt", 'w') as f:
+
+        with open(os.path.join(basedir,"params.txt"), 'w+') as f:
             for line in text_strings:
                 print(line, file=f)
-
+        
+        # return
         title_filename = ""
         title_split = title.split()
         for word in title_split[:-1]: 
             title_filename += (word + "_")
         title_filename += title_split[-1]
 
-        args = ["sh", "score.sh", f"{title_filename}", "params.txt"]
+        # Run the App Specific score script
+        args = ["sh", "appScore.sh", f"{title_filename}", basedir, output_path ]
         if parts:
             args += ["-p"]
-            msg = f"Score is in directory score-{title_filename} with filename {title_filename}"
+            msg = f"Score is in directory {output_path}/score-{title_filename} with filename {title_filename}"
         else:
-            msg = f"Score is in current directory with filename {title_filename}"
-
+            msg = f"Score is {output_path} \n With filename {title_filename}"
         # Launch Thread from here
         worker = Worker(args)
         self.threadpool.start(worker)

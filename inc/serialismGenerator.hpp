@@ -68,6 +68,7 @@ class SerialismGenerator
     std::string title_;
     std::string composer_;
     std::string outputFilename_;
+    std::string outputPath_{"."};
 
     // Matrices
     std::shared_ptr<AnalysisMatrix> pitches_;
@@ -162,10 +163,10 @@ class SerialismGenerator
     // Given a seed and output filename, generate the fields randomly. 
     SerialismGenerator(long seed, std::string outputFilename, unsigned int numThreads = 8, bool parts=false);
 
-    // Given an input and output filenae, use the inputfile to read in fields. 
+    // Given an input and output filename, use the inputfile to read in fields. 
     SerialismGenerator(std::string inputfile, std::string outputFilename, bool parts=false);
     
-    // Clean up Analysis Matrices, Instruments and Factory
+    // No memory to clean up
     ~SerialismGenerator() = default;
 
     /**

@@ -55,7 +55,7 @@ SerialismGenerator::SerialismGenerator(string inputfile, string outputFilename, 
     rhythms_ = make_shared<AnalysisMatrix>(sequences[1]);
     articulations_ = make_shared<AnalysisMatrix>(sequences[2]);
 
-    // Read in tempo, time sig, title, composer
+    // Read in tempo, time sig, title, composer, output filename and path
     string tempo_str;
     string ts_str;
     string numRows_str;
@@ -67,6 +67,7 @@ SerialismGenerator::SerialismGenerator(string inputfile, string outputFilename, 
     getline(input, composer_);
     getline(input, numRows_str);
     numRows_ = stoi(numRows_str);
+    getline(input, outputPath_);
 
     // Initialize Factory
     boulezDist_= std::normal_distribution<double>(0, 0);
@@ -329,15 +330,16 @@ void SerialismGenerator::run(){
 
     if (!parts_){
         lilypondCode.push_back(scoreBox());
-        ofstream outputFile{outputFilename_};
+        fs::path outPath = fs::path(outputPath_) / fs::path(outputFilename_);
+        ofstream outputFile{outPath};
         for (auto& line : lilypondCode){
             outputFile << line;
         }
     } else {
         // Clear out if it exists
         std::string outputFolder = "score-" + outputFilename_;
-        fs::path path(outputFolder);
-        fs::path folder = path.stem();
+        fs::path path = fs::path(outputPath_) / fs::path(outputFolder);
+        fs::path folder = fs::path(outputPath_) / path.stem();
         if (fs::exists(folder)) {
             fs::remove_all(folder);
         }

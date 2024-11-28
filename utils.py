@@ -4,7 +4,8 @@ from PyQt6.QtWidgets import (
     QLabel,
     QVBoxLayout,
     QDialogButtonBox,
-    QDialog
+    QDialog,
+    QFileDialog
 )
 
 import random
@@ -42,6 +43,17 @@ class GeneratedPiece(QDialog):
         self.layout.addWidget(self.msg)
         self.layout.addWidget(self.buttonBox, alignment=Qt.AlignmentFlag.AlignHCenter)
         self.setLayout(self.layout)
+
+def fileDialog():
+    dialog = QFileDialog()
+    dialog.setWindowTitle("Select Output Directory")
+    dialog.setDirectory("/")
+    dialog.setFileMode(QFileDialog.FileMode.Directory)
+    ok = dialog.exec()
+    if not ok:
+        return ""
+    return dialog.selectedFiles()[0]
+
 
 
 class Worker(QRunnable):
