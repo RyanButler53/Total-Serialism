@@ -281,9 +281,10 @@ class MainWindow(QMainWindow):
             else:
                 tempo = str(tempo)
         except ValueError as error:
-            if self.param_dict["Tempo"].text() == "": # left blank, set random
+            tempo_text = self.param_dict["Tempo"].text()
+            if tempo_text == "": # left blank, set random
                 tempo = random.randrange(40, 240)
-            elif not utils.launchDialog(f"{self.param_dict["Tempo"].text()} is not an invalid tempo. Press ok to set the tempo to 140"):
+            elif not utils.launchDialog(f"{tempo_text} is not an invalid tempo. Press ok to set the tempo to 140"):
                 return 
             else:
                 tempo = '140'
@@ -368,7 +369,8 @@ class MainWindow(QMainWindow):
         title_filename += title_split[-1]
 
         # Run the App Specific score script
-        args = ["sh", "appScore.sh", f"{title_filename}", basedir, output_path ]
+        score_path = os.path.join(basedir, "appScore.sh")
+        args = ["sh", score_path, f"{title_filename}", basedir, output_path ]
         if parts:
             args += ["-p"]
             msg = f"Score is in directory {output_path}/score-{title_filename} with filename {title_filename}"
