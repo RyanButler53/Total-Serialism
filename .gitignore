@@ -42,3 +42,7 @@ fuzz/
 *.ily
 *.pdf
 params.txt
+
+# Release Related Files
+dist/
+*.spec

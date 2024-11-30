@@ -55,7 +55,7 @@ SerialismGenerator::SerialismGenerator(string inputfile, string outputFilename, 
     rhythms_ = make_shared<AnalysisMatrix>(sequences[1]);
     articulations_ = make_shared<AnalysisMatrix>(sequences[2]);
 
-    // Read in tempo, time sig, title, composer
+    // Read in tempo, time sig, title, composer, output filename and path
     string tempo_str;
     string ts_str;
     string numRows_str;
@@ -67,6 +67,7 @@ SerialismGenerator::SerialismGenerator(string inputfile, string outputFilename, 
     getline(input, composer_);
     getline(input, numRows_str);
     numRows_ = stoi(numRows_str);
+    getline(input, outputPath_);
 
     // Initialize Factory
     boulezDist_= std::normal_distribution<double>(0, 0);
@@ -329,23 +330,33 @@ void SerialismGenerator::run(){
 
     if (!parts_){
         lilypondCode.push_back(scoreBox());
-        ofstream outputFile{outputFilename_};
+        fs::path outPath = fs::path(outputPath_) / fs::path(outputFilename_);
+        ofstream outputFile{outPath};
         for (auto& line : lilypondCode){
             outputFile << line;
         }
-    } else {
+        // Compilation Script
+        fs::path compilePath = fs::path(outputPath_) / fs::path("compile");
+        ofstream compileScript{compilePath};
+        compileScript << "cd " << outputPath_ << ";\n";
+        compileScript << "lilypond -f pdf -l NONE " << outputFilename_ << ";\n";
+        compileScript << "open " << fs::path(outputFilename_).stem() << ".pdf;\n";
+        compileScript << "rm " << outputFilename_ << " $0\n";
+    }
+    else
+    { // parts
         // Clear out if it exists
         std::string outputFolder = "score-" + outputFilename_;
-        fs::path path(outputFolder);
-        fs::path folder = path.stem();
-        if (fs::exists(folder)) {
+        fs::path path = fs::path(outputPath_) / fs::path(outputFolder);
+        fs::path folder = fs::path(outputPath_) / path.stem();
+        if (fs::exists(folder))
+        {
             fs::remove_all(folder);
         }
         fs::create_directory(folder);
         // First create instrument definitions file:
         ofstream definitionsFile(folder / fs::path("definitions.ily"));
-        // Needs to have the instrument definition header: 
-        // Needs version, language and global block.
+
         std::string defHeader = definitionHeader();
         definitionsFile << defHeader;
         for (auto &line : lilypondCode)
@@ -357,12 +368,22 @@ void SerialismGenerator::run(){
         mainScore << scoreBox();
 
         // Make parts for all instruments
-        for (std::shared_ptr<Instrument>& ins : instruments_){
+        for (std::shared_ptr<Instrument> &ins : instruments_)
+        {
             std::string filename = ins->getName();
             std::string num = to_string(ins->getNum());
             std::replace(filename.begin(), filename.end(), ' ', '_');
             filename += "_" + num + ".ly";
             ins->makePart(folder / fs::path(filename), title_, composer_);
         }
+
+        // Compilation Script
+        fs::path compilePath = folder / fs::path("compile");
+        std::cout << compilePath << std::endl;
+        ofstream compileScript{compilePath};
+        compileScript << "cd " << folder << ";\n";
+        compileScript << "lilypond -f pdf -l NONE *.ly;\n";
+        compileScript << "open " << fs::path(outputFilename_).stem() << ".pdf;\n";
+        compileScript << "rm *.ly definitions.ily $0\n";
     }
 }
