@@ -52,12 +52,13 @@ The number of tests defaults to 10, max parallel tests defaults to 4.
 
 ### Release: 
 - Release 1.0 code freeze: 10/24/24
+- Release 1.1 code freeze
 
 ### Roadmap
 - Grand Plans for 2.0
     - Export Midi files
     - Gui could be improved
-- No Tickets have been written (8/24/24)
+- No Tickets have been written (11/29/24)
 - Email requests to `keymckeyface@gmail.com`
 
 
