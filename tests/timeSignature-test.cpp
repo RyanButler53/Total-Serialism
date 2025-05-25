@@ -29,3 +29,8 @@ TEST(isValid, invalidSignatures ){
         ASSERT_FALSE(ts.isValid());
     }
 }
+
+int main(int argc, char** argv) {
+    testing::InitGoogleTest();
+    return RUN_ALL_TESTS();
+}
