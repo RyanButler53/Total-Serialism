@@ -8,17 +8,16 @@ FetchContent_MakeAvailable(googletest)
 include(GoogleTest)
 
 macro(TotalSerialismTest testname src)
-    message(${testname})
-    message(${src})
     add_executable(${testname} ${src})
-    target_link_libraries(${testname} gtest ${ARGN})
+    target_link_libraries(${testname} gtest serialism)
     gtest_discover_tests(${testname})
 endmacro()
 
+enable_testing()
 
-TotalSerialismTest(AnalysisMatrixTest analysisMatrix-test.cpp serialism)
-TotalSerialismTest(NoteTest note-test.cpp serialism)
-TotalSerialismTest(TimeSignatureTest timeSignature-test.cpp serialism)
+TotalSerialismTest(AnalysisMatrixTest analysisMatrix-test.cpp)
+TotalSerialismTest(NoteTest note-test.cpp)
+TotalSerialismTest(TimeSignatureTest timeSignature-test.cpp)
 
 add_executable(fuzz fuzzTest.cpp)
-target_link_libraries(fuzz serialism parallelism instrument)
+target_link_libraries(fuzz serialism parallelism)

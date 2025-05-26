@@ -347,7 +347,7 @@ class MainWindow(QMainWindow):
                 return 
             text_strings.append(utils.toString(dynamics_row_clean))
         
-        with open("params.txt", 'w') as f:
+        with open("mount/params.txt", 'w') as f:
             for line in text_strings:
                 print(line, file=f)
 
@@ -357,7 +357,9 @@ class MainWindow(QMainWindow):
             title_filename += (word + "_")
         title_filename += title_split[-1]
 
-        args = ["sh", "score.sh", f"{title_filename}", "params.txt"]
+        # args = ["sh", "score.sh", f"{title_filename}", "params.txt"]
+        args = ["docker", "run", "-it", "-v", "$(pwd)/scores:/TotalSerialism/scores", "-v", "$(pwd)/mount:/TotalSerialism/inputs", "totalserialism:latest"]
+        args += ["sh", "score.sh", f"{title_filename}", "mount/params.txt"]
         if parts:
             args += ["-p"]
             msg = f"Score is in directory score-{title_filename} with filename {title_filename}"
