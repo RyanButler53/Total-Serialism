@@ -1,11 +1,16 @@
 # Utility functions for gui
-from PyQt6.QtCore import Qt, QRunnable, pyqtSlot
-from PyQt6.QtWidgets import (
-    QLabel,
-    QVBoxLayout,
-    QDialogButtonBox,
-    QDialog
-)
+try:
+    from PyQt6.QtCore import Qt, QRunnable, pyqtSlot
+    from PyQt6.QtWidgets import (
+        QLabel,
+        QVBoxLayout,
+        QDialogButtonBox,
+        QDialog,
+        QFileDialog
+    )
+except ImportError as error:
+    print("Cannot find PyQt. Please use the Command Line tool")
+    exit(1)
 
 import random
 import subprocess
@@ -53,6 +58,16 @@ class Worker(QRunnable):
     @pyqtSlot()
     def run(self):
         subprocess.call(self.args)
+
+def fileDialog():
+    dialog = QFileDialog()
+    dialog.setWindowTitle("Select Output Directory")
+    dialog.setDirectory("/")
+    dialog.setFileMode(QFileDialog.FileMode.Directory)
+    ok = dialog.exec()
+    if not ok:
+        return ""
+    return dialog.selectedFiles()[0]
 
 
 def toString(l):

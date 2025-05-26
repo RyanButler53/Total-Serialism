@@ -3,16 +3,15 @@
 using namespace std;
 
 Instrument::Instrument(InstrumentData data, BoulezData boulez, Range r) : 
-pitches_{data.pitches_}, 
-rhythms_{data.rhythms_}, 
-articulations_{data.articulations_},
-ts_{data.ts_},
-rng_{boulez.rng_},
-boulezDist_{boulez.boulezDist_},
-boulezMutex_{boulez.boulezMutex_},
-low_{r.low_},
-high_{r.high_}
-{}
+                        pitches_{data.pitches_}, 
+                        rhythms_{data.rhythms_}, 
+                        articulations_{data.articulations_},
+                        ts_{data.ts_},
+                        rng_{boulez.rng_},
+                        boulezDist_{boulez.boulezDist_},
+                        boulezMutex_{boulez.boulezMutex_},
+                        low_{r.low_},
+                        high_{r.high_}{}
 
 string Instrument::rowToLilypond(Row r, short dynamic, short& leftoverDuration){
     // Get the piches, rhythms and articulations for the row. 
@@ -220,7 +219,6 @@ std::string Instrument::header(std::string title, std::string composer){
     std::string header = "\\header {\n\t title = \"";
     header += title;
     header += "\"\n\tsubtitile = \"Algorithmic Composition\"";
-    // header += subtitile;
     header += "\n\tinstrument = \"";
     header += getName() + " " + to_string(getNum()) + "\"";
     header += "\n\tcomposer = \"";
