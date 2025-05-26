@@ -15,12 +15,11 @@ then
     mv $finalFile scores
 else
     # Check Parts
-    if [ "${@: -1}" == "-p" ];
+    if [ "${@: -1}" == "p" ];
     then
-        ((numArgs--))
+        : $((--numArgs))
         if [ $numArgs == 2 ]; 
         then # specify input and output
-
             out_filename=$1;
             in_filename=$2;
             build/TotalSerialism -o $out_filename.ly -i $in_filename -p;
@@ -29,7 +28,7 @@ else
             cd ..
             finalFile=score-$out_filename/$out_filename.pdf
             mv score-$out_filename/ scores
-            # rm params.txt 2> /dev/null
+            rm $in_filename
         elif [ $numArgs == 1 ];
         then
             seed=$1
@@ -53,7 +52,7 @@ else
             build/TotalSerialism -o $out_filename.ly -i $in_filename;
             lilypond -f pdf -l NONE $out_filename.ly;
             finalFile=$(basename $out_filename).pdf
-            # rm params.txt 2> /dev/null
+            rm $in_filename 2> /dev/null
         elif [ $numArgs == 1 ];
         then
             seed=$1

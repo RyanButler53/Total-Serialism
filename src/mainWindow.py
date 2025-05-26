@@ -15,7 +15,7 @@ from PyQt6.QtWidgets import (
 
 import subprocess
 import random
-import utils
+import utils as utils
 from utils import Worker, GeneratedPiece
 import consts
 
@@ -311,6 +311,10 @@ class MainWindow(QMainWindow):
 
         parts = self.parts_box.isChecked() # boolean to add parts
         
+        output_path = utils.fileDialog()
+        if not output_path: # if no path selected then don't generate. 
+            return
+
         # INSTRUMENTS
         if self.instrument_data == []:
             utils.launchDialog("No Instruments")
@@ -346,8 +350,7 @@ class MainWindow(QMainWindow):
             if dynamics_row_clean == []:
                 return 
             text_strings.append(utils.toString(dynamics_row_clean))
-        
-        with open("mount/params.txt", 'w') as f:
+        with open(f"{output_path}/params.txt", 'w') as f:
             for line in text_strings:
                 print(line, file=f)
 
@@ -357,9 +360,8 @@ class MainWindow(QMainWindow):
             title_filename += (word + "_")
         title_filename += title_split[-1]
 
-        # args = ["sh", "score.sh", f"{title_filename}", "params.txt"]
-        args = ["docker", "run", "-it", "-v", "$(pwd)/scores:/TotalSerialism/scores", "-v", "$(pwd)/mount:/TotalSerialism/inputs", "totalserialism:latest"]
-        args += ["sh", "score.sh", f"{title_filename}", "mount/params.txt"]
+        args = ["docker", "run", "-it", "-v", f"{output_path}:/TotalSerialism/scores", "totalserialism:latest"]
+        args += ["sh", "score.sh", f"{title_filename}", f"/TotalSerialism/scores/params.txt"]
         if parts:
             args += ["-p"]
             msg = f"Score is in directory score-{title_filename} with filename {title_filename}"
