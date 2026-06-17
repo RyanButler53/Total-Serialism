@@ -1,6 +1,7 @@
 #ifndef NOTE_HPP_INCLUDED
 #define NOTE_HPP_INCLUDED
 #include <string>
+#include <cmath>
 
 /**
  * @brief Class to represent a note. 

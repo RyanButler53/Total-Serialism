@@ -35,7 +35,10 @@ SerialismGenerator::SerialismGenerator(string inputfile, string outputFilename, 
     // Set up rng, fileinput and row mapping
     rng_ = mt19937(seed_);
     fstream input = fstream(inputfile);
-
+    if (!input.is_open()){
+        std::cout << "INPUT NOT FOUND" << std::endl;
+        exit(1);
+    }
     // Pitch, Rhythm, Articulation
     vector<vector<short>> sequences{3};
     for (auto &seq : sequences)

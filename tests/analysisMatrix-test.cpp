@@ -45,3 +45,8 @@ TEST(AnalysisMatrixTest, getRow){
     ASSERT_EQ(row6_test, row6);
 
 }
+
+int main(int argc, char** argv) {
+    testing::InitGoogleTest();
+    return RUN_ALL_TESTS();
+}

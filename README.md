@@ -1,6 +1,6 @@
 # Total Serialism
 
-Generate Customizable Total Serial Style sheet music
+Total-Serialism is a containerized app to generate Customizable Total Serial Style sheet music. 
 
 ### Features
 - Generates Total Serial pdf sheet music in seconds
@@ -15,27 +15,29 @@ Generate Customizable Total Serial Style sheet music
     - Export Parts
 
 ### Requirements:
-  - Cmake
-  - C++ Compiler with C++ 20 support
   - Python3 with PyQt6 installed
-  - Lilypond Compiler (www.lilypond.org)
+  - Docker Desktop
 
 ### Build: 
 
-`sh setup.sh`
+First you will need to build the docker image for the C++/Lilypond part of the project:
+`docker build -t totalserialism:latest .`
 
 ### Run: 
 
-`python3 main.py` or `./run`
+`./run`
 
 If you don't have pyqt installed, you can specify a seed for randomness with 
 
 `sh score.sh <seed>`.
+`docker run -v <path to store scores>:/TotalSerialism/scores totalserialism:latest sh score.sh <seed>`
 
 Alternatively, you can specify an input file and output filename. The input file must be in the same 
 form as below or it will not work. Then run 
 
 `sh score.sh <output_filename> <input_filename>`
+`docker run -v <path to store scores>:/TotalSerialism/scores totalserialism:latest sh score.sh <title_filename> <input file>`
+
 
 ### Tests: 
 
@@ -52,18 +54,20 @@ The number of tests defaults to 10, max parallel tests defaults to 4.
 
 ### Release: 
 - Release 1.0 code freeze: 10/24/24
+- Release 1.1.0 code freeze: 5/26/25
 
 ### Roadmap
 - Grand Plans for 2.0
     - Export Midi files
     - Gui could be improved
-- No Tickets have been written (8/24/24)
+    - App should be able to be run from a pre-built and pushed docker image. 
+- No Tickets have been written (5/26/25)
 - Email requests to `keymckeyface@gmail.com`
 
 
 ### Notes:
 
-Input Files are in this format. It's typically easier to use the gui if you have pyqt installed. 
+Input Files are in this format. It's typically easier to use the gui if you have PyQt6 installed. 
 ```
 11 10 9 8 7 6 5 4 3 2 1 0 // Pitch P0 Row
 0 1 2 3 4 5 6 7 8 9 10 11 // Rhythm P0 Row
@@ -72,7 +76,7 @@ Input Files are in this format. It's typically easier to use the gui if you have
 9/8 // Time Signature
 Title // Title
 Composer Name // Composer
-14 // Number of rows in the piece, aka piece length
+14 // Number of rows in the piece, (piece length)
 3 // Number of instruments
 trombone // Instrument 1 name
 1 0 10 1 3 2 1 1 3 10 7 10 6 5 // Row Numbers
@@ -106,7 +110,7 @@ R RI P RI RI P R P R R R P RI R // Row Types
 - piano
 - harp
 
- Instruments must be spelled in this specific spelling in the instrument input files: 
+Instruments must be spelled in this specific spelling in the instrument input files
 
 #### Available Time Signatures: 
 - 4/4 (Default)

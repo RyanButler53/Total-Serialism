@@ -16,6 +16,7 @@ from PyQt6.QtWidgets import (
 import subprocess
 import random
 import utils as utils
+import utils as utils
 from utils import Worker, GeneratedPiece
 import consts as consts
 import os

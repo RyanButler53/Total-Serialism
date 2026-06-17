@@ -1,3 +1,3 @@
-build/analysisMatrix-test
-build/timeSignature-test
-build/note-test
+build/tests/analysisMatrix-test
+build/tests/timeSignature-test
+build/tests/note-test
