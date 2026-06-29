@@ -20,6 +20,7 @@ import utils as utils
 from utils import Worker, GeneratedPiece
 import consts as consts
 import os
+import py_total_serialism as pts
 
 basedir = os.path.dirname(__file__)
 
@@ -264,13 +265,13 @@ class MainWindow(QMainWindow):
         """
         Extract all the data and write it to a file called params.txt 
         Launches the subprocess to generate the music"""
-        text_strings = []
-        for field_name in consts.PARAM_NAMES[:3]:
+        inputs = pts.Inputs()
+        for field_name, attr in zip(consts.PARAM_NAMES[:3], ["pitches", "rhythms", "articulations"]):
             text = self.param_dict[field_name].text()
             clean_nums = utils.clean12Nums(text, field_name)
             if clean_nums == []:
                 return
-            text_strings.append(utils.toString(clean_nums))
+            setattr(inputs, attr, clean_nums)
 
         # handle tempo
         try:
@@ -289,96 +290,119 @@ class MainWindow(QMainWindow):
                 return 
             else:
                 tempo = '140'
-        text_strings.append(tempo)
+        inputs.tempo = tempo
 
         # time signature
         if self.param_dict["Time Signature"].text() in consts.TIME_SIGNATURES:
-            text_strings.append(self.param_dict["Time Signature"].text() )
+            inputs.timeSig = self.param_dict["Time Signature"].text() 
         else:
-            text_strings.append("4/4")
+            inputs.timeSig = "4/4"
                     
         title = self.param_dict["Title"].text()
         if title == "":
             title = "Total Serialist Piece"
-        text_strings.append(title)
+        inputs.title = title
 
         composer = self.param_dict["Composer"].text()
         if composer == "":
             composer = "The Algorithm"
-        text_strings.append(composer)
+        inputs.composer = composer
 
         count = self.param_dict["Number of Rows"].text()
         try:
             count = int(count)
         except ValueError as error:
             count = 12
-        text_strings.append(str(count))
+        # text_strings.append(str(count))
 
-        parts = self.parts_box.isChecked() # boolean to add parts
+        inputs.parts = self.parts_box.isChecked() # boolean to add parts
         # Check here
         output_path = utils.fileDialog()
         if not output_path: # if no path selected then don't generate. 
             return
 
-        text_strings.append(output_path)
+        # text_strings.append(output_path)
+        inputs.outputPath = output_path
 
         # INSTRUMENTS
         if self.instrument_data == []:
             utils.launchDialog("No Instruments")
             return
         
-        text_strings.append(len(self.instrument_data))
+        # text_strings.append(len(self.instrument_data))
+        inputs.singleParts = []
+        inputs.multiParts = []
         for instrument_dict in self.instrument_data:
             name = instrument_dict["Instrument Name"].currentText()
-            text_strings.append(name)
-
+            attr = ""
             if name in consts.MULTI_CLEF:
-                for hand in ["Right", "Left"]:
-                    row_nums = instrument_dict[f"{hand} Hand Row Numbers"].text()
-                    row_types = instrument_dict[f"{hand} Hand Row Types"].text()
-                    row_nums_clean = utils.cleanAnyNums(row_nums, name, count)
-                    row_types_clean = utils.cleanRows(row_types,name, count)
-                    if row_nums_clean == [] or row_types_clean == []: # Handle error
-                        return 
-                    text_strings.append(utils.toString(row_nums_clean))
-                    text_strings.append(utils.toString(row_types_clean))
+                data = pts.MultiPartData()
+                attr = "multiParts"
+                # for hand in ["Right", "Left"]:
+                row_nums = instrument_dict["Right Hand Row Numbers"].text()
+                row_types = instrument_dict["Right Hand Row Types"].text()
+                row_nums_clean = utils.cleanAnyNums(row_nums, name, count)
+                row_types_clean = utils.cleanRows(row_types,name, count)
+                if row_nums_clean == [] or row_types_clean == []: return # Handle error
+
+                data.rightRowNums = row_nums_clean
+                data.rightRowTypes = row_types_clean
+                row_nums = instrument_dict["Left Hand Row Numbers"].text()
+                row_types = instrument_dict["Left Hand Row Types"].text()
+                if row_nums_clean == [] or row_types_clean == []: return # Handle error
+
+                row_nums_clean = utils.cleanAnyNums(row_nums, name, count)
+                row_types_clean = utils.cleanRows(row_types,name, count)
+
+                data.leftRowNums = row_nums_clean
+                data.leftRowTypes = row_types_clean
+            
             else:
+                data = pts.SinglePartData()
+                attr = "singleParts"
                 row_nums = instrument_dict["Row Numbers"].text()
                 row_types = instrument_dict["Row Types"].text()
                 row_nums_clean = utils.cleanAnyNums(row_nums, f"{name}: Row Numbers", count)
                 row_types_clean = utils.cleanRows(row_types,f"{name}: Row Types", count)
                 if row_nums_clean == [] or row_types_clean == []: # Handle error
                     return 
-                text_strings.append(utils.toString(row_nums_clean))
-                text_strings.append(utils.toString(row_types_clean))
+                data.rowNums = row_nums_clean
+                data.rowTypes = row_types_clean
+                print(f"Single Parts: {inputs.singleParts}")
 
             dynamics_row = instrument_dict["Dynamics Row"].text()
             dynamics_row_clean = utils.cleanAnyNums(dynamics_row, "Dynamics Row", count)
-            if dynamics_row_clean == []:
-                return 
-            text_strings.append(utils.toString(dynamics_row_clean))
+            if dynamics_row_clean == []: return
+            data.instrument = name
+            data.dynamics = dynamics_row_clean
 
-        with open(os.path.join(basedir,"params.txt"), 'w+') as f:
-            for line in text_strings:
-                print(line, file=f)
-        
-        # return
+            inputdata = getattr(inputs, attr)
+            inputdata.append(data)
+            setattr(inputs, attr, inputdata)
+            
+
+        ## USE HE VALUES FROM THE GUI ELEMENTS TO POPULATE THE INPUTS STRUCTS
+        # Call .run() right here
+        # Run lilypond commands from here. No shell scripts
+
         title_filename = ""
         title_split = title.split()
         for word in title_split[:-1]: 
             title_filename += (word + "_")
         title_filename += title_split[-1]
+        inputs.outputFilename = title_filename + ".ly"
 
-        # Run the App Specific score script
-        score_path = os.path.join(basedir, "appScore.sh")
-        args = ["sh", score_path, f"{title_filename}", basedir, output_path ]
-        if parts:
-            args += ["-p"]
+        result = subprocess.run(['lilypond', '-h'])
+        if (result.returncode != 0):
+            utils.launchDialog("\"lilypond\" executable is not in $PATH")
+            return
+        
+        if inputs.parts:
             msg = f"Score is in directory {output_path}/score-{title_filename} with filename {title_filename}"
         else:
             msg = f"Score is {output_path} \n With filename {title_filename}"
         # Launch Thread from here
-        worker = Worker(args)
+        worker = Worker(inputs)
         self.threadpool.start(worker)
         dlg = GeneratedPiece(msg, self)
         dlg.exec()

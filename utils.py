@@ -14,6 +14,8 @@ except ImportError as error:
 
 import random
 import subprocess
+import py_total_serialism as pts
+import glob
 
 class IncorrectInputDlg(QDialog):
     def __init__(self, msg, parent = None):
@@ -62,13 +64,17 @@ def fileDialog():
 
 class Worker(QRunnable):
     
-    def __init__(self, args):
+    def __init__(self, inputs):
         super(Worker, self).__init__()
-        self.args = args
+        self.inputs = inputs
+
 
     @pyqtSlot()
     def run(self):
-        subprocess.call(self.args)
+        pts.run(self.inputs)
+        outputFolder = self.inputs.outputFolder
+        files = glob.glob("*.ly", root_dir=outputFolder)
+        subprocess.call(['lilypond', '-f', 'pdf'] + files)
 
 def fileDialog():
     dialog = QFileDialog()
