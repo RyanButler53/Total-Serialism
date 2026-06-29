@@ -1,56 +1,32 @@
 cmake_minimum_required(VERSION 3.31.0)
-set(VERSION 1.0.1)
+set(VERSION 1.1.0)
 project(Total-Serialism)
 
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 23) # std:;println
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-string(TOUPPER ${CMAKE_BUILD_TYPE} buildType)
-if (buildType STREQUAL "DEBUG")
-    add_compile_options(-fsanitize=address)
-    add_link_options(-fsanitize=address)
+# Address and Undefined behavior sanitizers for debug builds
+add_compile_options($<$<CONFIG:Debug>:-fsanitize=address>)
+add_link_options($<$<CONFIG:Debug>:-fsanitize=address>)
 
-    add_compile_options(-fsanitize=undefined)
-    add_link_options(-fsanitize=undefined)
-    message("-- Debug Mode: Enabling address and undefined behavior sanitizers")
-endif()
+add_compile_options($<$<CONFIG:Debug>:-fsanitize=undefined>)
+add_link_options($<$<CONFIG:Debug>:-fsanitize=undefined>)
 
 option(TS_DO_TESTS "Build Tests" OFF)
+option(WITH_PYTHON_BINDINGS "With Python Bindings" OFF)
 
-set(INSTRUMENT_SRC 
-    src/instrumentFactory.cpp
-    src/instrument.cpp
-    src/singleClef.cpp
-    src/multiClef.cpp
-    src/instrumentDefinitions.cpp
-    src/pianoharp.cpp)
-
-set (SERIALISM_SRC
-    src/serialismGenerator.cpp
-    src/analysisMatrix.cpp
-    src/timeSignature.cpp
-    src/note.cpp
-    )
-
-set (PARALLELISM_SRC
-    src/joinThreads.cpp
-    src/threadPool.cpp)
-
-include_directories(inc)
-
-add_library(serialism ${INSTRUMENT_SRC} ${SERIALISM_SRC})
-add_library(parallelism ${PARALLELISM_SRC})
-
+add_subdirectory(src)
+# Python bindings
+if (WITH_PYTHON_BINDINGS)
+  message(STATUS "Building Python Bindings")
+  add_subdirectory(python_bindings)
+endif()
 
 # Tests
 if(TS_DO_TESTS)
-    message("-- Building Tests")
+    message(STATUS "Building Tests")
     add_subdirectory(tests)
 else()
-    message("-- Not building tests")
+    message(STATUS "Not building tests")
 endif()
 
-# Production
-add_executable( TotalSerialism src/totalSerialism.cpp)
-
-target_link_libraries(TotalSerialism serialism parallelism)

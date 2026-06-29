@@ -11,6 +11,7 @@ macro(TotalSerialismTest testname src)
     add_executable(${testname} ${src})
     target_link_libraries(${testname} gtest serialism)
     gtest_discover_tests(${testname})
+    target_include_directories(${testname} PRIVATE ${PROJECT_SOURCE_DIR}/inc)
 endmacro()
 
 enable_testing()
@@ -21,3 +22,4 @@ TotalSerialismTest(TimeSignatureTest timeSignature-test.cpp)
 
 add_executable(fuzz fuzzTest.cpp)
 target_link_libraries(fuzz serialism parallelism)
+target_include_directories(fuzz PRIVATE ${PROJECT_SOURCE_DIR}/inc)
