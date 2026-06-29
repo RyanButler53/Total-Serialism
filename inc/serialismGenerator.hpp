@@ -13,7 +13,7 @@
 #include "instrument.hpp"
 #include "pianoharp.hpp"
 #include "instrumentDefinitions.hpp"
-#include "threadPool.hpp"
+#include "inputs.hpp"
 
 #ifndef SERIALISM_GENERATOR_HPP_INCLUDED
 #define SERIALISM_GENERATOR_HPP_INCLUDED
@@ -166,6 +166,9 @@ class SerialismGenerator
     // Given an input and output filename, use the inputfile to read in fields. 
     SerialismGenerator(std::string inputfile, std::string outputFilename, bool parts=false);
     
+    // Given a Generator Inputs struct (from pybind), initialize from its data
+    SerialismGenerator(GeneratorInputs inputs);
+
     // No memory to clean up
     ~SerialismGenerator() = default;
 
@@ -175,6 +178,10 @@ class SerialismGenerator
      * Writes the lilypond code to the outputFilename_ file for compilation
      */
     void run();
+};
+
+namespace TotalSerialism {
+  void run(GeneratorInputs inputs);
 };
 
 #endif

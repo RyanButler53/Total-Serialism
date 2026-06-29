@@ -5,6 +5,9 @@
 #include <sstream>
 #include <algorithm>
 #include <cmath>
+#include <iostream>
+#include <print>
+#include "threadPool.hpp"
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -124,6 +127,80 @@ SerialismGenerator::SerialismGenerator(string inputfile, string outputFilename, 
     };
     std::sort(instruments_.begin(), instruments_.end(), compareFunc);
     }
+
+SerialismGenerator::SerialismGenerator(GeneratorInputs inputs):
+
+ts_{TimeSignature(inputs.timeSig_)},
+title_{inputs.title_},
+composer_{inputs.composer_},
+outputFilename_{inputs.outputFilename_},
+outputPath_{inputs.outputPath_},
+pitches_{std::make_shared<AnalysisMatrix>(inputs.pitches_)},
+rhythms_{std::make_shared<AnalysisMatrix>(inputs.rhythms_)},
+articulations_{std::make_shared<AnalysisMatrix>(inputs.articulations_)},
+tempo_{inputs.tempo_},
+parts_{inputs.parts},
+boulezFactor_{inputs.boulezFactor_}
+{
+    std::println("Starting ctor");
+    rng_ = std::mt19937(seed_);
+    BoulezData boulezData{rng_, boulezDist_, boulezMutex_};
+    factory_ = make_shared<InstrumentFactory>(pitches_, rhythms_, articulations_, ts_, boulezData);
+
+    std::unordered_map<std::string, int> instrumentMap;
+    std::println("Num Miulti Part: {}", inputs.multiParts_.size());
+    std::println("Num Single Part: {}", inputs.singleParts_.size());
+
+    for (const MultiPartData& mp : inputs.multiParts_){
+        std::string name = mp.instrument;
+        if (!instrumentMap.contains(name)){
+            instrumentMap[name] = 1;
+        } else {
+            instrumentMap[name] += 1;
+        }
+        instrumentNames_.push_back({name,instrumentMap[name]});
+        // Convert the rows strings to Row
+        std::vector<Row> rightRows;
+        std::vector<Row> leftRows;
+        for (size_t i = 0; i < 12; ++i){
+            rightRows.push_back({rowTypes_[mp.rightRowTypes[i]], mp.rightRowNums[i]});
+            leftRows.push_back({rowTypes_[mp.leftRowTypes[i]], mp.leftRowNums[i]});
+        }
+
+        instruments_.push_back(factory_->createInstrument(name, rightRows, leftRows, mp.dynamics, instrumentMap[name]));
+    }
+    
+    for (const PartData& p : inputs.singleParts_){
+        std::string name = p.instrument;
+        std::println("Instrument: {}", name);
+
+        if (!instrumentMap.contains(name)){
+            instrumentMap[name] = 1;
+        } else {
+            instrumentMap[name] += 1;
+        }
+        instrumentNames_.push_back({name,instrumentMap[name]});
+        // Convert the rows strings to Row
+        std::vector<Row> rows;
+        for (size_t i = 0; i < 12; ++i){
+            rows.push_back({rowTypes_[p.rowTypes[i]], p.rowNums[i]});
+        }
+
+        instruments_.push_back(factory_->createInstrument(name, rows, p.dynamics, instrumentMap[name]));
+    }
+    // Copy-pasted
+    auto compareFunc = [this](std::shared_ptr<Instrument>i1, std::shared_ptr<Instrument> i2) {
+        std::string i1name = i1->getName();
+        std::string i2name = i2->getName();
+        if (i1name == i2name) {
+            return i1->getNum() < i2->getNum();
+        } else {
+            return scoreOrdering_.at(i1name) < scoreOrdering_.at(i2name);
+        }
+    };
+    std::println("Sorting");
+    std::sort(instruments_.begin(), instruments_.end(), compareFunc);
+}
 
 void SerialismGenerator::initializeRandom(){
     rng_ = mt19937(seed_);
@@ -389,4 +466,11 @@ void SerialismGenerator::run(){
         compileScript << "open " << fs::path(outputFilename_).stem() << ".pdf;\n";
         compileScript << "rm *.ly definitions.ily $0\n";
     }
+}
+
+void TotalSerialism::run(GeneratorInputs inputs){
+    std::cout << "Making generator " << std::endl;
+    SerialismGenerator generator(inputs);
+    std::cout << "running generation" << std::endl;
+    generator.run();
 }
