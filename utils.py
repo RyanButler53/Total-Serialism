@@ -51,18 +51,6 @@ class GeneratedPiece(QDialog):
         self.layout.addWidget(self.buttonBox, alignment=Qt.AlignmentFlag.AlignHCenter)
         self.setLayout(self.layout)
 
-def fileDialog():
-    dialog = QFileDialog()
-    dialog.setWindowTitle("Select Output Directory")
-    dialog.setDirectory("/")
-    dialog.setFileMode(QFileDialog.FileMode.Directory)
-    ok = dialog.exec()
-    if not ok:
-        return ""
-    return dialog.selectedFiles()[0]
-
-
-
 class Worker(QRunnable):
     
     def __init__(self, inputs):
@@ -74,14 +62,20 @@ class Worker(QRunnable):
     def run(self):
         pts.run(self.inputs)
         outputFolder = self.inputs.outputPath
+        if self.inputs.parts:
+            outputFolder = os.path.join(outputFolder, f"score-{self.inputs.outputFilename[:-3]}")
         files = glob.glob("*.ly", root_dir=outputFolder)
         files = [os.path.join(outputFolder, f) for f in files]
-        subprocess.call(['lilypond', '-f', 'pdf', '-l', 'NONE', '-o', outputFolder] + files)
+        for f in files:
+            subprocess.call(['lilypond', '-f', 'pdf', '-l', 'NONE', '-o', outputFolder, f])
+            os.remove(f)
+        # Remove definitions file if it exists. 
+        if (self.inputs.parts):
+            os.remove(os.path.join(outputFolder, "definitions.ily"))
 
 def fileDialog():
     dialog = QFileDialog()
     dialog.setWindowTitle("Select Output Directory")
-    dialog.setDirectory("/")
     dialog.setFileMode(QFileDialog.FileMode.Directory)
     ok = dialog.exec()
     if not ok:

@@ -368,7 +368,6 @@ class MainWindow(QMainWindow):
                     return 
                 data.rowNums = row_nums_clean
                 data.rowTypes = row_types_clean
-                print(f"Single Parts: {inputs.singleParts}")
 
             dynamics_row = instrument_dict["Dynamics Row"].text()
             dynamics_row_clean = utils.cleanAnyNums(dynamics_row, "Dynamics Row", count)
@@ -380,11 +379,6 @@ class MainWindow(QMainWindow):
             inputdata.append(data)
             setattr(inputs, attr, inputdata)
             
-
-        ## USE HE VALUES FROM THE GUI ELEMENTS TO POPULATE THE INPUTS STRUCTS
-        # Call .run() right here
-        # Run lilypond commands from here. No shell scripts
-
         title_filename = ""
         title_split = title.split()
         for word in title_split[:-1]: 
@@ -392,7 +386,7 @@ class MainWindow(QMainWindow):
         title_filename += title_split[-1]
         inputs.outputFilename = title_filename + ".ly"
 
-        result = subprocess.run(['lilypond', '-h'])
+        result = subprocess.run(['lilypond', '-h'], capture_output=True)
         if (result.returncode != 0):
             utils.launchDialog("\"lilypond\" executable is not in $PATH")
             return
@@ -409,11 +403,11 @@ class MainWindow(QMainWindow):
 
     # Utility Functions
     def make_title(self,text) -> QLabel:
-            """Makes a reasonable size title
-            Returns a QLabel object"""
-            title = QLabel(text)
-            font = title.font()
-            font.setPointSize(20)
-            title.setFont(font)
-            title.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
-            return title
+        """Makes a reasonable size title
+        Returns a QLabel object"""
+        title = QLabel(text)
+        font = title.font()
+        font.setPointSize(20)
+        title.setFont(font)
+        title.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
+        return title

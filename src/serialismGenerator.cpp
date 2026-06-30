@@ -142,15 +142,11 @@ tempo_{inputs.tempo_},
 parts_{inputs.parts},
 boulezFactor_{inputs.boulezFactor_}
 {
-    std::println("Starting ctor");
     rng_ = std::mt19937(seed_);
     BoulezData boulezData{rng_, boulezDist_, boulezMutex_};
     factory_ = make_shared<InstrumentFactory>(pitches_, rhythms_, articulations_, ts_, boulezData);
 
     std::unordered_map<std::string, int> instrumentMap;
-    std::println("Num Miulti Part: {}", inputs.multiParts_.size());
-    std::println("Num Single Part: {}", inputs.singleParts_.size());
-
     for (const MultiPartData& mp : inputs.multiParts_){
         std::string name = mp.instrument;
         if (!instrumentMap.contains(name)){
@@ -172,7 +168,6 @@ boulezFactor_{inputs.boulezFactor_}
     
     for (const PartData& p : inputs.singleParts_){
         std::string name = p.instrument;
-        std::println("Instrument: {}", name);
 
         if (!instrumentMap.contains(name)){
             instrumentMap[name] = 1;
@@ -198,7 +193,6 @@ boulezFactor_{inputs.boulezFactor_}
             return scoreOrdering_.at(i1name) < scoreOrdering_.at(i2name);
         }
     };
-    std::println("Sorting");
     std::sort(instruments_.begin(), instruments_.end(), compareFunc);
 }
 
@@ -415,13 +409,6 @@ void SerialismGenerator::run(){
         for (auto& line : lilypondCode){
             outputFile << line;
         }
-        // Compilation Script
-        fs::path compilePath = fs::path(outputPath_) / fs::path("compile");
-        ofstream compileScript{compilePath};
-        compileScript << "cd " << outputPath_ << ";\n";
-        compileScript << "lilypond -f pdf -l NONE " << outputFilename_ << ";\n";
-        compileScript << "open " << fs::path(outputFilename_).stem() << ".pdf;\n";
-        compileScript << "rm " << outputFilename_ << " $0\n";
     }
     else
     { // parts
@@ -456,21 +443,10 @@ void SerialismGenerator::run(){
             filename += "_" + num + ".ly";
             ins->makePart(folder / fs::path(filename), title_, composer_);
         }
-
-        // Compilation Script
-        fs::path compilePath = folder / fs::path("compile");
-        std::cout << compilePath << std::endl;
-        ofstream compileScript{compilePath};
-        compileScript << "cd " << folder << ";\n";
-        compileScript << "lilypond -f pdf -l NONE *.ly;\n";
-        compileScript << "open " << fs::path(outputFilename_).stem() << ".pdf;\n";
-        compileScript << "rm *.ly definitions.ily $0\n";
     }
 }
 
 void TotalSerialism::run(GeneratorInputs inputs){
-    std::cout << "Making generator " << std::endl;
     SerialismGenerator generator(inputs);
-    std::cout << "running generation" << std::endl;
     generator.run();
 }
