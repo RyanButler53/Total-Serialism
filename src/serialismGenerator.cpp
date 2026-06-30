@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
-#include <print>
 #include "threadPool.hpp"
 
 using namespace std;

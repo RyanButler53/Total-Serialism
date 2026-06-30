@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.31.0)
 set(VERSION 1.1.0)
 project(Total-Serialism)
 
-set(CMAKE_CXX_STANDARD 23) # std:;println
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Address and Undefined behavior sanitizers for debug builds
@@ -25,6 +25,7 @@ endif()
 # Tests
 if(TS_DO_TESTS)
     message(STATUS "Building Tests")
+    enable_testing()
     add_subdirectory(tests)
 else()
     message(STATUS "Not building tests")

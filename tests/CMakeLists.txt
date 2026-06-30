@@ -14,7 +14,6 @@ macro(TotalSerialismTest testname src)
     target_include_directories(${testname} PRIVATE ${PROJECT_SOURCE_DIR}/inc)
 endmacro()
 
-enable_testing()
 
 TotalSerialismTest(AnalysisMatrixTest analysisMatrix-test.cpp)
 TotalSerialismTest(NoteTest note-test.cpp)
