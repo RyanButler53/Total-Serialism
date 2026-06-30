@@ -1,6 +1,6 @@
 # Total Serialism
 
-Total-Serialism is a containerized app to generate Customizable Total Serial Style sheet music. 
+Total-Serialism is an app to generate Customizable Total Serial Style sheet music. 
 
 ### Features
 - Generates Total Serial pdf sheet music in seconds
@@ -51,8 +51,8 @@ The tests are in the `build/tests` directory and can be run with `ctest tests -j
 - Grand Plans for 2.0
     - Export Midi files
     - Gui could be improved
-    - App should be able to be run from a pre-built and pushed docker image. 
-- No Tickets have been written (5/26/25)
+    - Release with PyInstaller 
+- No Tickets have been written (6/30/25)
 - Email requests to `keymckeyface@gmail.com`
 
 
