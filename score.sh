@@ -1,4 +1,4 @@
-# Driving script for creating the scores and processing options. 
+# Driving script for creating the scores and processing options via the cli
 
 # ./score.sh <out_filename> <in_filename> [-p]
 # ./score.sh seed [-p]
