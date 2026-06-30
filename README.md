@@ -17,12 +17,15 @@ Total-Serialism is a containerized app to generate Customizable Total Serial Sty
 ### Build Requirements:
   - C++ compiler with C++20 support (specifically `std::format`)
 
-### Build: 
+### Building and Running 
 
-Python gui: 
-`pip install .`
+#### Python Gui:
+Create an environment: `python -m venv <venv_name>` and install with `pip install .`. 
 
-C++ cli and tests: 
+Run with `total-serialism` in the command line
+
+#### C++ cli (and tests): 
+To build: 
 ```
 mkdir build
 cd build
@@ -30,22 +33,14 @@ cmake -DTS_DO_TESTS ..
 cmake --build . --parallel 10
 ```
 
-### Run: 
-
-Run via gui: 
-
-`./run`
-
 Run via cli:
 
 - Run with seeded randomness:  `sh score.sh <options>`
 - Run with specified input and output file: `sh score.sh <output_filename> <input_filename>`
 - Each can accept a `-p` flag to create individual parts
 
-### Tests: 
-
 Tests can be built with `cmake -DTS_DO_TESTS=ON ..` in the configure command. 
-The tests are in the `tests` folder in the build directory and can be run with `ctest tests -j5`
+The tests are in the `build/tests` directory and can be run with `ctest tests -j5` from the build directory
 
 ### Release: 
 - Release 1.0 code freeze: 10/24/24

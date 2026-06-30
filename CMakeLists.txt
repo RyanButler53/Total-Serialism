@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.31.0)
-set(VERSION 1.1.0)
+set(VERSION 1.2.0)
 project(Total-Serialism)
 
 set(CMAKE_CXX_STANDARD 20)

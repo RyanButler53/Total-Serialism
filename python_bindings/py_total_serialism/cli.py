@@ -2,9 +2,9 @@
 
 from PyQt6.QtWidgets import QApplication
 
-from mainWindow import MainWindow
+from .mainWindow import MainWindow
 
-if __name__ == "__main__":
+def main():
     app = QApplication([])
     window = MainWindow()
     window.show()

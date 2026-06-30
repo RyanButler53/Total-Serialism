@@ -15,10 +15,8 @@ from PyQt6.QtWidgets import (
 
 import subprocess
 import random
-import utils as utils
-import utils as utils
-from utils import Worker, GeneratedPiece
-import consts as consts
+from .utils import Worker, GeneratedPiece, clean12Nums, launchDialog, fileDialog, cleanAnyNums, cleanRows
+from .consts import TIME_SIGNATURES, SINGLE_CLEF, MULTI_CLEF, PARAM_NAMES, INSTRUMENT_FIELDS, MULTI_CLEF_FIELDS
 import os
 import py_total_serialism as pts
 
@@ -65,14 +63,14 @@ class MainWindow(QMainWindow):
         labels = QVBoxLayout()
         data = QVBoxLayout()
         self.param_dict = {}
-        for label_name in consts.PARAM_NAMES:
+        for label_name in PARAM_NAMES:
             labels.addWidget(QLabel(label_name))
             entry_box = QLineEdit()
             data.addWidget(entry_box)
             self.param_dict[label_name] = entry_box
 
         # Set placehold text when appropriate
-        for param_name in consts.PARAM_NAMES[:3]:
+        for param_name in PARAM_NAMES[:3]:
             self.param_dict[param_name].setPlaceholderText("0 1 2 3 4 5 6 7 8 9 10 11")
 
         self.param_dict["Time Signature"].setPlaceholderText("4/4")
@@ -168,12 +166,12 @@ class MainWindow(QMainWindow):
         labels = QVBoxLayout()
         data = QVBoxLayout()
         instrument_dict = {}
-        for label_name in consts.INSTRUMENT_FIELDS:
+        for label_name in INSTRUMENT_FIELDS:
             labels.addWidget(QLabel(label_name))
             
         instrument_name = QComboBox()
         data.addWidget(instrument_name)
-        instrument_name.addItems(consts.SINGLE_CLEF)
+        instrument_name.addItems(SINGLE_CLEF)
         instrument_dict["Instrument Name"] = instrument_name
 
         # Set up row numbers and types. Add appropriate placeholder data
@@ -210,12 +208,12 @@ class MainWindow(QMainWindow):
         labels = QVBoxLayout()
         data = QVBoxLayout()
         instrument_dict = {}
-        for label_name in consts.MULTI_CLEF_FIELDS:
+        for label_name in MULTI_CLEF_FIELDS:
             labels.addWidget(QLabel(label_name))
             
         instrument_name = QComboBox()
         data.addWidget(instrument_name)
-        instrument_name.addItems(consts.MULTI_CLEF)
+        instrument_name.addItems(MULTI_CLEF)
         instrument_dict["Instrument Name"] = instrument_name
 
         # Set up row numbers and types. Add appropriate placeholder data
@@ -266,9 +264,9 @@ class MainWindow(QMainWindow):
         Extract all the data and write it to a file called params.txt 
         Launches the subprocess to generate the music"""
         inputs = pts.Inputs()
-        for field_name, attr in zip(consts.PARAM_NAMES[:3], ["pitches", "rhythms", "articulations"]):
+        for field_name, attr in zip(PARAM_NAMES[:3], ["pitches", "rhythms", "articulations"]):
             text = self.param_dict[field_name].text()
-            clean_nums = utils.clean12Nums(text, field_name)
+            clean_nums = clean12Nums(text, field_name)
             if clean_nums == []:
                 return
             setattr(inputs, attr, clean_nums)
@@ -286,14 +284,14 @@ class MainWindow(QMainWindow):
             tempo_text = self.param_dict["Tempo"].text()
             if tempo_text == "": # left blank, set random
                 tempo = random.randrange(40, 240)
-            elif not utils.launchDialog(f"{tempo_text} is not an invalid tempo. Press ok to set the tempo to 140"):
+            elif not launchDialog(f"{tempo_text} is not an invalid tempo. Press ok to set the tempo to 140"):
                 return 
             else:
                 tempo = '140'
         inputs.tempo = tempo
 
         # time signature
-        if self.param_dict["Time Signature"].text() in consts.TIME_SIGNATURES:
+        if self.param_dict["Time Signature"].text() in TIME_SIGNATURES:
             inputs.timeSig = self.param_dict["Time Signature"].text() 
         else:
             inputs.timeSig = "4/4"
@@ -317,7 +315,7 @@ class MainWindow(QMainWindow):
 
         inputs.parts = self.parts_box.isChecked() # boolean to add parts
         # Check here
-        output_path = utils.fileDialog()
+        output_path = fileDialog()
         if not output_path: # if no path selected then don't generate. 
             return
 
@@ -326,7 +324,7 @@ class MainWindow(QMainWindow):
 
         # INSTRUMENTS
         if self.instrument_data == []:
-            utils.launchDialog("No Instruments")
+            launchDialog("No Instruments")
             return
         
         # text_strings.append(len(self.instrument_data))
@@ -335,14 +333,14 @@ class MainWindow(QMainWindow):
         for instrument_dict in self.instrument_data:
             name = instrument_dict["Instrument Name"].currentText()
             attr = ""
-            if name in consts.MULTI_CLEF:
+            if name in MULTI_CLEF:
                 data = pts.MultiPartData()
                 attr = "multiParts"
                 # for hand in ["Right", "Left"]:
                 row_nums = instrument_dict["Right Hand Row Numbers"].text()
                 row_types = instrument_dict["Right Hand Row Types"].text()
-                row_nums_clean = utils.cleanAnyNums(row_nums, name, count)
-                row_types_clean = utils.cleanRows(row_types,name, count)
+                row_nums_clean = cleanAnyNums(row_nums, name, count)
+                row_types_clean = cleanRows(row_types,name, count)
                 if row_nums_clean == [] or row_types_clean == []: return # Handle error
 
                 data.rightRowNums = row_nums_clean
@@ -351,8 +349,8 @@ class MainWindow(QMainWindow):
                 row_types = instrument_dict["Left Hand Row Types"].text()
                 if row_nums_clean == [] or row_types_clean == []: return # Handle error
 
-                row_nums_clean = utils.cleanAnyNums(row_nums, name, count)
-                row_types_clean = utils.cleanRows(row_types,name, count)
+                row_nums_clean = cleanAnyNums(row_nums, name, count)
+                row_types_clean = cleanRows(row_types,name, count)
 
                 data.leftRowNums = row_nums_clean
                 data.leftRowTypes = row_types_clean
@@ -362,15 +360,15 @@ class MainWindow(QMainWindow):
                 attr = "singleParts"
                 row_nums = instrument_dict["Row Numbers"].text()
                 row_types = instrument_dict["Row Types"].text()
-                row_nums_clean = utils.cleanAnyNums(row_nums, f"{name}: Row Numbers", count)
-                row_types_clean = utils.cleanRows(row_types,f"{name}: Row Types", count)
+                row_nums_clean = cleanAnyNums(row_nums, f"{name}: Row Numbers", count)
+                row_types_clean = cleanRows(row_types,f"{name}: Row Types", count)
                 if row_nums_clean == [] or row_types_clean == []: # Handle error
                     return 
                 data.rowNums = row_nums_clean
                 data.rowTypes = row_types_clean
 
             dynamics_row = instrument_dict["Dynamics Row"].text()
-            dynamics_row_clean = utils.cleanAnyNums(dynamics_row, "Dynamics Row", count)
+            dynamics_row_clean = cleanAnyNums(dynamics_row, "Dynamics Row", count)
             if dynamics_row_clean == []: return
             data.instrument = name
             data.dynamics = dynamics_row_clean
@@ -388,7 +386,7 @@ class MainWindow(QMainWindow):
 
         result = subprocess.run(['lilypond', '-h'], capture_output=True)
         if (result.returncode != 0):
-            utils.launchDialog("\"lilypond\" executable is not in $PATH")
+            launchDialog("\"lilypond\" executable is not in $PATH")
             return
         
         if inputs.parts:

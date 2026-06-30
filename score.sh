@@ -68,4 +68,4 @@ else
     fi
 fi
 
-# open $finalFile
+open $finalFile
