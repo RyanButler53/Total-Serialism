@@ -15,9 +15,12 @@ from PyQt6.QtWidgets import (
 
 import subprocess
 import random
-import utils as utils
-from utils import Worker, GeneratedPiece
-import consts
+from .utils import Worker, GeneratedPiece, clean12Nums, launchDialog, fileDialog, cleanAnyNums, cleanRows
+from .consts import TIME_SIGNATURES, SINGLE_CLEF, MULTI_CLEF, PARAM_NAMES, INSTRUMENT_FIELDS, MULTI_CLEF_FIELDS
+import os
+import py_total_serialism as pts
+
+basedir = os.path.dirname(__file__)
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -60,14 +63,14 @@ class MainWindow(QMainWindow):
         labels = QVBoxLayout()
         data = QVBoxLayout()
         self.param_dict = {}
-        for label_name in consts.PARAM_NAMES:
+        for label_name in PARAM_NAMES:
             labels.addWidget(QLabel(label_name))
             entry_box = QLineEdit()
             data.addWidget(entry_box)
             self.param_dict[label_name] = entry_box
 
         # Set placehold text when appropriate
-        for param_name in consts.PARAM_NAMES[:3]:
+        for param_name in PARAM_NAMES[:3]:
             self.param_dict[param_name].setPlaceholderText("0 1 2 3 4 5 6 7 8 9 10 11")
 
         self.param_dict["Time Signature"].setPlaceholderText("4/4")
@@ -163,12 +166,12 @@ class MainWindow(QMainWindow):
         labels = QVBoxLayout()
         data = QVBoxLayout()
         instrument_dict = {}
-        for label_name in consts.INSTRUMENT_FIELDS:
+        for label_name in INSTRUMENT_FIELDS:
             labels.addWidget(QLabel(label_name))
             
         instrument_name = QComboBox()
         data.addWidget(instrument_name)
-        instrument_name.addItems(consts.SINGLE_CLEF)
+        instrument_name.addItems(SINGLE_CLEF)
         instrument_dict["Instrument Name"] = instrument_name
 
         # Set up row numbers and types. Add appropriate placeholder data
@@ -205,12 +208,12 @@ class MainWindow(QMainWindow):
         labels = QVBoxLayout()
         data = QVBoxLayout()
         instrument_dict = {}
-        for label_name in consts.MULTI_CLEF_FIELDS:
+        for label_name in MULTI_CLEF_FIELDS:
             labels.addWidget(QLabel(label_name))
             
         instrument_name = QComboBox()
         data.addWidget(instrument_name)
-        instrument_name.addItems(consts.MULTI_CLEF)
+        instrument_name.addItems(MULTI_CLEF)
         instrument_dict["Instrument Name"] = instrument_name
 
         # Set up row numbers and types. Add appropriate placeholder data
@@ -260,13 +263,13 @@ class MainWindow(QMainWindow):
         """
         Extract all the data and write it to a file called params.txt 
         Launches the subprocess to generate the music"""
-        text_strings = []
-        for field_name in consts.PARAM_NAMES[:3]:
+        inputs = pts.Inputs()
+        for field_name, attr in zip(PARAM_NAMES[:3], ["pitches", "rhythms", "articulations"]):
             text = self.param_dict[field_name].text()
-            clean_nums = utils.clean12Nums(text, field_name)
+            clean_nums = clean12Nums(text, field_name)
             if clean_nums == []:
                 return
-            text_strings.append(utils.toString(clean_nums))
+            setattr(inputs, attr, clean_nums)
 
         # handle tempo
         try:
@@ -278,109 +281,131 @@ class MainWindow(QMainWindow):
             else:
                 tempo = str(tempo)
         except ValueError as error:
-            if self.param_dict["Tempo"].text() == "": # left blank, set random
+            tempo_text = self.param_dict["Tempo"].text()
+            if tempo_text == "": # left blank, set random
                 tempo = random.randrange(40, 240)
-            elif not utils.launchDialog(f"{self.param_dict["Tempo"].text()} is not an invalid tempo. Press ok to set the tempo to 140"):
+            elif not launchDialog(f"{tempo_text} is not an invalid tempo. Press ok to set the tempo to 140"):
                 return 
             else:
                 tempo = '140'
-        text_strings.append(tempo)
+        inputs.tempo = tempo
 
         # time signature
-        if self.param_dict["Time Signature"].text() in consts.TIME_SIGNATURES:
-            text_strings.append(self.param_dict["Time Signature"].text() )
+        if self.param_dict["Time Signature"].text() in TIME_SIGNATURES:
+            inputs.timeSig = self.param_dict["Time Signature"].text() 
         else:
-            text_strings.append("4/4")
+            inputs.timeSig = "4/4"
                     
         title = self.param_dict["Title"].text()
         if title == "":
             title = "Total Serialist Piece"
-        text_strings.append(title)
+        inputs.title = title
 
         composer = self.param_dict["Composer"].text()
         if composer == "":
             composer = "The Algorithm"
-        text_strings.append(composer)
+        inputs.composer = composer
 
         count = self.param_dict["Number of Rows"].text()
         try:
             count = int(count)
         except ValueError as error:
             count = 12
-        text_strings.append(str(count))
+        # text_strings.append(str(count))
 
-        parts = self.parts_box.isChecked() # boolean to add parts
-        
-        output_path = utils.fileDialog()
+        inputs.parts = self.parts_box.isChecked() # boolean to add parts
+        # Check here
+        output_path = fileDialog()
         if not output_path: # if no path selected then don't generate. 
             return
 
+        # text_strings.append(output_path)
+        inputs.outputPath = output_path
+
         # INSTRUMENTS
         if self.instrument_data == []:
-            utils.launchDialog("No Instruments")
+            launchDialog("No Instruments")
             return
         
-        text_strings.append(len(self.instrument_data))
+        # text_strings.append(len(self.instrument_data))
+        inputs.singleParts = []
+        inputs.multiParts = []
         for instrument_dict in self.instrument_data:
             name = instrument_dict["Instrument Name"].currentText()
-            text_strings.append(name)
+            attr = ""
+            if name in MULTI_CLEF:
+                data = pts.MultiPartData()
+                attr = "multiParts"
+                # for hand in ["Right", "Left"]:
+                row_nums = instrument_dict["Right Hand Row Numbers"].text()
+                row_types = instrument_dict["Right Hand Row Types"].text()
+                row_nums_clean = cleanAnyNums(row_nums, name, count)
+                row_types_clean = cleanRows(row_types,name, count)
+                if row_nums_clean == [] or row_types_clean == []: return # Handle error
 
-            if name in consts.MULTI_CLEF:
-                for hand in ["Right", "Left"]:
-                    row_nums = instrument_dict[f"{hand} Hand Row Numbers"].text()
-                    row_types = instrument_dict[f"{hand} Hand Row Types"].text()
-                    row_nums_clean = utils.cleanAnyNums(row_nums, name, count)
-                    row_types_clean = utils.cleanRows(row_types,name, count)
-                    if row_nums_clean == [] or row_types_clean == []: # Handle error
-                        return 
-                    text_strings.append(utils.toString(row_nums_clean))
-                    text_strings.append(utils.toString(row_types_clean))
+                data.rightRowNums = row_nums_clean
+                data.rightRowTypes = row_types_clean
+                row_nums = instrument_dict["Left Hand Row Numbers"].text()
+                row_types = instrument_dict["Left Hand Row Types"].text()
+                if row_nums_clean == [] or row_types_clean == []: return # Handle error
+
+                row_nums_clean = cleanAnyNums(row_nums, name, count)
+                row_types_clean = cleanRows(row_types,name, count)
+
+                data.leftRowNums = row_nums_clean
+                data.leftRowTypes = row_types_clean
+            
             else:
+                data = pts.SinglePartData()
+                attr = "singleParts"
                 row_nums = instrument_dict["Row Numbers"].text()
                 row_types = instrument_dict["Row Types"].text()
-                row_nums_clean = utils.cleanAnyNums(row_nums, f"{name}: Row Numbers", count)
-                row_types_clean = utils.cleanRows(row_types,f"{name}: Row Types", count)
+                row_nums_clean = cleanAnyNums(row_nums, f"{name}: Row Numbers", count)
+                row_types_clean = cleanRows(row_types,f"{name}: Row Types", count)
                 if row_nums_clean == [] or row_types_clean == []: # Handle error
                     return 
-                text_strings.append(utils.toString(row_nums_clean))
-                text_strings.append(utils.toString(row_types_clean))
+                data.rowNums = row_nums_clean
+                data.rowTypes = row_types_clean
 
             dynamics_row = instrument_dict["Dynamics Row"].text()
-            dynamics_row_clean = utils.cleanAnyNums(dynamics_row, "Dynamics Row", count)
-            if dynamics_row_clean == []:
-                return 
-            text_strings.append(utils.toString(dynamics_row_clean))
-        with open(f"{output_path}/params.txt", 'w') as f:
-            for line in text_strings:
-                print(line, file=f)
+            dynamics_row_clean = cleanAnyNums(dynamics_row, "Dynamics Row", count)
+            if dynamics_row_clean == []: return
+            data.instrument = name
+            data.dynamics = dynamics_row_clean
 
+            inputdata = getattr(inputs, attr)
+            inputdata.append(data)
+            setattr(inputs, attr, inputdata)
+            
         title_filename = ""
         title_split = title.split()
         for word in title_split[:-1]: 
             title_filename += (word + "_")
         title_filename += title_split[-1]
+        inputs.outputFilename = title_filename + ".ly"
 
-        args = ["docker", "run", "-it", "-v", f"{output_path}:/TotalSerialism/scores", "totalserialism:latest"]
-        args += ["sh", "score.sh", f"{title_filename}", f"/TotalSerialism/scores/params.txt"]
-        if parts:
-            args += ["-p"]
-            msg = f"Score is in directory score-{title_filename} with filename {title_filename}"
+        result = subprocess.run(['lilypond', '-h'], capture_output=True)
+        if (result.returncode != 0):
+            launchDialog("\"lilypond\" executable is not in $PATH")
+            return
+        
+        if inputs.parts:
+            msg = f"Score is in directory {output_path}/score-{title_filename} with filename {title_filename}"
         else:
-            msg = f"Score is in current directory with filename {title_filename}"
-
+            msg = f"Score is {output_path} \n With filename {title_filename}"
         # Launch Thread from here
-        worker = Worker(args)
+        worker = Worker(inputs)
         self.threadpool.start(worker)
         dlg = GeneratedPiece(msg, self)
         dlg.exec()
 
     # Utility Functions
     def make_title(self,text) -> QLabel:
-            """Makes a reasonable size title
-            Returns a QLabel object"""
-            title = QLabel(text)
-            font = title.font()
-            font.setPointSize(20)
-            title.setFont(font)
-            title.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
-            return title
+        """Makes a reasonable size title
+        Returns a QLabel object"""
+        title = QLabel(text)
+        font = title.font()
+        font.setPointSize(20)
+        title.setFont(font)
+        title.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
+        return title

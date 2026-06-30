@@ -2,7 +2,6 @@
 #define PIANO_HARP_HPP_INCLUDED
 
 #include "instrument.hpp"
-#include "note.hpp"
 #include "multiClef.hpp"
 #include "analysisMatrix.hpp"
 

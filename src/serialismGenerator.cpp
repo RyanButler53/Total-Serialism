@@ -5,6 +5,8 @@
 #include <sstream>
 #include <algorithm>
 #include <cmath>
+#include <iostream>
+#include "threadPool.hpp"
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -58,7 +60,7 @@ SerialismGenerator::SerialismGenerator(string inputfile, string outputFilename, 
     rhythms_ = make_shared<AnalysisMatrix>(sequences[1]);
     articulations_ = make_shared<AnalysisMatrix>(sequences[2]);
 
-    // Read in tempo, time sig, title, composer
+    // Read in tempo, time sig, title, composer, output filename and path
     string tempo_str;
     string ts_str;
     string numRows_str;
@@ -70,6 +72,7 @@ SerialismGenerator::SerialismGenerator(string inputfile, string outputFilename, 
     getline(input, composer_);
     getline(input, numRows_str);
     numRows_ = stoi(numRows_str);
+    getline(input, outputPath_);
 
     // Initialize Factory
     boulezDist_= std::normal_distribution<double>(0, 0);
@@ -123,6 +126,74 @@ SerialismGenerator::SerialismGenerator(string inputfile, string outputFilename, 
     };
     std::sort(instruments_.begin(), instruments_.end(), compareFunc);
     }
+
+SerialismGenerator::SerialismGenerator(GeneratorInputs inputs):
+
+ts_{TimeSignature(inputs.timeSig_)},
+title_{inputs.title_},
+composer_{inputs.composer_},
+outputFilename_{inputs.outputFilename_},
+outputPath_{inputs.outputPath_},
+pitches_{std::make_shared<AnalysisMatrix>(inputs.pitches_)},
+rhythms_{std::make_shared<AnalysisMatrix>(inputs.rhythms_)},
+articulations_{std::make_shared<AnalysisMatrix>(inputs.articulations_)},
+tempo_{inputs.tempo_},
+parts_{inputs.parts},
+boulezFactor_{inputs.boulezFactor_}
+{
+    rng_ = std::mt19937(seed_);
+    BoulezData boulezData{rng_, boulezDist_, boulezMutex_};
+    factory_ = make_shared<InstrumentFactory>(pitches_, rhythms_, articulations_, ts_, boulezData);
+
+    std::unordered_map<std::string, int> instrumentMap;
+    for (const MultiPartData& mp : inputs.multiParts_){
+        std::string name = mp.instrument;
+        if (!instrumentMap.contains(name)){
+            instrumentMap[name] = 1;
+        } else {
+            instrumentMap[name] += 1;
+        }
+        instrumentNames_.push_back({name,instrumentMap[name]});
+        // Convert the rows strings to Row
+        std::vector<Row> rightRows;
+        std::vector<Row> leftRows;
+        for (size_t i = 0; i < 12; ++i){
+            rightRows.push_back({rowTypes_[mp.rightRowTypes[i]], mp.rightRowNums[i]});
+            leftRows.push_back({rowTypes_[mp.leftRowTypes[i]], mp.leftRowNums[i]});
+        }
+
+        instruments_.push_back(factory_->createInstrument(name, rightRows, leftRows, mp.dynamics, instrumentMap[name]));
+    }
+    
+    for (const PartData& p : inputs.singleParts_){
+        std::string name = p.instrument;
+
+        if (!instrumentMap.contains(name)){
+            instrumentMap[name] = 1;
+        } else {
+            instrumentMap[name] += 1;
+        }
+        instrumentNames_.push_back({name,instrumentMap[name]});
+        // Convert the rows strings to Row
+        std::vector<Row> rows;
+        for (size_t i = 0; i < 12; ++i){
+            rows.push_back({rowTypes_[p.rowTypes[i]], p.rowNums[i]});
+        }
+
+        instruments_.push_back(factory_->createInstrument(name, rows, p.dynamics, instrumentMap[name]));
+    }
+    // Copy-pasted
+    auto compareFunc = [this](std::shared_ptr<Instrument>i1, std::shared_ptr<Instrument> i2) {
+        std::string i1name = i1->getName();
+        std::string i2name = i2->getName();
+        if (i1name == i2name) {
+            return i1->getNum() < i2->getNum();
+        } else {
+            return scoreOrdering_.at(i1name) < scoreOrdering_.at(i2name);
+        }
+    };
+    std::sort(instruments_.begin(), instruments_.end(), compareFunc);
+}
 
 void SerialismGenerator::initializeRandom(){
     rng_ = mt19937(seed_);
@@ -332,23 +403,26 @@ void SerialismGenerator::run(){
 
     if (!parts_){
         lilypondCode.push_back(scoreBox());
-        ofstream outputFile{outputFilename_};
+        fs::path outPath = fs::path(outputPath_) / fs::path(outputFilename_);
+        ofstream outputFile{outPath};
         for (auto& line : lilypondCode){
             outputFile << line;
         }
-    } else {
+    }
+    else
+    { // parts
         // Clear out if it exists
         std::string outputFolder = "score-" + outputFilename_;
-        fs::path path(outputFolder);
-        fs::path folder = path.stem();
-        if (fs::exists(folder)) {
+        fs::path path = fs::path(outputPath_) / fs::path(outputFolder);
+        fs::path folder = fs::path(outputPath_) / path.stem();
+        if (fs::exists(folder))
+        {
             fs::remove_all(folder);
         }
         fs::create_directory(folder);
         // First create instrument definitions file:
         ofstream definitionsFile(folder / fs::path("definitions.ily"));
-        // Needs to have the instrument definition header: 
-        // Needs version, language and global block.
+
         std::string defHeader = definitionHeader();
         definitionsFile << defHeader;
         for (auto &line : lilypondCode)
@@ -360,7 +434,8 @@ void SerialismGenerator::run(){
         mainScore << scoreBox();
 
         // Make parts for all instruments
-        for (std::shared_ptr<Instrument>& ins : instruments_){
+        for (std::shared_ptr<Instrument> &ins : instruments_)
+        {
             std::string filename = ins->getName();
             std::string num = to_string(ins->getNum());
             std::replace(filename.begin(), filename.end(), ' ', '_');
@@ -368,4 +443,9 @@ void SerialismGenerator::run(){
             ins->makePart(folder / fs::path(filename), title_, composer_);
         }
     }
+}
+
+void TotalSerialism::run(GeneratorInputs inputs){
+    SerialismGenerator generator(inputs);
+    generator.run();
 }

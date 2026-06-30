@@ -6,6 +6,9 @@ using namespace std;
 AnalysisMatrix::AnalysisMatrix(vector<short> P0):
     matrix_{Matrix<short>(ROW_LEN, ROW_LEN)},P0_{P0}
 {
+    if (P0.size() != ROW_LEN){
+        std::cout << "Row size is not 12!" << std::endl;
+    }
     std::copy(P0.begin(), P0.end(), &(matrix_(0,0)));
     for (size_t row = 1; row < ROW_LEN; ++row){
         short offset = (P0[0] - P0[row]);

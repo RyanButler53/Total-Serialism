@@ -14,6 +14,9 @@ except ImportError as error:
 
 import random
 import subprocess
+import py_total_serialism as pts
+import glob
+import os
 
 class IncorrectInputDlg(QDialog):
     def __init__(self, msg, parent = None):
@@ -48,21 +51,31 @@ class GeneratedPiece(QDialog):
         self.layout.addWidget(self.buttonBox, alignment=Qt.AlignmentFlag.AlignHCenter)
         self.setLayout(self.layout)
 
-
 class Worker(QRunnable):
     
-    def __init__(self, args):
+    def __init__(self, inputs):
         super(Worker, self).__init__()
-        self.args = args
+        self.inputs = inputs
+
 
     @pyqtSlot()
     def run(self):
-        subprocess.call(self.args)
+        pts.run(self.inputs)
+        outputFolder = self.inputs.outputPath
+        if self.inputs.parts:
+            outputFolder = os.path.join(outputFolder, f"score-{self.inputs.outputFilename[:-3]}")
+        files = glob.glob("*.ly", root_dir=outputFolder)
+        files = [os.path.join(outputFolder, f) for f in files]
+        for f in files:
+            subprocess.call(['lilypond', '-f', 'pdf', '-l', 'NONE', '-o', outputFolder, f])
+            os.remove(f)
+        # Remove definitions file if it exists. 
+        if (self.inputs.parts):
+            os.remove(os.path.join(outputFolder, "definitions.ily"))
 
 def fileDialog():
     dialog = QFileDialog()
     dialog.setWindowTitle("Select Output Directory")
-    dialog.setDirectory("/")
     dialog.setFileMode(QFileDialog.FileMode.Directory)
     ok = dialog.exec()
     if not ok:

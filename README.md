@@ -1,6 +1,6 @@
 # Total Serialism
 
-Total-Serialism is a containerized app to generate Customizable Total Serial Style sheet music. 
+Total-Serialism is an app to generate Customizable Total Serial Style sheet music. 
 
 ### Features
 - Generates Total Serial pdf sheet music in seconds
@@ -14,54 +14,45 @@ Total-Serialism is a containerized app to generate Customizable Total Serial Sty
     - Set piece title and composer
     - Export Parts
 
-### Requirements:
-  - Python3 with PyQt6 installed
-  - Docker Desktop
+### Build Requirements:
+  - C++ compiler with C++20 support (specifically `std::format`)
 
-### Build: 
+### Building and Running 
 
-First you will need to build the docker image for the C++/Lilypond part of the project:
-`docker build -t totalserialism:latest .`
+#### Python Gui:
+Create an environment: `python -m venv <venv_name>` and install with `pip install .`. 
 
-### Run: 
+Run with `total-serialism` in the command line
 
-`./run`
+#### C++ cli (and tests): 
+To build: 
+```
+mkdir build
+cd build
+cmake -DTS_DO_TESTS ..
+cmake --build . --parallel 10
+```
 
-If you don't have pyqt installed, you can specify a seed for randomness with 
+Run via cli:
 
-`sh score.sh <seed>`.
-`docker run -v <path to store scores>:/TotalSerialism/scores totalserialism:latest sh score.sh <seed>`
+- Run with seeded randomness:  `sh score.sh <options>`
+- Run with specified input and output file: `sh score.sh <output_filename> <input_filename>`
+- Each can accept a `-p` flag to create individual parts
 
-Alternatively, you can specify an input file and output filename. The input file must be in the same 
-form as below or it will not work. Then run 
-
-`sh score.sh <output_filename> <input_filename>`
-`docker run -v <path to store scores>:/TotalSerialism/scores totalserialism:latest sh score.sh <title_filename> <input file>`
-
-
-### Tests: 
-
-There are a 3 non rigorous unit tests written using google test. They can be run with the script
-
-`sh unitTests.sh`
-
-There is also a longer fuzz testing script. Fuzz testing leverages the lilypond compiler's error messages:
-
-`sh fuzzTest.sh <numTests> <max_parallel_tests>`
-
-It checks if there are no errors or warnings from the lilypond compiler. The lilypond compiler is slow and this test takes some time to run. 
-The number of tests defaults to 10, max parallel tests defaults to 4.
+Tests can be built with `cmake -DTS_DO_TESTS=ON ..` in the configure command. 
+The tests are in the `build/tests` directory and can be run with `ctest tests -j5` from the build directory
 
 ### Release: 
 - Release 1.0 code freeze: 10/24/24
 - Release 1.1.0 code freeze: 5/26/25
+- Release 1.2.0: 6/30/26
 
 ### Roadmap
 - Grand Plans for 2.0
     - Export Midi files
     - Gui could be improved
-    - App should be able to be run from a pre-built and pushed docker image. 
-- No Tickets have been written (5/26/25)
+    - Release with PyInstaller 
+- No Tickets have been written (6/30/25)
 - Email requests to `keymckeyface@gmail.com`
 
 

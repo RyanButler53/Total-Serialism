@@ -13,7 +13,7 @@
 #include "instrument.hpp"
 #include "pianoharp.hpp"
 #include "instrumentDefinitions.hpp"
-#include "threadPool.hpp"
+#include "inputs.hpp"
 
 #ifndef SERIALISM_GENERATOR_HPP_INCLUDED
 #define SERIALISM_GENERATOR_HPP_INCLUDED
@@ -68,6 +68,7 @@ class SerialismGenerator
     std::string title_;
     std::string composer_;
     std::string outputFilename_;
+    std::string outputPath_{"."};
 
     // Matrices
     std::shared_ptr<AnalysisMatrix> pitches_;
@@ -162,10 +163,13 @@ class SerialismGenerator
     // Given a seed and output filename, generate the fields randomly. 
     SerialismGenerator(long seed, std::string outputFilename, unsigned int numThreads = 8, bool parts=false);
 
-    // Given an input and output filenae, use the inputfile to read in fields. 
+    // Given an input and output filename, use the inputfile to read in fields. 
     SerialismGenerator(std::string inputfile, std::string outputFilename, bool parts=false);
     
-    // Clean up Analysis Matrices, Instruments and Factory
+    // Given a Generator Inputs struct (from pybind), initialize from its data
+    SerialismGenerator(GeneratorInputs inputs);
+
+    // No memory to clean up
     ~SerialismGenerator() = default;
 
     /**
@@ -174,6 +178,10 @@ class SerialismGenerator
      * Writes the lilypond code to the outputFilename_ file for compilation
      */
     void run();
+};
+
+namespace TotalSerialism {
+  void run(GeneratorInputs inputs);
 };
 
 #endif
